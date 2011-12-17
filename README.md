@@ -1,4 +1,4 @@
-# stompngo-examples - A collection of examples for package stomp #
+# stompngo_examples - A collection of examples for package stomp #
 
 ## Features ##
 
@@ -21,7 +21,7 @@ Any and all are welcome by pull request or e-mail patch.
 
 For the record, the canonical repository for this project is at:
 
-* [stompngo-examples at github](https://github.com/gmallard/stompngo-examples)
+* [stompngo_examples at github](https://github.com/gmallard/stompngo_examples)
 
 ## Issues ##
 
