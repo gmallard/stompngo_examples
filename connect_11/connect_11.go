@@ -23,9 +23,9 @@ import (
   . "stompngo_examples/common"
 )
 
-var exampid = "connect_10: "
+var exampid = "connect_11: "
 
-// Connect to a STOMP 1.0 broker and disconnect.
+// Connect to a STOMP 1.1 broker and disconnect.
 func main() {
   fmt.Println(exampid + "starts ...")
 
@@ -40,14 +40,22 @@ func main() {
   // All stomp API methods require 'Headers'.  Stomp headers are key/value 
   // pairs.  The stomp package implements them using a string slice.
   //
-  // Empty Headers are useful for a number of API method calls, and we
-  // use them to connect to a Stomp 1.0 broker.
-  eh := stomp.Headers{}
+  // To connect to a Stomp 1.1 broker, you must:
+  // a) Use the correct host and port of course
+  // b) Pass the 'accept-version' header per specification requirements
+  // c) Pass the 'host' header per specification requirements
+  //
+  // We demand a 1.1 connection here.
+  // Note that the 1.1 vhost _could_ be different than the host name used
+  // for the connection, but in this example is the same.
+  //
+  ch := stomp.Headers{"accept-version", "1.1",
+    "host", h}
 
   // Get a stomp connection.  Parameters are:
   // a) the opened net connection
   // b) the (empty) Headers
-  conn, e := stomp.Connect(n, eh)
+  conn, e := stomp.Connect(n, ch)
   if e != nil {
     panic(e)  // Handle this ......
   }
@@ -57,7 +65,7 @@ func main() {
 
   // Polite Stomp disconnects are not required, but highly recommended.
   // Empty headers again in this example.
-  e = conn.Disconnect(eh)
+  e = conn.Disconnect(stomp.Headers{})
   if e != nil {
     panic(e)  // Handle this ......
   }
