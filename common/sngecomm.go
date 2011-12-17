@@ -17,7 +17,9 @@
 package sngecomm
 
 import (
+  "fmt"
   "os"
+  "strconv"
 )
 
 var h10 = "localhost" // default 1.0 host 
@@ -25,6 +27,9 @@ var p10 = "61613"     // default 1.0 port (ActiveMQ on the author's machine)
 
 var h11 = "localhost" // default 1.1 host 
 var p11 = "62613"     // default 1.1 port (Apollo on the author's machine)
+
+var nmsgs = 1         // Default number of messages to send
+var dest = "/queue/snge.common.queue" // Default destination
 
 // Override 1.0 Host and port for Dial if requested.
 func HostAndPort10() (string, string) {
@@ -50,5 +55,28 @@ func HostAndPort11() (string, string) {
     p11 = pe
 	}
 	return h11, p11
+}
+
+// Number of messages to send
+func Nmsgs() int {
+  c := os.Getenv("STOMP_NMSGS")
+  if c == "" {
+    return nmsgs
+  }
+  n, e := strconv.ParseInt(c, 10, 0)
+  if e != nil {
+    fmt.Printf("NMSGS Conversion error: %v\n", e)
+    return nmsgs
+  }
+  return int(n)
+}
+
+// Destination to send to
+func Dest() string {
+  d := os.Getenv("STOMP_DEST")
+  if d == "" {
+    return dest
+  }
+  return d
 }
 
