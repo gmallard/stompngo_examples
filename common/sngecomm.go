@@ -30,6 +30,7 @@ var p11 = "62613"     // default 1.1 port (Apollo on the author's machine)
 
 var nmsgs = 1         // Default number of messages to send
 var dest = "/queue/snge.common.queue" // Default destination
+var nqs = 1           // Default number of queues for multi-queue demo(s)
 
 // Override 1.0 Host and port for Dial if requested.
 func HostAndPort10() (string, string) {
@@ -67,6 +68,20 @@ func Nmsgs() int {
   if e != nil {
     fmt.Printf("NMSGS Conversion error: %v\n", e)
     return nmsgs
+  }
+  return int(n)
+}
+
+// Number of queues to use
+func Nqs() int {
+  c := os.Getenv("STOMP_NQS")
+  if c == "" {
+    return nqs
+  }
+  n, e := strconv.ParseInt(c, 10, 0)
+  if e != nil {
+    fmt.Printf("NQS Conversion error: %v\n", e)
+    return nqs
   }
   return int(n)
 }
