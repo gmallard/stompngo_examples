@@ -18,6 +18,7 @@ package main
 
 import (
   "fmt"
+  "log"
   "net"
   "stomp"
   "stompngo_examples/common"
@@ -33,13 +34,13 @@ func main() {
   h, p := sngecomm.HostAndPort11() // A 1.1 connection
   n, e := net.Dial("tcp", net.JoinHostPort(h, p))
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   fmt.Println(exampid + "dial complete ...")
   eh := stomp.Headers{}
   conn, e := stomp.Connect(n, eh)
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   fmt.Println(exampid + "stomp connect complete ...")
 
@@ -58,7 +59,7 @@ func main() {
   // example the broker just crashed.
   r, e := conn.Subscribe(s)
   if e != nil {
-    panic(e) // Handle this ...
+    log.Fatalln(e) // Handle this ...
   }
   fmt.Println(exampid + "stomp subscribe complete ...")
   // Read data from the returned channel
@@ -69,7 +70,7 @@ func main() {
     // a) a Message struct
     // b) an Error value.  Check the error value as usual
     if m.Error != nil {
-      panic(m.Error)  // Handle this
+      log.Fatalln(m.Error)  // Handle this
     }
     //
     fmt.Printf("Frame Type: %s\n", m.Message.Command)   // Will be MESSAGE or ERROR!
@@ -87,7 +88,7 @@ func main() {
     // But check that this is the case for demonstration purposes.
     if h.Value("subscription") != u {
       fmt.Printf("Error condition, expected [%s], received [%s]\n", u, h.Value("subscription"))
-      panic("Bad subscription header")
+      log.Fatalln("Bad subscription header")
     }
   }
   // It is polite to unsubscribe, although unnecessary if a disconnect follows.
@@ -95,19 +96,19 @@ func main() {
   // to provide it will result in an error return.
   e = conn.Unsubscribe(s)
   if e != nil {
-    panic(e)  // Handle this ...
+    log.Fatalln(e)  // Handle this ...
   }
   fmt.Println(exampid + "stomp unsubscribe complete ...")
 
   // Disconnect and Close
   e = conn.Disconnect(eh)
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   fmt.Println(exampid + "stomp disconnect complete ...")
   e = n.Close()
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   fmt.Println(exampid + "network close complete ...")
 

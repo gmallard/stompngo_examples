@@ -22,6 +22,7 @@ package main
 import (
   "crypto/rand"
   "fmt"
+  "log"
   "math/big"
   "net"
   "runtime"
@@ -70,7 +71,7 @@ func sender(conn *stomp.Connection, qn, c int) {
     fmt.Println("sender", m)
     e := conn.Send(h, m)
     if e != nil {
-      panic(e)
+      log.Fatalln(e)
     }
     runtime.Gosched() // yield for this example
     time.Sleep(time.Duration(send_factor * timeBetween(min, max))) // Time to build next message
@@ -93,13 +94,13 @@ func receiver(conn *stomp.Connection, qn, c int) {
   // Subscribe
   r, e := conn.Subscribe(h)
   if e != nil {
-    panic(e)
+    log.Fatalln(e)
   }
   // Receive loop
   for i := 1; i <= c; i++ {
     d := <-r
     if d.Error != nil {
-      panic(d.Error)
+      log.Fatalln(d.Error)
     }
     // Process the inbound message .................
     fmt.Println("receiver", d.Message.BodyString())
@@ -109,7 +110,7 @@ func receiver(conn *stomp.Connection, qn, c int) {
   // Unsubscribe
   e = conn.Unsubscribe(h)
   if e != nil {
-    panic(e)
+    log.Fatalln(e)
   }
   // Receiving is done 
   fmt.Println(exampid + "receiver ends ...")
@@ -123,12 +124,12 @@ func startSenders(q int) {
   h, p := sngecomm.HostAndPort11() // a 1.1 connect
   n, e := net.Dial("tcp", net.JoinHostPort(h, p))
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   eh := stomp.Headers{}
   conn, e := stomp.Connect(n, eh)
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
 
   c := sngecomm.Nmsgs() // message count
@@ -142,11 +143,11 @@ func startSenders(q int) {
   // Close
   e = conn.Disconnect(eh)
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   e = n.Close()
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
 
   fmt.Println(exampid + "startSenders ends ...")
@@ -160,12 +161,12 @@ func startReceivers(q int) {
   h, p := sngecomm.HostAndPort11() // a 1.1 connect
   n, e := net.Dial("tcp", net.JoinHostPort(h, p))
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   eh := stomp.Headers{}
   conn, e := stomp.Connect(n, eh)
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
 
   c := sngecomm.Nmsgs() // get message count
@@ -179,11 +180,11 @@ func startReceivers(q int) {
   // Close
   e = conn.Disconnect(eh)
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   e = n.Close()
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
 
   fmt.Println(exampid + "startReceivers ends ...")

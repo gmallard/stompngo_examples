@@ -18,6 +18,7 @@ package main
 
 import (
   "fmt"
+  "log"
   "net"
   "stomp"
   . "stompngo_examples/common"
@@ -33,7 +34,7 @@ func main() {
   h, p := HostAndPort10()
   n, e := net.Dial("tcp", net.JoinHostPort(h, p))
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   fmt.Println(exampid + "dial complete ...")
 
@@ -49,7 +50,7 @@ func main() {
   // b) the (empty) Headers
   conn, e := stomp.Connect(n, eh)
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   fmt.Println(exampid + "stomp connect complete ...")
 
@@ -59,14 +60,14 @@ func main() {
   // Empty headers again in this example.
   e = conn.Disconnect(eh)
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   fmt.Println(exampid + "stomp disconnect complete ...")
 
   // Close the net connection.  We ignore errors here.
   e = n.Close()
   if e != nil {
-    panic(e)  // Handle this ......
+    log.Fatalln(e)  // Handle this ......
   }
   fmt.Println(exampid + "network close complete ...")
 
