@@ -13,6 +13,20 @@ Uses the stomp package at:
 
 * [stompngo at github](https://github.com/gmallard/stompngo)
 
+## Installation ##
+
+To install these example programs:
+
+* goinstall github.com/gmallard/stompngo
+* goinstall github.com/gmallard/stompngo_examples/common
+* goinstall github.com/gmallard/stompngo_examples/connect_10
+* goinstall github.com/gmallard/stompngo_examples/connect_11
+* goinstall github.com/gmallard/stompngo_examples/receive_10
+* goinstall github.com/gmallard/stompngo_examples/receive_11
+* goinstall github.com/gmallard/stompngo_examples/send_10
+* goinstall github.com/gmallard/stompngo_examples/send_11
+* goinstall github.com/gmallard/stompngo_examples/srmgor_11
+
 ## Contributions ##
 
 Any and all are welcome by pull request or e-mail patch.

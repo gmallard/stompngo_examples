@@ -20,8 +20,8 @@ import (
   "fmt"
   "log"
   "net"
-  "stomp"
-  "stompngo_examples/common"
+  "github.com/gmallard/stompngo"
+  "github.com/gmallard/stompngo_examples/common"
 )
 
 var exampid = "receive_11: "
