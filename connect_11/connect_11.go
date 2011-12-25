@@ -17,69 +17,67 @@
 package main
 
 import (
-  "fmt"
-  "log"
-  "net"
-  "github.com/gmallard/stompngo"
-  . "github.com/gmallard/stompngo_examples/common"
+	"fmt"
+	"github.com/gmallard/stompngo"
+	. "github.com/gmallard/stompngo_examples/common"
+	"log"
+	"net"
 )
 
 var exampid = "connect_11: "
 
 // Connect to a STOMP 1.1 broker and disconnect.
 func main() {
-  fmt.Println(exampid + "starts ...")
+	fmt.Println(exampid + "starts ...")
 
-  // Open a net connection
-  h, p := HostAndPort10()
-  n, e := net.Dial("tcp", net.JoinHostPort(h, p))
-  if e != nil {
-    log.Fatalln(e)  // Handle this ......
-  }
-  fmt.Println(exampid + "dial complete ...")
+	// Open a net connection
+	h, p := HostAndPort10()
+	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	if e != nil {
+		log.Fatalln(e) // Handle this ......
+	}
+	fmt.Println(exampid + "dial complete ...")
 
-  // All stomp API methods require 'Headers'.  Stomp headers are key/value 
-  // pairs.  The stomp package implements them using a string slice.
-  //
-  // To connect to a Stomp 1.1 broker, you must:
-  // a) Use the correct host and port of course
-  // b) Pass the 'accept-version' header per specification requirements
-  // c) Pass the 'host' header per specification requirements
-  //
-  // We demand a 1.1 connection here.
-  // Note that the 1.1 vhost _could_ be different than the host name used
-  // for the connection, but in this example is the same.
-  //
-  ch := stomp.Headers{"accept-version", "1.1",
-    "host", h}
+	// All stomp API methods require 'Headers'.  Stomp headers are key/value 
+	// pairs.  The stomp package implements them using a string slice.
+	//
+	// To connect to a Stomp 1.1 broker, you must:
+	// a) Use the correct host and port of course
+	// b) Pass the 'accept-version' header per specification requirements
+	// c) Pass the 'host' header per specification requirements
+	//
+	// We demand a 1.1 connection here.
+	// Note that the 1.1 vhost _could_ be different than the host name used
+	// for the connection, but in this example is the same.
+	//
+	ch := stomp.Headers{"accept-version", "1.1",
+		"host", h}
 
-  // Get a stomp connection.  Parameters are:
-  // a) the opened net connection
-  // b) the (empty) Headers
-  conn, e := stomp.Connect(n, ch)
-  if e != nil {
-    log.Fatalln(e)  // Handle this ......
-  }
-  fmt.Println(exampid + "stomp connect complete ...")
+	// Get a stomp connection.  Parameters are:
+	// a) the opened net connection
+	// b) the (empty) Headers
+	conn, e := stomp.Connect(n, ch)
+	if e != nil {
+		log.Fatalln(e) // Handle this ......
+	}
+	fmt.Println(exampid + "stomp connect complete ...")
 
-  // *NOTE* your application functionaltiy goes here!
+	// *NOTE* your application functionaltiy goes here!
 
-  // Polite Stomp disconnects are not required, but highly recommended.
-  // Empty headers again in this example.
-  e = conn.Disconnect(stomp.Headers{})
-  if e != nil {
-    log.Fatalln(e)  // Handle this ......
-  }
-  fmt.Println(exampid + "stomp disconnect complete ...")
+	// Polite Stomp disconnects are not required, but highly recommended.
+	// Empty headers again in this example.
+	e = conn.Disconnect(stomp.Headers{})
+	if e != nil {
+		log.Fatalln(e) // Handle this ......
+	}
+	fmt.Println(exampid + "stomp disconnect complete ...")
 
-  // Close the net connection.  We ignore errors here.
-  e = n.Close()
-  if e != nil {
-    log.Fatalln(e)  // Handle this ......
-  }
-  fmt.Println(exampid + "network close complete ...")
+	// Close the net connection.
+	e = n.Close()
+	if e != nil {
+		log.Fatalln(e) // Handle this ......
+	}
+	fmt.Println(exampid + "network close complete ...")
 
-  fmt.Println(exampid + "ends ...")
+	fmt.Println(exampid + "ends ...")
 }
-
-

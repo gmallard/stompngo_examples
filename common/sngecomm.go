@@ -17,9 +17,9 @@
 package sngecomm
 
 import (
-  "fmt"
-  "os"
-  "strconv"
+	"fmt"
+	"os"
+	"strconv"
 )
 
 var h10 = "localhost" // default 1.0 host 
@@ -28,9 +28,9 @@ var p10 = "61613"     // default 1.0 port (ActiveMQ on the author's machine)
 var h11 = "localhost" // default 1.1 host 
 var p11 = "62613"     // default 1.1 port (Apollo on the author's machine)
 
-var nmsgs = 1         // Default number of messages to send
+var nmsgs = 1                         // Default number of messages to send
 var dest = "/queue/snge.common.queue" // Default destination
-var nqs = 1           // Default number of queues for multi-queue demo(s)
+var nqs = 1                           // Default number of queues for multi-queue demo(s)
 
 // Override 1.0 Host and port for Dial if requested.
 func HostAndPort10() (string, string) {
@@ -40,7 +40,7 @@ func HostAndPort10() (string, string) {
 	}
 	pe := os.Getenv("STOMP_PORT")
 	if pe != "" {
-    p10 = pe
+		p10 = pe
 	}
 	return h10, p10
 }
@@ -53,45 +53,44 @@ func HostAndPort11() (string, string) {
 	}
 	pe := os.Getenv("STOMP_PORT")
 	if pe != "" {
-    p11 = pe
+		p11 = pe
 	}
 	return h11, p11
 }
 
 // Number of messages to send
 func Nmsgs() int {
-  c := os.Getenv("STOMP_NMSGS")
-  if c == "" {
-    return nmsgs
-  }
-  n, e := strconv.ParseInt(c, 10, 0)
-  if e != nil {
-    fmt.Printf("NMSGS Conversion error: %v\n", e)
-    return nmsgs
-  }
-  return int(n)
+	c := os.Getenv("STOMP_NMSGS")
+	if c == "" {
+		return nmsgs
+	}
+	n, e := strconv.ParseInt(c, 10, 0)
+	if e != nil {
+		fmt.Printf("NMSGS Conversion error: %v\n", e)
+		return nmsgs
+	}
+	return int(n)
 }
 
 // Number of queues to use
 func Nqs() int {
-  c := os.Getenv("STOMP_NQS")
-  if c == "" {
-    return nqs
-  }
-  n, e := strconv.ParseInt(c, 10, 0)
-  if e != nil {
-    fmt.Printf("NQS Conversion error: %v\n", e)
-    return nqs
-  }
-  return int(n)
+	c := os.Getenv("STOMP_NQS")
+	if c == "" {
+		return nqs
+	}
+	n, e := strconv.ParseInt(c, 10, 0)
+	if e != nil {
+		fmt.Printf("NQS Conversion error: %v\n", e)
+		return nqs
+	}
+	return int(n)
 }
 
 // Destination to send to
 func Dest() string {
-  d := os.Getenv("STOMP_DEST")
-  if d == "" {
-    return dest
-  }
-  return d
+	d := os.Getenv("STOMP_DEST")
+	if d == "" {
+		return dest
+	}
+	return d
 }
-

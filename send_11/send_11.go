@@ -17,60 +17,59 @@
 package main
 
 import (
-  "fmt"
-  "log"
-  "net"
-  "github.com/gmallard/stompngo"
-  "github.com/gmallard/stompngo_examples/common"
+	"fmt"
+	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo_examples/common"
+	"log"
+	"net"
 )
 
 var exampid = "send_11: "
 
 // Connect to a STOMP 1.1 broker, send some messages and disconnect.
 func main() {
-  fmt.Println(exampid + "starts ...")
+	fmt.Println(exampid + "starts ...")
 
-  // Open a net connection
-  h, p := sngecomm.HostAndPort11() // a 1.1 connect
-  n, e := net.Dial("tcp", net.JoinHostPort(h, p))
-  if e != nil {
-    log.Fatalln(e)  // Handle this ......
-  }
-  fmt.Println(exampid + "dial complete ...")
+	// Open a net connection
+	h, p := sngecomm.HostAndPort11() // a 1.1 connect
+	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	if e != nil {
+		log.Fatalln(e) // Handle this ......
+	}
+	fmt.Println(exampid + "dial complete ...")
 
-  eh := stomp.Headers{}
-  conn, e := stomp.Connect(n, eh)
-  if e != nil {
-    log.Fatalln(e)  // Handle this ......
-  }
-  fmt.Println(exampid + "stomp connect complete ...")
+	eh := stomp.Headers{}
+	conn, e := stomp.Connect(n, eh)
+	if e != nil {
+		log.Fatalln(e) // Handle this ......
+	}
+	fmt.Println(exampid + "stomp connect complete ...")
 
-  // *NOTE* your application functionaltiy goes here!
-  // Sending to a 1.1 broker is usally _exactly_ like sending to a 1.0 broker.
-  s := stomp.Headers{"destination", sngecomm.Dest()} // send headers
-  m := exampid + " message: "
-  for i := 1; i <= sngecomm.Nmsgs(); i++ {
-    t := m + fmt.Sprintf("%d", i)
-    e := conn.Send(s, t)
-    if e != nil {
-      log.Fatalln(e)  // Handle this ...
-    }
-    fmt.Println(exampid, "send complete:", t)
-  }
+	// *NOTE* your application functionaltiy goes here!
+	// Sending to a 1.1 broker is usally _exactly_ like sending to a 1.0 broker.
+	s := stomp.Headers{"destination", sngecomm.Dest()} // send headers
+	m := exampid + " message: "
+	for i := 1; i <= sngecomm.Nmsgs(); i++ {
+		t := m + fmt.Sprintf("%d", i)
+		e := conn.Send(s, t)
+		if e != nil {
+			log.Fatalln(e) // Handle this ...
+		}
+		fmt.Println(exampid, "send complete:", t)
+	}
 
-  // Disconnect and Close
-  e = conn.Disconnect(eh)
-  if e != nil {
-    log.Fatalln(e)  // Handle this ......
-  }
-  fmt.Println(exampid + "stomp disconnect complete ...")
-  e = n.Close()
-  if e != nil {
-    log.Fatalln(e)  // Handle this ......
-  }
-  fmt.Println(exampid + "network close complete ...")
+	// Disconnect from the Stomp server
+	e = conn.Disconnect(eh)
+	if e != nil {
+		log.Fatalln(e) // Handle this ......
+	}
+	fmt.Println(exampid + "stomp disconnect complete ...")
+	// Close the network connection
+	e = n.Close()
+	if e != nil {
+		log.Fatalln(e) // Handle this ......
+	}
+	fmt.Println(exampid + "network close complete ...")
 
-  fmt.Println(exampid + "ends ...")
+	fmt.Println(exampid + "ends ...")
 }
-
-
