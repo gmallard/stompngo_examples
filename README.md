@@ -15,17 +15,17 @@ Uses the stomp package at:
 
 ## Installation ##
 
-To install these example programs:
+To install these example programs using a recent version of go:
 
-* goinstall github.com/gmallard/stompngo
-* goinstall github.com/gmallard/stompngo_examples/common
-* goinstall github.com/gmallard/stompngo_examples/connect_10
-* goinstall github.com/gmallard/stompngo_examples/connect_11
-* goinstall github.com/gmallard/stompngo_examples/receive_10
-* goinstall github.com/gmallard/stompngo_examples/receive_11
-* goinstall github.com/gmallard/stompngo_examples/send_10
-* goinstall github.com/gmallard/stompngo_examples/send_11
-* goinstall github.com/gmallard/stompngo_examples/srmgor_11
+* go get  github.com/gmallard/stompngo
+* go get  github.com/gmallard/stompngo_examples/common
+* go get  github.com/gmallard/stompngo_examples/connect_10
+* go get  github.com/gmallard/stompngo_examples/connect_11
+* go get  github.com/gmallard/stompngo_examples/receive_10
+* go get  github.com/gmallard/stompngo_examples/receive_11
+* go get  github.com/gmallard/stompngo_examples/send_10
+* go get  github.com/gmallard/stompngo_examples/send_11
+* go get  github.com/gmallard/stompngo_examples/srmgor_11
 
 ## Contributions ##
 
