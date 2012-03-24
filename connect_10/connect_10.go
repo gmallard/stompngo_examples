@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 	"github.com/gmallard/stompngo"
-	. "github.com/gmallard/stompngo_examples/common"
+	. "github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
 )
@@ -43,12 +43,12 @@ func main() {
 	//
 	// Empty Headers are useful for a number of API method calls, and we
 	// use them to connect to a Stomp 1.0 broker.
-	eh := stomp.Headers{}
+	eh := stompngo.Headers{}
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
 	// b) the (empty) Headers
-	conn, e := stomp.Connect(n, eh)
+	conn, e := stompngo.Connect(n, eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

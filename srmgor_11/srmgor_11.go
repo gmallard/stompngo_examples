@@ -23,7 +23,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/common"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"math/big"
 	"net"
@@ -54,14 +54,14 @@ func timeBetween(min, max int64) int64 {
 }
 
 // Send messages to a particular queue
-func sender(conn *stomp.Connection, qn, c int) {
+func sender(conn *stompngo.Connection, qn, c int) {
 	fmt.Println(exampid + "sender starts ...")
 	//
 	qp := sngecomm.Dest()        // queue name prefix
 	qns := fmt.Sprintf("%d", qn) // queue number
 	q := qp + "." + qns
 	fmt.Println(exampid + "sender queue name: " + q)
-	h := stomp.Headers{"destination", q} // send Headers
+	h := stompngo.Headers{"destination", q} // send Headers
 
 	// Send loop
 	for i := 1; i <= c; i++ {
@@ -82,15 +82,15 @@ func sender(conn *stomp.Connection, qn, c int) {
 }
 
 // Receive messages from a particular queue
-func receiver(conn *stomp.Connection, qn, c int) {
+func receiver(conn *stompngo.Connection, qn, c int) {
 	fmt.Println(exampid + "receiver starts ...")
 	//
 	qp := sngecomm.Dest()        // queue name prefix
 	qns := fmt.Sprintf("%d", qn) // queue number
 	q := qp + "." + qns
 	fmt.Println(exampid + "receiver queue name: " + q)
-	u := stomp.Uuid() // A unique subscription ID
-	h := stomp.Headers{"destination", q, "id", u}
+	u := stompngo.Uuid() // A unique subscription ID
+	h := stompngo.Headers{"destination", q, "id", u}
 	// Subscribe
 	r, e := conn.Subscribe(h)
 	if e != nil {
@@ -126,8 +126,8 @@ func startSenders(q int) {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	eh := stomp.Headers{}
-	conn, e := stomp.Connect(n, eh)
+	eh := stompngo.Headers{}
+	conn, e := stompngo.Connect(n, eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
@@ -164,8 +164,8 @@ func startReceivers(q int) {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	eh := stomp.Headers{}
-	conn, e := stomp.Connect(n, eh)
+	eh := stompngo.Headers{}
+	conn, e := stompngo.Connect(n, eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

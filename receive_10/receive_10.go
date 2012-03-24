@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/common"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
 )
@@ -37,15 +37,15 @@ func main() {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "dial complete ...")
-	eh := stomp.Headers{}
-	conn, e := stomp.Connect(n, eh)
+	eh := stompngo.Headers{}
+	conn, e := stompngo.Connect(n, eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "stomp connect complete ...")
 
 	// Setup Headers ...
-	s := stomp.Headers{"destination", sngecomm.Dest()} // subscribe/unsubscribe headers
+	s := stompngo.Headers{"destination", sngecomm.Dest()} // subscribe/unsubscribe headers
 
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.

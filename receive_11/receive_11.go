@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/common"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
 )
@@ -37,16 +37,16 @@ func main() {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "dial complete ...")
-	eh := stomp.Headers{}
-	conn, e := stomp.Connect(n, eh)
+	eh := stompngo.Headers{}
+	conn, e := stompngo.Connect(n, eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "stomp connect complete ...")
 
 	// Setup Headers ...
-	u := stomp.Uuid() // Use package convenience function for unique ID
-	s := stomp.Headers{"destination", sngecomm.Dest(),
+	u := stompngo.Uuid() // Use package convenience function for unique ID
+	s := stompngo.Headers{"destination", sngecomm.Dest(),
 		"id", u} // subscribe/unsubscribe headers
 
 	// *NOTE* your application functionaltiy goes here!

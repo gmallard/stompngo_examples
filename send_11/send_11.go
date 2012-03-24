@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/common"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
 )
@@ -38,8 +38,8 @@ func main() {
 	}
 	fmt.Println(exampid + "dial complete ...")
 
-	eh := stomp.Headers{}
-	conn, e := stomp.Connect(n, eh)
+	eh := stompngo.Headers{}
+	conn, e := stompngo.Connect(n, eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
@@ -47,7 +47,7 @@ func main() {
 
 	// *NOTE* your application functionaltiy goes here!
 	// Sending to a 1.1 broker is usally _exactly_ like sending to a 1.0 broker.
-	s := stomp.Headers{"destination", sngecomm.Dest()} // send headers
+	s := stompngo.Headers{"destination", sngecomm.Dest()} // send headers
 	m := exampid + " message: "
 	for i := 1; i <= sngecomm.Nmsgs(); i++ {
 		t := m + fmt.Sprintf("%d", i)

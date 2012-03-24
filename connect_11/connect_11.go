@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 	"github.com/gmallard/stompngo"
-	. "github.com/gmallard/stompngo_examples/common"
+	. "github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
 )
@@ -50,13 +50,13 @@ func main() {
 	// Note that the 1.1 vhost _could_ be different than the host name used
 	// for the connection, but in this example is the same.
 	//
-	ch := stomp.Headers{"accept-version", "1.1",
+	ch := stompngo.Headers{"accept-version", "1.1",
 		"host", h}
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
 	// b) the (empty) Headers
-	conn, e := stomp.Connect(n, ch)
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
@@ -66,7 +66,7 @@ func main() {
 
 	// Polite Stomp disconnects are not required, but highly recommended.
 	// Empty headers again in this example.
-	e = conn.Disconnect(stomp.Headers{})
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

@@ -18,7 +18,7 @@ Uses the stomp package at:
 To install these example programs using a recent version of go:
 
 * go get  github.com/gmallard/stompngo
-* go get  github.com/gmallard/stompngo_examples/common
+* go get  github.com/gmallard/stompngo_examples/sngecomm
 * go get  github.com/gmallard/stompngo_examples/connect_10
 * go get  github.com/gmallard/stompngo_examples/connect_11
 * go get  github.com/gmallard/stompngo_examples/receive_10
