@@ -16,6 +16,7 @@
 
 // Show a number of queue writers and readers operating concurrently.
 // Try to be realistic about workloads.
+// Receiver checks messages for proper queue and message number.
 
 package main
 
@@ -28,6 +29,7 @@ import (
 	"math/big"
 	"net"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -67,7 +69,7 @@ func sender(conn *stompngo.Connection, qn, c int) {
 	for i := 1; i <= c; i++ {
 		si := fmt.Sprintf("%d", i)
 		// Generate a message to send ...............
-		m := exampid + "|" + "payload" + "|" + qns + "|" + si
+		m := exampid + "|" + "payload" + "|qnum:" + qns + "|msgnum:" + si
 		fmt.Println("sender", m)
 		e := conn.Send(h, m)
 		if e != nil {
@@ -102,8 +104,18 @@ func receiver(conn *stompngo.Connection, qn, c int) {
 		if d.Error != nil {
 			log.Fatalln(d.Error)
 		}
+
 		// Process the inbound message .................
-		fmt.Println("receiver", d.Message.BodyString())
+		m := d.Message.BodyString()
+		fmt.Println("receiver", m)
+
+		// Sanity check the queue and message numbers
+		mns := fmt.Sprintf("%d", i) // message number
+		t := "|qnum:" + qns + "|msgnum:" + mns
+		if !strings.Contains(m, t) {
+			log.Fatalln("bad message", m, t)
+		}
+
 		runtime.Gosched()                                              // yield for this example
 		time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
 	}
