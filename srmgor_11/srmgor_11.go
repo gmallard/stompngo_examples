@@ -44,15 +44,19 @@ var wgall sync.WaitGroup
 // amount of time.
 // Vary these for experimental purposes.  YMMV.
 var max int64 = 1e9            // Max stagger time (nanoseconds)
-var min int64 = 10 * max / 100 // Min stagger time (nanoseconds)
+var min int64 = max / 10 // Min stagger time (nanoseconds)
 // Vary these for experimental purposes.  YMMV.
 var send_factor int64 = 1 // Send factor time
 var recv_factor int64 = 1 // Receive factor time
 
+// Wait flags
+var send_wait = true
+var recv_wait = true
+
 // Get a duration between min amd max
 func timeBetween(min, max int64) int64 {
 	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
-	return br.Add(big.NewInt(min), br).Int64()
+	return (br.Add(big.NewInt(min), br).Int64())/2
 }
 
 // Send messages to a particular queue
@@ -75,8 +79,10 @@ func sender(conn *stompngo.Connection, qn, c int) {
 		if e != nil {
 			log.Fatalln(e)
 		}
-		runtime.Gosched()                                              // yield for this example
-		time.Sleep(time.Duration(send_factor * timeBetween(min, max))) // Time to build next message
+    if send_wait {
+		  runtime.Gosched()                                              // yield for this example
+		  time.Sleep(time.Duration(send_factor * timeBetween(min, max))) // Time to build next message
+    }
 	}
 	// Sending is done 
 	fmt.Println(exampid + "sender ends ...")
@@ -115,9 +121,10 @@ func receiver(conn *stompngo.Connection, qn, c int) {
 		if !strings.Contains(m, t) {
 			log.Fatalln("bad message", m, t)
 		}
-
-		runtime.Gosched()                                              // yield for this example
-		time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
+    if recv_wait {
+		  runtime.Gosched()                                              // yield for this example
+		  time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
+    }
 	}
 	// Unsubscribe
 	e = conn.Unsubscribe(h)
@@ -209,6 +216,9 @@ func startReceivers(q int) {
 // destinations.
 func main() {
 	fmt.Println(exampid + "starts ...")
+  //
+  send_wait = sngecomm.SendWait()
+  recv_wait = sngecomm.RecvWait()
 	//
 	q := sngecomm.Nqs()
 	fmt.Printf(exampid+"Nqs: %d\n", q)
