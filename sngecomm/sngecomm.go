@@ -99,17 +99,17 @@ func Dest() string {
 func RecvWait() bool {
   f := os.Getenv("STOMP_NORECVW")
   if f == "" {
-    return false
+    return true
   }
-  return true
+  return false
 }
 
 // Does send wait to simulate message building
 func SendWait() bool {
   f := os.Getenv("STOMP_NOSENDW")
   if f == "" {
-    return false
+    return true
   }
-  return true
+  return false
 }
 
