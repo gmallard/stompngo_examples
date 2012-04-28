@@ -31,7 +31,7 @@ func main() {
 	fmt.Println(exampid + "starts ...")
 
 	// Open a net connection
-	h, p := HostAndPort10()
+	h, p := HostAndPort11()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
