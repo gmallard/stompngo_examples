@@ -42,4 +42,7 @@ For the record, the canonical repository for this project is at:
 Please review issues at the canonical repository.  File any new issues there as
 well.
 
+## Interoperability with JMS and Java ##
+
+Please review documentation in the 'jinterop' directory.
 
