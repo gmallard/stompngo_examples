@@ -15,7 +15,7 @@
 //
 
 /*
-Package sngecomm provides common functionality used in the stompngo+examples
+Package sngecomm provides common functionality used in the stompngo_examples
 project.
 */
 package sngecomm
