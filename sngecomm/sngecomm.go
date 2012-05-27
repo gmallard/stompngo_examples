@@ -14,6 +14,10 @@
 // limitations under the License.
 //
 
+/*
+Package sngecomm provides common functionality used in the stompngo+examples
+project.
+*/
 package sngecomm
 
 import (

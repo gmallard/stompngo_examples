@@ -18,6 +18,11 @@
 // Try to be realistic about workloads.
 // Receiver checks messages for proper queue and message number.
 
+/*
+Send and receive many STOMP messages using multiple queues and goroutines
+to service each send or receive instance.  All senders share a single
+STOMP connection, as do all receivers.
+*/
 package main
 
 import (

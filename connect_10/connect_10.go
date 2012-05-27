@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
+/*
+Connect and Disconnect from a STOMP 1.1 broker.
+*/
 package main
 
 import (

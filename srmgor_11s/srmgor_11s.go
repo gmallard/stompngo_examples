@@ -19,6 +19,11 @@
 // Receiver checks messages for proper queue and message number.
 // All senders and receivers use the same Stomp connection.
 
+/*
+Send and receive many STOMP messages using multiple queues and goroutines
+to service each send or receive instance. All senders and receivers share the
+same STOMP connection.
+*/
 package main
 
 import (

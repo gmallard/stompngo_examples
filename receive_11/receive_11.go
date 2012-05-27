@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
+/*
+Receive messages from a STOMP 1.1 broker.
+*/
 package main
 
 import (

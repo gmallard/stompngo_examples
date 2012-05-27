@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
+/*
+A message sender, to demonstrate JMS interoperability.
+*/
 package main
 
 import (

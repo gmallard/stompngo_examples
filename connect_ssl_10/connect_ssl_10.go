@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
+/*
+Connect and Disconnect from a STOMP 1.0 broker with a TLS connection.
+*/
 package main
 
 import (
@@ -30,7 +33,7 @@ var (
 	testConfig *tls.Config
 )
 
-// Connect to a STOMP 1.0 broker using SSL and disconnect.
+// Connect to a STOMP 1.0 broker using TLS and disconnect.
 func main() {
 	fmt.Println(exampid + "starts ...")
 
