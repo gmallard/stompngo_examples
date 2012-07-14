@@ -150,8 +150,10 @@ func startSenders(q int) {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	eh := stompngo.Headers{}
-	conn, e := stompngo.Connect(n, eh)
+
+	// Stomp connect, 1.1
+	ch := stompngo.Headers{"host", h, "accept-version", "1.1"}	
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
@@ -165,6 +167,7 @@ func startSenders(q int) {
 	wgsend.Wait()
 
 	// Disconnect from Stomp server
+	eh := stompngo.Headers{}
 	e = conn.Disconnect(eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
@@ -188,8 +191,8 @@ func startReceivers(q int) {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	eh := stompngo.Headers{}
-	conn, e := stompngo.Connect(n, eh)
+	ch := stompngo.Headers{"host", "localhost", "accept-version", "1.1"}
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
@@ -203,6 +206,7 @@ func startReceivers(q int) {
 	wgrecv.Wait()
 
 	// Disconnect from Stomp server
+	eh := stompngo.Headers{}
 	e = conn.Disconnect(eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......

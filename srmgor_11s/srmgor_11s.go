@@ -194,9 +194,9 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	// Stomp connect
-	eh := stompngo.Headers{}
-	conn, e = stompngo.Connect(n, eh)
+	// Stomp connect, 1.1
+	ch := stompngo.Headers{"host", h, "accept-version", "1.1"}	
+	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
@@ -206,6 +206,7 @@ func main() {
 	go startSenders(q)
 	wgall.Wait()
 	// Disconnect from Stomp server
+	eh := stompngo.Headers{}
 	e = conn.Disconnect(eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
