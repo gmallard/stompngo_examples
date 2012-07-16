@@ -1,4 +1,4 @@
-# stompngo_examples - A collection of examples for package stomp #
+# stompngo_examples - A collection of examples for package stompngo #
 
 ## Features ##
 
@@ -7,9 +7,9 @@
     1. [Protocol Level 1.0](http://stomp.github.com/stomp-specification-1.0.html)
     2. [Protocol Level 1.1](http://stomp.github.com/stomp-specification-1.1.html)
 
-## stomp package ##
+## stompngo package ##
 
-Uses the stomp package at:
+Uses the stompngo package at:
 
 * [stompngo at github](https://github.com/gmallard/stompngo)
 
