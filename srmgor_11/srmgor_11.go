@@ -234,6 +234,11 @@ func startReceivers(qn int) {
 // destinations.
 func main() {
 	fmt.Println(exampid + "starts ...")
+	nc := runtime.NumCPU()
+	fmt.Println(exampid + "number of CPUs is ", nc)
+	c := runtime.GOMAXPROCS(nc)
+	fmt.Println(exampid + "previous number of GOMAXPROCS is:", c)
+	fmt.Println(exampid + "current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	//
 	send_wait = sngecomm.SendWait()
 	recv_wait = sngecomm.RecvWait()
