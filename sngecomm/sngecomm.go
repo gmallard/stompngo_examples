@@ -101,19 +101,27 @@ func Dest() string {
 
 // Does receive wait to simulate message processing
 func RecvWait() bool {
-  f := os.Getenv("STOMP_NORECVW")
-  if f == "" {
-    return true
-  }
-  return false
+	f := os.Getenv("STOMP_NORECVW")
+	if f == "" {
+		return true
+	}
+	return false
 }
 
 // Does send wait to simulate message building
 func SendWait() bool {
-  f := os.Getenv("STOMP_NOSENDW")
-  if f == "" {
-    return true
-  }
-  return false
+	f := os.Getenv("STOMP_NOSENDW")
+	if f == "" {
+		return true
+	}
+	return false
 }
 
+// True if persistent messages are desired.
+func Persistent() bool {
+	f := os.Getenv("STOMP_PERSISTENT")
+	if f == "" {
+		return false
+	}
+	return true
+}
