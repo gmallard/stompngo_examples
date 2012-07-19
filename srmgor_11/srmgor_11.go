@@ -58,9 +58,6 @@ var recv_factor int64 = 1 // Receive factor time
 var send_wait = true
 var recv_wait = true
 
-//
-var setMaxProcs = false
-
 // Get a duration between min amd max
 func timeBetween(min, max int64) int64 {
 	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
@@ -232,7 +229,7 @@ func startReceivers(qn int) {
 // destinations.
 func main() {
 	fmt.Println(exampid, "main starts")
-	if setMaxProcs {
+	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
 		fmt.Println(exampid, "main number of CPUs is:", nc)
 		c := runtime.GOMAXPROCS(nc)

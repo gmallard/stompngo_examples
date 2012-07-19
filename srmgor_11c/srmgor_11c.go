@@ -60,9 +60,6 @@ var recv_wait = true
 // Number of messages
 var nmsgs = 1
 
-//
-var setMaxProcs = false
-
 // Get a duration between min amd max
 func timeBetween(min, max int64) int64 {
 	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
@@ -71,7 +68,7 @@ func timeBetween(min, max int64) int64 {
 
 func sendMessages(conn *stompngo.Connection, qnum int) {
 	qns := fmt.Sprintf("%d", qnum) // queue number
-	qp := sngecomm.Dest() // queue name prefix
+	qp := sngecomm.Dest()          // queue name prefix
 	q := qp + "." + qns
 	fmt.Println(exampid, "send queue name:", q, qnum)
 	h := stompngo.Headers{"destination", q} // send Headers
@@ -98,7 +95,7 @@ func sendMessages(conn *stompngo.Connection, qnum int) {
 
 func receiveMessages(conn *stompngo.Connection, qnum int) {
 	qns := fmt.Sprintf("%d", qnum) // queue number
-	qp := sngecomm.Dest() // queue name prefix
+	qp := sngecomm.Dest()          // queue name prefix
 	q := qp + "." + qns
 	fmt.Println(exampid, "recv queue name:", q, qnum)
 	// Subscribe
@@ -178,7 +175,6 @@ func runReceiver(qnum int) {
 	wgrecv.Done()
 }
 
-
 func runSender(qnum int) {
 	fmt.Println(exampid, "send start for queue number", qnum)
 	// Network Open
@@ -219,7 +215,7 @@ func runSender(qnum int) {
 
 func main() {
 	fmt.Println(exampid, "starts")
-	if setMaxProcs {
+	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
 		fmt.Println(exampid, "number of CPUs is:", nc)
 		c := runtime.GOMAXPROCS(nc)
@@ -256,5 +252,3 @@ func main() {
 	//
 	fmt.Println(exampid, "ends")
 }
-
-

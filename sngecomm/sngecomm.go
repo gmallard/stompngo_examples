@@ -125,3 +125,12 @@ func Persistent() bool {
 	}
 	return true
 }
+
+// True if max procs are to be set
+func SetMAXPROCS() bool {
+	f := os.Getenv("STOMP_SETMAXPROCS")
+	if f == "" {
+		return false
+	}
+	return true
+}
