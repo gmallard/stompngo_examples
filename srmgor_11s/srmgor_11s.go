@@ -118,13 +118,10 @@ func receiver(qn, c int) {
 		log.Fatalln(exampid, "recv subscribe error:", e, qn)
 	}
 	// Receive loop
-	re := false
 	for i := 1; i <= c; i++ {
 		d := <-r
 		if d.Error != nil {
 			log.Fatalln(exampid, "recv error", d.Error, qn)
-			re = true
-			break
 		}
 
 		// Process the inbound message .................
@@ -142,12 +139,10 @@ func receiver(qn, c int) {
 			time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
 		}
 	}
-	if !re {
-		// Unsubscribe
-		e = conn.Unsubscribe(h)
-		if e != nil {
-			log.Fatalln(exampid, "recv unsubscribe error", e, qn)
-		}
+	// Unsubscribe
+	e = conn.Unsubscribe(h)
+	if e != nil {
+		log.Fatalln(exampid, "recv unsubscribe error", e, qn)
 	}
 	// Receiving is done 
 	fmt.Println(exampid, "recv ends", qn)

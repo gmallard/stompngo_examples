@@ -122,7 +122,6 @@ func receiveMessages(conn *stompngo.Connection, qnum int) {
 		t := "|qnum:" + qns + "|msgnum:" + mns
 		if !strings.Contains(m, t) {
 			log.Fatalln(exampid, "recv bad message", m, t, qnum)
-			break
 		}
 		if recv_wait {
 			runtime.Gosched()                                              // yield for this example
