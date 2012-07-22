@@ -66,7 +66,7 @@ func timeBetween(min, max int64) int64 {
 	return (br.Add(big.NewInt(min), br).Int64()) / 2
 }
 
-func sendMessages(conn *stompngo.Connection, qnum int) {
+func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	qns := fmt.Sprintf("%d", qnum) // queue number
 	qp := sngecomm.Dest()          // queue name prefix
 	q := qp + "." + qns
@@ -84,7 +84,7 @@ func sendMessages(conn *stompngo.Connection, qnum int) {
 		fmt.Println(exampid, "send message", m, qnum)
 		e := conn.Send(h, m)
 		if e != nil {
-			log.Fatalln(exampid, "send:", e, qnum)
+			log.Fatalln(exampid, "send:", e, nc.LocalAddr().String(), qnum)
 		}
 		if send_wait {
 			runtime.Gosched()                                              // yield for this example
@@ -93,7 +93,7 @@ func sendMessages(conn *stompngo.Connection, qnum int) {
 	}
 }
 
-func receiveMessages(conn *stompngo.Connection, qnum int) {
+func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	qns := fmt.Sprintf("%d", qnum) // queue number
 	qp := sngecomm.Dest()          // queue name prefix
 	q := qp + "." + qns
@@ -103,14 +103,14 @@ func receiveMessages(conn *stompngo.Connection, qnum int) {
 	h := stompngo.Headers{"destination", q, "id", u}
 	r, e := conn.Subscribe(h)
 	if e != nil {
-		log.Fatalln(exampid, "recv subscribe", e, qnum)
+		log.Fatalln(exampid, "recv subscribe", e, nc.LocalAddr().String(), qnum)
 	}
 	// Receive messages
 	fmt.Println(exampid, "recv starts", nmsgs, qnum)
 	for n := 1; n <= nmsgs; n++ {
 		d := <-r
 		if d.Error != nil {
-			log.Fatalln(exampid, "recv read:", d.Error, qnum)
+			log.Fatalln(exampid, "recv read:", d.Error, nc.LocalAddr().String(), qnum)
 		}
 
 		// Process the inbound message .................
@@ -121,7 +121,7 @@ func receiveMessages(conn *stompngo.Connection, qnum int) {
 		mns := fmt.Sprintf("%d", n) // message number
 		t := "|qnum:" + qns + "|msgnum:" + mns
 		if !strings.Contains(m, t) {
-			log.Fatalln(exampid, "recv bad message", m, t, qnum)
+			log.Fatalln(exampid, "recv bad message", m, t, nc.LocalAddr().String(), qnum)
 		}
 		if recv_wait {
 			runtime.Gosched()                                              // yield for this example
@@ -131,7 +131,7 @@ func receiveMessages(conn *stompngo.Connection, qnum int) {
 	// Unsubscribe
 	e = conn.Unsubscribe(h)
 	if e != nil {
-		log.Fatalln(exampid, "recv unsubscribe", e, qnum)
+		log.Fatalln(exampid, "recv unsubscribe", e, nc.LocalAddr().String(), qnum)
 	}
 	//
 }
@@ -155,7 +155,7 @@ func runReceiver(qnum int) {
 	}
 	fmt.Println(exampid, "recv connection complete:", qnum)
 	// Receives
-	receiveMessages(conn, qnum)
+	receiveMessages(conn, qnum, n)
 	fmt.Println(exampid, "recv receives complete:", qnum)
 	// Disconnect from Stomp server
 	eh := stompngo.Headers{"recv_discqueue", fmt.Sprintf("%d", qnum)}
@@ -193,7 +193,7 @@ func runSender(qnum int) {
 	}
 	fmt.Println(exampid, "send connection complete:", qnum)
 	//
-	sendMessages(conn, qnum)
+	sendMessages(conn, qnum, n)
 	fmt.Println(exampid, "send sends complete:", qnum)
 	// Disconnect from Stomp server
 	eh := stompngo.Headers{"send_discqueue", fmt.Sprintf("%d", qnum)}
