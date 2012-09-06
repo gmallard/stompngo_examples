@@ -27,13 +27,16 @@ package main
 
 import (
 	"crypto/rand"
+	"flag"
 	"fmt"
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"math/big"
 	"net"
+	"os"
 	"runtime"
+	"runtime/pprof"
 	"strings"
 	"sync"
 	"time"
@@ -57,6 +60,9 @@ var recv_factor int64 = 1 // Receive factor time
 // Wait flags
 var send_wait = true
 var recv_wait = true
+
+// Possible profile file
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 // Get a duration between min amd max
 func timeBetween(min, max int64) int64 {
@@ -228,6 +234,17 @@ func startReceivers(qn int) {
 // destinations.
 func main() {
 	fmt.Println(exampid, "main starts")
+
+	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
+
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
 		fmt.Println(exampid, "main number of CPUs is:", nc)
