@@ -60,7 +60,7 @@ func main() {
 	// a) A channel of MessageData struct.  Note that with this package, the
 	// channel is unique (based on the unique subscription id).
 	// b) A possible error.  Always check for errors.  They can be logical
-	// errors detected by the stomp package, or even hard network errors, for
+	// errors detected by the stompngo package, or even hard network errors, for
 	// example the broker just crashed.
 	r, e := conn.Subscribe(s)
 	if e != nil {

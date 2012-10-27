@@ -42,7 +42,7 @@ func main() {
 	fmt.Println(exampid + "dial complete ...")
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value 
-	// pairs.  The stomp package implements them using a string slice.
+	// pairs.  The stompngo package implements them using a string slice.
 	//
 	// To connect to a Stomp 1.1 broker, you must:
 	// a) Use the correct host and port of course
