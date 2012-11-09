@@ -32,6 +32,9 @@ var p10 = "61613"     // default 1.0 port (ActiveMQ on the author's machine)
 var h11 = "localhost" // default 1.1 host 
 var p11 = "62613"     // default 1.1 port (Apollo on the author's machine)
 
+var h12 = "localhost" // default 1.2 host 
+var p12 = "62613"     // default 1.2 port (Apollo on the author's machine)
+
 var nmsgs = 1                         // Default number of messages to send
 var dest = "/queue/snge.common.queue" // Default destination
 var nqs = 1                           // Default number of queues for multi-queue demo(s)
@@ -60,6 +63,19 @@ func HostAndPort11() (string, string) {
 		p11 = pe
 	}
 	return h11, p11
+}
+
+// Override 1.2 Host and port for Dial if requested.
+func HostAndPort12() (string, string) {
+	he := os.Getenv("STOMP_HOST")
+	if he != "" {
+		h12 = he
+	}
+	pe := os.Getenv("STOMP_PORT")
+	if pe != "" {
+		p12 = pe
+	}
+	return h12, p12
 }
 
 // Number of messages to send

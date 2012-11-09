@@ -41,12 +41,13 @@ func main() {
 	}
 	fmt.Println(exampid + "dial complete ...")
 
-	eh := stompngo.Headers{}
-	conn, e := stompngo.Connect(n, eh)
+	ch := stompngo.Headers{"accept-version", "1.1",
+		"host", h}
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...")
+	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
 
 	// *NOTE* your application functionaltiy goes here!
 	// Sending to a 1.1 broker is usally _exactly_ like sending to a 1.0 broker.
@@ -62,7 +63,7 @@ func main() {
 	}
 
 	// Disconnect from the Stomp server
-	e = conn.Disconnect(eh)
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

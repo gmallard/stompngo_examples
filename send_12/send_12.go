@@ -15,7 +15,7 @@
 //
 
 /*
-Send messages to a STOMP 1.0 broker.
+Send messages to a STOMP 1.2 broker.
 */
 package main
 
@@ -27,28 +27,30 @@ import (
 	"net"
 )
 
-var exampid = "send_10: "
+var exampid = "send_12: "
 
-// Connect to a STOMP 1.0 broker, send some messages and disconnect.
+// Connect to a STOMP 1.2 broker, send some messages and disconnect.
 func main() {
 	fmt.Println(exampid + "starts ...")
 
 	// Open a net connection
-	h, p := sngecomm.HostAndPort10()
+	h, p := sngecomm.HostAndPort12() // a 1.2 connect
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "dial complete ...")
 
-	eh := stompngo.Headers{}
-	conn, e := stompngo.Connect(n, eh)
+	ch := stompngo.Headers{"accept-version", "1.2",
+		"host", h}
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
 
 	// *NOTE* your application functionaltiy goes here!
+	// Sending to a 1.2 broker is usally _exactly_ like sending to a 1.0 broker.
 	s := stompngo.Headers{"destination", sngecomm.Dest()} // send headers
 	m := exampid + " message: "
 	for i := 1; i <= sngecomm.Nmsgs(); i++ {
@@ -61,7 +63,7 @@ func main() {
 	}
 
 	// Disconnect from the Stomp server
-	e = conn.Disconnect(eh)
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

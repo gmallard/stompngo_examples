@@ -15,7 +15,7 @@
 //
 
 /*
-Receive messages from a STOMP 1.0 broker.
+Receive messages from a STOMP 1.0 broker, and ACK them.
 */
 package main
 
@@ -27,7 +27,7 @@ import (
 	"net"
 )
 
-var exampid = "receive_10: "
+var exampid = "ack_10: "
 
 // Connect to a STOMP 1.0 broker, receive some messages and disconnect.
 func main() {
@@ -48,7 +48,9 @@ func main() {
 	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
 
 	// Setup Headers ...
-	s := stompngo.Headers{"destination", sngecomm.Dest()} // subscribe/unsubscribe headers
+	uh := stompngo.Headers{"destination", sngecomm.Dest()} // unsubscribe headers
+	s := stompngo.Headers{"destination", sngecomm.Dest(),  // subscribe headers
+		"ack", "client"}
 
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.
@@ -81,9 +83,23 @@ func main() {
 			fmt.Printf("Header: %s:%s\n", h[j], h[j+1])
 		}
 		fmt.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
+		// ACK the message just received.
+		ah := stompngo.Headers{"message-id", m.Message.Headers.Value("message-id")}
+		fmt.Println(exampid, "ACK Headers", ah)
+		e := conn.Ack(ah)
+		if e != nil {
+			log.Fatalln(e) // Handle this
+		}
+		// Spurious ERROR frame?
+		select {
+		case m = <-r:
+			log.Fatalln("RECEIVE not expected, got: [%v]\n", m)
+		default:
+		}
+		fmt.Println(exampid + "ACK complete ...")
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
-	e = conn.Unsubscribe(s)
+	e = conn.Unsubscribe(uh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ...
 	}
