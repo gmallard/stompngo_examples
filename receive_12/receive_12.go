@@ -46,7 +46,7 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
+	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
 	// Setup Headers ...
 	u := stompngo.Uuid() // Use package convenience function for unique ID
@@ -80,6 +80,9 @@ func main() {
 		}
 		//
 		fmt.Printf("Frame Type: %s\n", m.Message.Command) // Will be MESSAGE or ERROR!
+		if m.Message.Command != stompngo.MESSAGE {
+			log.Fatalln(m) // Handle this ...
+		}
 		h := m.Message.Headers
 		for j := 0; j < len(h)-1; j += 2 {
 			fmt.Printf("Header: %s:%s\n", h[j], h[j+1])
