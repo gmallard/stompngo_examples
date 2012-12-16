@@ -82,6 +82,9 @@ func main() {
 		}
 		//
 		fmt.Printf("Frame Type: %s\n", m.Message.Command) // Will be MESSAGE or ERROR!
+		if m.Message.Command != stompngo.MESSAGE {
+			log.Fatalln(m) // Handle this ...
+		}
 		h := m.Message.Headers
 		for j := 0; j < len(h)-1; j += 2 {
 			fmt.Printf("Header: %s:%s\n", h[j], h[j+1])
@@ -106,14 +109,7 @@ func main() {
 		if e != nil {
 			log.Fatalln(e) // Handle this
 		}
-		// Spurious ERROR frame?
-		select {
-		case m = <-r:
-			log.Fatalln("RECEIVE not expected, got: [%v]\n", m)
-		default:
-		}
 		fmt.Println(exampid + "ACK complete ...")
-
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
 	// With Stomp 1.1, the same unique ID is required on UNSUBSCRIBE.  Failure
