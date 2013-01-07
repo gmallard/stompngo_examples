@@ -41,12 +41,12 @@ func main() {
 	}
 	fmt.Println(exampid + "dial complete ...")
 	ch := stompngo.Headers{"accept-version", "1.1",
-		"host", h}
+		"host", sngecomm.Vhost()}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
+	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
 	// Setup Headers ...
 	u := stompngo.Uuid() // Use package convenience function for unique ID

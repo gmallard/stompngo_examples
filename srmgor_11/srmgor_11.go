@@ -161,7 +161,7 @@ func startSenders(qn int) {
 	}
 
 	// Stomp connect, 1.1
-	ch := stompngo.Headers{"host", h, "accept-version", "1.1"}
+	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(exampid, "startSenders stompconnect error", e, qn) // Handle this ......
@@ -200,7 +200,7 @@ func startReceivers(qn int) {
 	if e != nil {
 		log.Fatalln(exampid, "startReceivers nectonnr:", e, qn) // Handle this ......
 	}
-	ch := stompngo.Headers{"host", "localhost", "accept-version", "1.1"}
+	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln("startReceivers stompconnectr:", e, qn) // Handle this ......

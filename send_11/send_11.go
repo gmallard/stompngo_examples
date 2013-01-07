@@ -42,12 +42,12 @@ func main() {
 	fmt.Println(exampid + "dial complete ...")
 
 	ch := stompngo.Headers{"accept-version", "1.1",
-		"host", h}
+		"host", sngecomm.Vhost()}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
+	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
 	// *NOTE* your application functionaltiy goes here!
 	// Sending to a 1.1 broker is usally _exactly_ like sending to a 1.0 broker.

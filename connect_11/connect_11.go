@@ -54,7 +54,7 @@ func main() {
 	// for the connection, but in this example is the same.
 	//
 	ch := stompngo.Headers{"accept-version", "1.1",
-		"host", h}
+		"host", Vhost()}
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection

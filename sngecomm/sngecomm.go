@@ -150,3 +150,12 @@ func SetMAXPROCS() bool {
 	}
 	return true
 }
+
+// Virtual Host Name to use
+func Vhost() string {
+	d := os.Getenv("STOMP_VHOST")
+	if d == "" {
+		return "localhost"
+	}
+	return d
+}

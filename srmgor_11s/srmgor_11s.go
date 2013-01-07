@@ -168,7 +168,7 @@ func startReceivers(qn int) {
 	fmt.Println(exampid, "startReceivers starts", qn)
 
 	c := sngecomm.Nmsgs() // get message count
-	fmt.Printf(exampid, "startReceivers message count:", c, qn)
+	fmt.Println(exampid, "startReceivers message count:", c, qn)
 	for i := 1; i <= qn; i++ { // all queues
 		wgrecv.Add(1)
 		go receiver(i, c)
@@ -205,7 +205,7 @@ func main() {
 		log.Fatalln("main dial error", e) // Handle this ......
 	}
 	// Stomp connect, 1.1
-	ch := stompngo.Headers{"host", h, "accept-version", "1.1"}
+	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(exampid, "main connect error", e) // Handle this ......

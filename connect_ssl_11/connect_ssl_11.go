@@ -64,7 +64,7 @@ func main() {
 	// pairs.  The stompngo package implements them using a string slice.
 	//
 	ch := stompngo.Headers{"accept-version", "1.1",
-		"host", h}
+		"host", Vhost()}
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection

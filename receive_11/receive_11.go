@@ -41,7 +41,7 @@ func main() {
 	}
 	fmt.Println(exampid + "dial complete ...")
 	ch := stompngo.Headers{"accept-version", "1.1",
-		"host", h}
+		"host", sngecomm.Vhost()}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......

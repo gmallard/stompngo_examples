@@ -148,7 +148,7 @@ func runReceiver(qnum int) {
 	fmt.Println(exampid, "recv network local", n.LocalAddr().String(), qnum)
 	fmt.Println(exampid, "recv network remote", n.RemoteAddr().String(), qnum)
 	// Stomp connect, 1.1
-	ch := stompngo.Headers{"host", h, "accept-version", "1.1"}
+	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(exampid, "recv stompconnect:", qnum, e) // Handle this ......
@@ -186,7 +186,7 @@ func runSender(qnum int) {
 	fmt.Println(exampid, "send network local", n.LocalAddr().String(), qnum)
 	fmt.Println(exampid, "send network remote", n.RemoteAddr().String(), qnum)
 	// Stomp connect, 1.1
-	ch := stompngo.Headers{"host", h, "accept-version", "1.1"}
+	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(exampid, "send stompconnect:", qnum, e) // Handle this ......
