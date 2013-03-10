@@ -188,6 +188,7 @@ func startSenders(qn int) {
 	}
 
 	fmt.Println(exampid, "startSenders ends", qn)
+	sngecomm.ShowStats(exampid, "startSenders", conn)
 	wgall.Done()
 }
 
@@ -227,6 +228,7 @@ func startReceivers(qn int) {
 	}
 
 	fmt.Println(exampid, "startReceivers ends", qn)
+	sngecomm.ShowStats(exampid, "startReceivers", conn)
 	wgall.Done()
 }
 

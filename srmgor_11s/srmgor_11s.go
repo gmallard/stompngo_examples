@@ -231,5 +231,6 @@ func main() {
 	if e != nil {
 		log.Fatalln(exampid, "main netclose error", e) // Handle this ......
 	}
+	sngecomm.ShowStats(exampid, "done", conn)
 	fmt.Println(exampid, "main ends")
 }

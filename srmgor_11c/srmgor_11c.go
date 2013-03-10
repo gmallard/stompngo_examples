@@ -171,6 +171,7 @@ func runReceiver(qnum int) {
 	}
 	fmt.Println(exampid, "recv network close complete", qnum)
 	fmt.Println(exampid, "recv end for queue number", qnum)
+	sngecomm.ShowStats(exampid, "recv "+fmt.Sprintf("%d", qnum), conn)
 	wgrecv.Done()
 }
 
@@ -209,6 +210,7 @@ func runSender(qnum int) {
 	}
 	fmt.Println(exampid, "send network close complete", qnum)
 	fmt.Println(exampid, "send end for queue number", qnum)
+	sngecomm.ShowStats(exampid, "send "+fmt.Sprintf("%d", qnum), conn)
 	wgsend.Done()
 }
 

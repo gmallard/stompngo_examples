@@ -22,6 +22,7 @@ package sngecomm
 
 import (
 	"fmt"
+	"github.com/gmallard/stompngo"
 	"os"
 	"strconv"
 )
@@ -158,4 +159,18 @@ func Vhost() string {
 		return "localhost"
 	}
 	return d
+}
+
+// Show connection metrics.
+func ShowStats(exampid, tag string, conn *stompngo.Connection) {
+	r := conn.FramesRead()
+	w := conn.FramesWritten()
+	s := conn.Running().Seconds()
+	n := conn.Running().Nanoseconds()
+	fmt.Println(exampid, tag, "read count", r)
+	fmt.Println(exampid, tag, "write count", w)
+	fmt.Println(exampid, tag, "duration(ns)", n)
+	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "duration(sec)", s)
+	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "reads/sec", float64(r)/s)
+	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "writes/sec", float64(w)/s)
 }
