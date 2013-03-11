@@ -103,6 +103,34 @@ func sender(conn *stompngo.Connection, qn, c int) {
 	wgsend.Done()
 }
 
+// Asynchronously process all messages for a given subscription.
+func receiveWorker(mc chan stompngo.MessageData, qns string, c int, d chan bool) {
+	// Receive loop
+	for i := 1; i <= c; i++ {
+		d := <-mc
+		if d.Error != nil {
+			log.Fatalln(exampid, "recv read error", d.Error, qns)
+		}
+
+		// Process the inbound message .................
+		m := d.Message.BodyString()
+		fmt.Println(exampid, "recv message", m, qns)
+
+		// Sanity check the queue and message numbers
+		mns := fmt.Sprintf("%d", i) // message number
+		t := "|qnum:" + qns + "|msgnum:" + mns
+		if !strings.Contains(m, t) {
+			log.Fatalln(exampid, "recv bad message", m, t, qns)
+		}
+		if recv_wait {
+			runtime.Gosched()                                              // yield for this example
+			time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
+		}
+	}
+	//
+	d <- true
+}
+
 // Receive messages from a particular queue
 func receiver(conn *stompngo.Connection, qn, c int) {
 	qns := fmt.Sprintf("%d", qn) // queue number
@@ -118,28 +146,24 @@ func receiver(conn *stompngo.Connection, qn, c int) {
 	if e != nil {
 		log.Fatalln(exampid, "recv subscribe error", e, qn)
 	}
-	// Receive loop
+
+	// Many receivers running under the same connection can cause
+	// (wire read) performance issues.  This is *very* dependent on the broker
+	// being used, specifically the broker's algorithm for putting messages on
+	// the wire.
+	// To alleviate those issues, this strategy insures that messages are
+	// received from the wire as soon as possible.  Those messages are then
+	// buffered internally for (possibly later) application processing.
+
+	// Process all inputs async .......
+	mc := make(chan stompngo.MessageData, c) // All messages we could possibly get, YMMV
+	dc := make(chan bool)                    // Receive processing done channel
+	go receiveWorker(mc, qns, c, dc)         // Start async processor
 	for i := 1; i <= c; i++ {
-		d := <-r
-		if d.Error != nil {
-			log.Fatalln(exampid, "recv read error", d.Error, qn)
-		}
-
-		// Process the inbound message .................
-		m := d.Message.BodyString()
-		fmt.Println(exampid, "recv message", m, qn)
-
-		// Sanity check the queue and message numbers
-		mns := fmt.Sprintf("%d", i) // message number
-		t := "|qnum:" + qns + "|msgnum:" + mns
-		if !strings.Contains(m, t) {
-			log.Fatalln(exampid, "recv bad message", m, t, qn)
-		}
-		if recv_wait {
-			runtime.Gosched()                                              // yield for this example
-			time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
-		}
+		mc <- <-r // Receive message data as soon as possible, and internally queue it
 	}
+	<-dc // Wait until receive processing is done
+
 	// Unsubscribe
 	e = conn.Unsubscribe(h)
 	if e != nil {
