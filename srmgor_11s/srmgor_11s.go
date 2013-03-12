@@ -211,6 +211,16 @@ func main() {
 		log.Fatalln(exampid, "main connect error", e) // Handle this ......
 	}
 
+	// Many receivers running under the same connection can cause
+	// (wire read) performance issues.  This is *very* dependent on the broker
+	// being used, specifically the broker's algorithm for putting messages on
+	// the wire.
+	// To alleviate those issues, this strategy insures that messages are
+	// received from the wire as soon as possible.  Those messages are then
+	// buffered internally for (possibly later) application processing. In
+	// this example, buffering occurs in the client package.
+	conn.SetSubChanCap(sngecomm.Nmsgs()) // Max possible for this example, YMMV
+
 	// Set up a logger
 	// l := log.New(os.Stdout, "", log.Ldate|log.Lmicroseconds)
 	// conn.SetLogger(l)
