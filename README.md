@@ -6,6 +6,7 @@
 
     1. [Protocol Level 1.0](http://stomp.github.com/stomp-specification-1.0.html)
     2. [Protocol Level 1.1](http://stomp.github.com/stomp-specification-1.1.html)
+    3. [Protocol Level 1.2](http://stomp.github.com/stomp-specification-1.2.html)
 
 ## stompngo package ##
 
