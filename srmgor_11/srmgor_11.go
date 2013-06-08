@@ -96,7 +96,7 @@ func sender(conn *stompngo.Connection, qn, c int) {
 }
 
 // Asynchronously process all messages for a given subscription.
-func receiveWorker(mc chan stompngo.MessageData, qns string, c int, d chan bool) {
+func receiveWorker(mc <-chan stompngo.MessageData, qns string, c int, d chan<- bool) {
 	// Receive loop
 	for i := 1; i <= c; i++ {
 		d := <-mc
