@@ -27,13 +27,11 @@ same STOMP connection.
 package main
 
 import (
-	"crypto/rand"
 	"fmt"
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	//	"os"
-	"math/big"
 	"net"
 	"runtime"
 	"strings"
@@ -64,12 +62,6 @@ var recv_wait = true
 var n net.Conn                // Network Connection
 var conn *stompngo.Connection // Stomp Connection
 
-// Get a duration between min amd max
-func timeBetween(min, max int64) int64 {
-	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
-	return (br.Add(big.NewInt(min), br).Int64()) / 2
-}
-
 // Send messages to a particular queue
 func sender(qn, c int) {
 	qns := fmt.Sprintf("%d", qn) // queue number
@@ -93,11 +85,11 @@ func sender(qn, c int) {
 			log.Fatalln(exampid, "send error", e, qn)
 		}
 		if send_wait {
-			runtime.Gosched()                                              // yield for this example
-			time.Sleep(time.Duration(send_factor * timeBetween(min, max))) // Time to build next message
+			runtime.Gosched()                                                              // yield for this example
+			time.Sleep(time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))) // Time to build next message
 		}
 	}
-	// Sending is done 
+	// Sending is done
 	fmt.Println(exampid, "send ends", qn)
 	wgsend.Done()
 }
@@ -135,8 +127,8 @@ func receiver(qn, c int) {
 			log.Fatalln(exampid, "recv bad message", m, t, qn)
 		}
 		if recv_wait {
-			runtime.Gosched()                                              // yield for this example
-			time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
+			runtime.Gosched()                                                              // yield for this example
+			time.Sleep(time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))) // Time to build next message
 		}
 	}
 	// Unsubscribe
@@ -144,7 +136,7 @@ func receiver(qn, c int) {
 	if e != nil {
 		log.Fatalln(exampid, "recv unsubscribe error", e, qn)
 	}
-	// Receiving is done 
+	// Receiving is done
 	fmt.Println(exampid, "recv ends", qn)
 	wgrecv.Done()
 }

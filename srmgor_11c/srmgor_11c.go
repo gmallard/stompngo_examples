@@ -20,18 +20,16 @@
 
 /*
 Send and receive many STOMP messages using multiple queues and goroutines
-to service each send or receive instance.  Each sender and receiver 
+to service each send or receive instance.  Each sender and receiver
 operates under a unique network connection.
 */
 package main
 
 import (
-	"crypto/rand"
 	"fmt"
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
-	"math/big"
 	"net"
 	"runtime"
 	"strings"
@@ -60,12 +58,6 @@ var recv_wait = true
 // Number of messages
 var nmsgs = 1
 
-// Get a duration between min amd max
-func timeBetween(min, max int64) int64 {
-	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
-	return (br.Add(big.NewInt(min), br).Int64()) / 2
-}
-
 func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	qns := fmt.Sprintf("%d", qnum) // queue number
 	qp := sngecomm.Dest()          // queue name prefix
@@ -87,8 +79,8 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 			log.Fatalln(exampid, "send:", e, nc.LocalAddr().String(), qnum)
 		}
 		if send_wait {
-			runtime.Gosched()                                              // yield for this example
-			time.Sleep(time.Duration(send_factor * timeBetween(min, max))) // Time to build next message
+			runtime.Gosched()                                                              // yield for this example
+			time.Sleep(time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))) // Time to build next message
 		}
 	}
 }
@@ -124,8 +116,8 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 			log.Fatalln(exampid, "recv bad message", m, t, nc.LocalAddr().String(), qnum)
 		}
 		if recv_wait {
-			runtime.Gosched()                                              // yield for this example
-			time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
+			runtime.Gosched()                                                              // yield for this example
+			time.Sleep(time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))) // Time to build next message
 		}
 	}
 	// Unsubscribe

@@ -21,19 +21,21 @@ project.
 package sngecomm
 
 import (
+	"crypto/rand"
 	"fmt"
 	"github.com/gmallard/stompngo"
+	"math/big"
 	"os"
 	"strconv"
 )
 
-var h10 = "localhost" // default 1.0 host 
+var h10 = "localhost" // default 1.0 host
 var p10 = "61613"     // default 1.0 port (ActiveMQ on the author's machine)
 
-var h11 = "localhost" // default 1.1 host 
+var h11 = "localhost" // default 1.1 host
 var p11 = "62613"     // default 1.1 port (Apollo on the author's machine)
 
-var h12 = "localhost" // default 1.2 host 
+var h12 = "localhost" // default 1.2 host
 var p12 = "62613"     // default 1.2 port (Apollo on the author's machine)
 
 var nmsgs = 1                         // Default number of messages to send
@@ -179,4 +181,10 @@ func ShowStats(exampid, tag string, conn *stompngo.Connection) {
 	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes read/sec", float64(br)/s)
 	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "frame writes/sec", float64(w)/s)
 	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes written/sec", float64(bw)/s)
+}
+
+// Get a value between min amd max
+func ValueBetween(min, max int64) int64 {
+	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
+	return br.Add(big.NewInt(min), br).Int64()
 }

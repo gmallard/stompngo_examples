@@ -26,13 +26,11 @@ STOMP connection, as do all receivers.
 package main
 
 import (
-	"crypto/rand"
 	"flag"
 	"fmt"
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
-	"math/big"
 	"net"
 	"os"
 	"runtime"
@@ -64,12 +62,6 @@ var recv_wait = true
 // Possible profile file
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
-// Get a duration between min amd max
-func timeBetween(min, max int64) int64 {
-	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
-	return (br.Add(big.NewInt(min), br).Int64()) / 2
-}
-
 // Send messages to a particular queue
 func sender(conn *stompngo.Connection, qn, c int) {
 	qns := fmt.Sprintf("%d", qn) // queue number
@@ -94,11 +86,11 @@ func sender(conn *stompngo.Connection, qn, c int) {
 			break
 		}
 		if send_wait {
-			runtime.Gosched()                                              // yield for this example
-			time.Sleep(time.Duration(send_factor * timeBetween(min, max))) // Time to build next message
+			runtime.Gosched()                                                              // yield for this example
+			time.Sleep(time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))) // Time to build next message
 		}
 	}
-	// Sending is done 
+	// Sending is done
 	fmt.Println(exampid, "send ends", qn)
 	wgsend.Done()
 }
@@ -123,8 +115,8 @@ func receiveWorker(mc chan stompngo.MessageData, qns string, c int, d chan bool)
 			log.Fatalln(exampid, "recv bad message", m, t, qns)
 		}
 		if recv_wait {
-			runtime.Gosched()                                              // yield for this example
-			time.Sleep(time.Duration(recv_factor * timeBetween(min, max))) // Time to process this message
+			runtime.Gosched()                                                              // yield for this example
+			time.Sleep(time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))) // Time to build next message
 		}
 	}
 	//
@@ -169,7 +161,7 @@ func receiver(conn *stompngo.Connection, qn, c int) {
 	if e != nil {
 		log.Fatalln(exampid, "recv unsubscribe error", e, qn)
 	}
-	// Receiving is done 
+	// Receiving is done
 	fmt.Println(exampid, "recv ends", qn)
 	wgrecv.Done()
 }
