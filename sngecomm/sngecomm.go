@@ -22,6 +22,7 @@ package sngecomm
 
 import (
 	"crypto/rand"
+	"crypto/tls"
 	"fmt"
 	"github.com/gmallard/stompngo"
 	"math/big"
@@ -33,10 +34,11 @@ var h10 = "localhost" // default 1.0 host
 var p10 = "61613"     // default 1.0 port (ActiveMQ on the author's machine)
 
 var h11 = "localhost" // default 1.1 host
-var p11 = "62613"     // default 1.1 port (Apollo on the author's machine)
+var p11 = "61613"     // default 1.1 port (ActiveMQ on the author's machine)
 
 var h12 = "localhost" // default 1.2 host
-var p12 = "62613"     // default 1.2 port (Apollo on the author's machine)
+var p12 = "61613"     // default 1.2 port (ActiveMQ on the author's machine)
+var ptls12 = "62614"  // default 1.2 TLS port (Apollo on the author's machine)
 
 var nmsgs = 1                         // Default number of messages to send
 var dest = "/queue/snge.common.queue" // Default destination
@@ -79,6 +81,19 @@ func HostAndPort12() (string, string) {
 		p12 = pe
 	}
 	return h12, p12
+}
+
+// Override 1.2 Host and TLS port for Dial if requested.
+func HostAndTLSPort12() (string, string) {
+	he := os.Getenv("STOMP_HOST")
+	if he != "" {
+		h12 = he
+	}
+	pe := os.Getenv("STOMP_TLSPORT")
+	if pe != "" {
+		ptls12 = pe
+	}
+	return h12, ptls12
 }
 
 // Number of messages to send
@@ -187,4 +202,23 @@ func ShowStats(exampid, tag string, conn *stompngo.Connection) {
 func ValueBetween(min, max int64) int64 {
 	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
 	return br.Add(big.NewInt(min), br).Int64()
+}
+
+// Dump a TLS Configuration Struct
+func DumpTLSConfig(c *tls.Config) {
+	fmt.Println()
+	fmt.Printf("Rand: %v\n", c.Rand)
+	fmt.Printf("Time: %v\n", c.Time)
+	fmt.Printf("Certificates: %v\n", c.Certificates)
+	fmt.Printf("NameToCertificate: %v\n", c.NameToCertificate)
+	fmt.Printf("RootCAs: %v\n", c.RootCAs)
+	fmt.Printf("NextProtos: %v\n", c.NextProtos)
+	fmt.Printf("ServerName: %v\n", c.ServerName)
+	fmt.Printf("ClientAuth: %v\n", c.ClientAuth)
+	fmt.Printf("ClientCAs: %v\n", c.ClientCAs)
+	fmt.Printf("CipherSuites: %v\n", c.CipherSuites)
+	fmt.Printf("PreferServerCipherSuites: %v\n", c.PreferServerCipherSuites)
+	fmt.Printf("SessionTicketsDisabled: %v\n", c.SessionTicketsDisabled)
+	fmt.Printf("SessionTicketKey: %v\n", c.SessionTicketKey)
+	fmt.Println()
 }
