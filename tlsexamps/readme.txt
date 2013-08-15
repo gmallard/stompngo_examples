@@ -12,3 +12,11 @@ instance that is configured to require client certificates.
 The exact cause of this failure is unknown at present.  SSL logging seems to 
 indicate that AMQ does not correctly read the client certificate chain.
 
+#-------------------------------------------------------------------------------
+
+Update: Use cases 3 and 4 pass running against ActiveMQ.
+
+Code changes: none
+
+Modifications made:  correctly build ActiveMQ's trust store!
+
