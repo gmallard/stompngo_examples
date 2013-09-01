@@ -210,8 +210,8 @@ func main() {
 	// To alleviate those issues, this strategy insures that messages are
 	// received from the wire as soon as possible.  Those messages are then
 	// buffered internally for (possibly later) application processing. In
-	// this example, buffering occurs in the client package.
-	conn.SetSubChanCap(sngecomm.Nmsgs()) // Max possible for this example, YMMV
+	// this example, buffering occurs in the stompngo package.
+	conn.SetSubChanCap(sngecomm.SubChanCap()) // Experiment with this value, YMMV
 
 	// Set up a logger
 	// l := log.New(os.Stdout, "", log.Ldate|log.Lmicroseconds)

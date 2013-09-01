@@ -30,19 +30,19 @@ import (
 	"strconv"
 )
 
-var h10 = "localhost" // default 1.0 host
-var p10 = "61613"     // default 1.0 port (ActiveMQ on the author's machine)
-
-var h11 = "localhost" // default 1.1 host
-var p11 = "61613"     // default 1.1 port (ActiveMQ on the author's machine)
-
-var h12 = "localhost" // default 1.2 host
-var p12 = "61613"     // default 1.2 port (ActiveMQ on the author's machine)
-var ptls12 = "62614"  // default 1.2 TLS port (Apollo on the author's machine)
-
-var nmsgs = 1                         // Default number of messages to send
-var dest = "/queue/snge.common.queue" // Default destination
-var nqs = 1                           // Default number of queues for multi-queue demo(s)
+var (
+	h10    = "localhost"                // default 1.0 host
+	p10    = "61613"                    // default 1.0 port (ActiveMQ on the author's machine)
+	h11    = "localhost"                // default 1.1 host
+	p11    = "61613"                    // default 1.1 port (ActiveMQ on the author's machine)
+	h12    = "localhost"                // default 1.2 host
+	p12    = "61613"                    // default 1.2 port (ActiveMQ on the author's machine)
+	ptls12 = "62614"                    // default 1.2 TLS port (Apollo on the author's machine)
+	nmsgs  = 1                          // Default number of messages to send
+	dest   = "/queue/snge.common.queue" // Default destination
+	nqs    = 1                          // Default number of queues for multi-queue demo(s)
+	scc    = 1                          // Default subscribe channel capacity
+)
 
 // Override 1.0 Host and port for Dial if requested.
 func HostAndPort10() (string, string) {
@@ -120,6 +120,20 @@ func Nqs() int {
 	if e != nil {
 		fmt.Printf("NQS Conversion error: %v\n", e)
 		return nqs
+	}
+	return int(n)
+}
+
+// Subscribe Channel Capacity
+func SubChanCap() int {
+	c := os.Getenv("STOMP_SUBCHANCAP")
+	if c == "" {
+		return scc
+	}
+	n, e := strconv.ParseInt(c, 10, 0)
+	if e != nil {
+		fmt.Printf("SUBCHANCAP Conversion error: %v\n", e)
+		return scc
 	}
 	return int(n)
 }
