@@ -111,6 +111,7 @@ func receiver(qn, c int) {
 	}
 	// Receive loop
 	for i := 1; i <= c; i++ {
+		fmt.Println(exampid, "recv chanchek", "q", qns, "len", len(r), "cap", cap(r))
 		d := <-r
 		if d.Error != nil {
 			log.Fatalln(exampid, "recv error", d.Error, qn)
