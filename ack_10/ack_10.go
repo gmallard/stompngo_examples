@@ -45,7 +45,7 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
+	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
 	// Setup Headers ...
 	uh := stompngo.Headers{"destination", sngecomm.Dest()} // unsubscribe headers

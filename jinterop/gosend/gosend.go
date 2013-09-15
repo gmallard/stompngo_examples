@@ -49,7 +49,7 @@ func main() {
 	}
 	fmt.Println(exampid + "stomp connect complete ...")
 
-  // Suppress content length here, so JMS will treat this as a 'text' message.
+	// Suppress content length here, so JMS will treat this as a 'text' message.
 	s := stompngo.Headers{"destination", "/queue/allards.queue",
 		"suppress-content-length", "true"} // send headers, suppress content-length
 	m := exampid + " message: "

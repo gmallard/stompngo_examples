@@ -60,7 +60,7 @@ func main() {
 		log.Fatalln(e) // Handle this ......
 	}
 
-	// All stomp API methods require 'Headers'.  Stomp headers are key/value 
+	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
 	//
 	ch := stompngo.Headers{"accept-version", "1.1",

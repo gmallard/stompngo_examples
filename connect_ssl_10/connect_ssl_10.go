@@ -54,7 +54,7 @@ func main() {
 	}
 	fmt.Println(exampid + "dial complete ...")
 
-	// All stomp API methods require 'Headers'.  Stomp headers are key/value 
+	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
 	//
 	// Empty Headers are useful for a number of API method calls, and we
