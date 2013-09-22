@@ -34,7 +34,7 @@ import (
 var (
 	h10    = "localhost"                // default 1.0 host
 	p10    = "61613"                    // default 1.0 port (ActiveMQ on the author's machine)
-	h11    = "localhost"                // default 1.1 host
+	h11    = "localhost"                // default 1.1 host (might also support 1.1+)
 	p11    = "61613"                    // default 1.1 port (ActiveMQ on the author's machine)
 	h12    = "localhost"                // default 1.2 host
 	p12    = "61613"                    // default 1.2 port (ActiveMQ on the author's machine)
@@ -45,6 +45,7 @@ var (
 	scc    = 1                          // Default subscribe channel capacity
 	md     = ""                         // Additional message data, primed during init()
 	mdml   = 1024 * 32                  // Message data max length of variable message, 32K
+	dp     = "1.1"                      // Default protocol level
 )
 
 // Initialization
@@ -58,6 +59,15 @@ func init() {
 func Partial() string {
 	r := int(ValueBetween(1, int64(mdml-1)))
 	return string(md[0:r])
+}
+
+// Override default protocol level
+func Protocol() string {
+	p := os.Getenv("STOMP_PROTOCOL")
+	if p != "" {
+		dp = p
+	}
+	return dp
 }
 
 // Override 1.0 Host and port for Dial if requested.

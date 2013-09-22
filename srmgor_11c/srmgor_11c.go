@@ -133,7 +133,7 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 func runReceiver(qnum int) {
 	fmt.Println(exampid, "recv start for queue number", qnum)
 	// Network Open
-	h, p := sngecomm.HostAndPort11() // a 1.1 connect
+	h, p := sngecomm.HostAndPort11() // a 1.1(+) connect
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(exampid, "recv nectonnr:", qnum, e) // Handle this ......
@@ -141,8 +141,10 @@ func runReceiver(qnum int) {
 	fmt.Println(exampid, "recv network open complete", qnum)
 	fmt.Println(exampid, "recv network local", n.LocalAddr().String(), qnum)
 	fmt.Println(exampid, "recv network remote", n.RemoteAddr().String(), qnum)
-	// Stomp connect, 1.1
-	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
+	// Stomp connect, 1.1(+)
+	ch := stompngo.Headers{"host", sngecomm.Vhost(),
+		"accept-version", sngecomm.Protocol()}
+	log.Println(exampid, "recv", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(exampid, "recv stompconnect:", qnum, e) // Handle this ......
@@ -172,7 +174,7 @@ func runReceiver(qnum int) {
 func runSender(qnum int) {
 	fmt.Println(exampid, "send start for queue number", qnum)
 	// Network Open
-	h, p := sngecomm.HostAndPort11() // a 1.1 connect
+	h, p := sngecomm.HostAndPort11() // a 1.1(+) connect
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(exampid, "send nectonnr:", qnum, e) // Handle this ......
@@ -180,8 +182,10 @@ func runSender(qnum int) {
 	fmt.Println(exampid, "send network open complete", qnum)
 	fmt.Println(exampid, "send network local", n.LocalAddr().String(), qnum)
 	fmt.Println(exampid, "send network remote", n.RemoteAddr().String(), qnum)
-	// Stomp connect, 1.1
-	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
+	// Stomp connect, 1.1(+)
+	ch := stompngo.Headers{"host", sngecomm.Vhost(),
+		"accept-version", sngecomm.Protocol()}
+	log.Println(exampid, "send", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(exampid, "send stompconnect:", qnum, e) // Handle this ......

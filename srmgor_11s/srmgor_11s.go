@@ -199,8 +199,10 @@ func main() {
 	if e != nil {
 		log.Fatalln("main dial error", e) // Handle this ......
 	}
-	// Stomp connect, 1.1
-	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
+	// Stomp connect, 1.1(+)
+	ch := stompngo.Headers{"host", sngecomm.Vhost(),
+		"accept-version", sngecomm.Protocol()}
+	log.Println(exampid, "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(exampid, "main connect error", e) // Handle this ......

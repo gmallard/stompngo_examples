@@ -172,14 +172,16 @@ func startSenders(qn int) {
 	fmt.Println(exampid, "startSenders starts", qn)
 
 	// Open
-	h, p := sngecomm.HostAndPort11() // a 1.1 connect
+	h, p := sngecomm.HostAndPort11() // a 1.1(+) connect
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(exampid, "startSenders netconnect error", e, qn) // Handle this ......
 	}
 
-	// Stomp connect, 1.1
-	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
+	// Stomp connect, 1.1(+)
+	ch := stompngo.Headers{"host", sngecomm.Vhost(),
+		"accept-version", sngecomm.Protocol()}
+	log.Println(exampid, "startSenders", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(exampid, "startSenders stompconnect error", e, qn) // Handle this ......
@@ -214,12 +216,14 @@ func startReceivers(qn int) {
 	fmt.Println(exampid, "startReceivers starts", qn)
 
 	// Open
-	h, p := sngecomm.HostAndPort11() // a 1.1 connect
+	h, p := sngecomm.HostAndPort11() // a 1.1(+) connect
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(exampid, "startReceivers nectonnr:", e, qn) // Handle this ......
 	}
-	ch := stompngo.Headers{"host", sngecomm.Vhost(), "accept-version", "1.1"}
+	ch := stompngo.Headers{"host", sngecomm.Vhost(),
+		"accept-version", sngecomm.Protocol()}
+	log.Println(exampid, "startReceivers", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln("startReceivers stompconnectr:", e, qn) // Handle this ......
