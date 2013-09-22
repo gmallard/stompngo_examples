@@ -28,6 +28,7 @@ import (
 	"math/big"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -42,7 +43,22 @@ var (
 	dest   = "/queue/snge.common.queue" // Default destination
 	nqs    = 1                          // Default number of queues for multi-queue demo(s)
 	scc    = 1                          // Default subscribe channel capacity
+	md     = ""                         // Additional message data, primed during init()
+	mdml   = 1024 * 32                  // Message data max length of variable message, 32K
 )
+
+// Initialization
+func init() {
+	p := "_123456789ABCDEF"
+	c := mdml / len(p)
+	md = strings.Repeat(p, c) // A long string
+}
+
+// Get partial string, random length
+func Partial() string {
+	r := int(ValueBetween(1, int64(mdml-1)))
+	return string(md[0:r])
+}
 
 // Override 1.0 Host and port for Dial if requested.
 func HostAndPort10() (string, string) {

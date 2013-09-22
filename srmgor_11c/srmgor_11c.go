@@ -72,8 +72,9 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	for n := 1; n <= nmsgs; n++ {
 		si := fmt.Sprintf("%d", n)
 		// Generate a message to send ...............
-		m := exampid + "|" + "payload" + "|qnum:" + qns + "|msgnum:" + si
-		fmt.Println(exampid, "send message", m, qnum)
+		mp := exampid + "|" + "payload" + "|qnum:" + qns + "|msgnum:" + si + " :"
+		m := mp + sngecomm.Partial() // Variable length
+		fmt.Println(exampid, "send message", mp, qnum)
 		e := conn.Send(h, m)
 		if e != nil {
 			log.Fatalln(exampid, "send:", e, nc.LocalAddr().String(), qnum)
@@ -107,7 +108,8 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 
 		// Process the inbound message .................
 		m := d.Message.BodyString()
-		fmt.Println(exampid, "recv message", m, qnum)
+		li := strings.LastIndex(m, ":")
+		fmt.Println(exampid, "recv message", string(m[0:li]), qnum)
 
 		// Sanity check the queue and message numbers
 		mns := fmt.Sprintf("%d", n) // message number

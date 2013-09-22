@@ -78,8 +78,9 @@ func sender(qn, c int) {
 	for i := 1; i <= c; i++ {
 		si := fmt.Sprintf("%d", i)
 		// Generate a message to send ...............
-		m := exampid + "|" + "payload" + "|qnum:" + qns + "|msgnum:" + si
-		fmt.Println(exampid, "send msg", m, qn)
+		mp := exampid + "|" + "payload" + "|qnum:" + qns + "|msgnum:" + si + " :"
+		m := mp + sngecomm.Partial() // Variable length message
+		fmt.Println(exampid, "send msg", mp, qn)
 		e := conn.Send(h, m)
 		if e != nil {
 			log.Fatalln(exampid, "send error", e, qn)
@@ -119,7 +120,8 @@ func receiver(qn, c int) {
 
 		// Process the inbound message .................
 		m := d.Message.BodyString()
-		fmt.Println(exampid, "recv message", m, qn)
+		li := strings.LastIndex(m, ":")
+		fmt.Println(exampid, "recv message", string(m[0:li]), qn)
 
 		// Sanity check the queue and message numbers
 		mns := fmt.Sprintf("%d", i) // message number
