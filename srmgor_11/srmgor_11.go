@@ -226,7 +226,7 @@ func startReceivers(qn int) {
 	log.Println(exampid, "startReceivers", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln("startReceivers stompconnectr:", e, qn) // Handle this ......
+		log.Fatalln(exampid, "startReceivers stompconnectr:", e, qn) // Handle this ......
 	}
 	log.Println("startReceivers Receive connection is:", conn, qn)
 	c := sngecomm.Nmsgs() // get message count

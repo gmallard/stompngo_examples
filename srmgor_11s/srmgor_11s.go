@@ -197,7 +197,7 @@ func main() {
 	// Network open
 	n, e = net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln("main dial error", e) // Handle this ......
+		log.Fatalln(exampid, "main dial error", e) // Handle this ......
 	}
 	// Stomp connect, 1.1(+)
 	ch := stompngo.Headers{"host", sngecomm.Vhost(),
