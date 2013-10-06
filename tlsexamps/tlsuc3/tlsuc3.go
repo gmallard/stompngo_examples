@@ -23,7 +23,7 @@ Connect and Disconnect from a STOMP 1.2 broker with a TLS connection, use case 3
 
 	- Expect connection success
 
-Subcase 3.B - Message broker configuration *does* require client authentication
+	Subcase 3.B - Message broker configuration *does* require client authentication
 
 	- Expect connection success if the broker can authenticate the client certificate
 
