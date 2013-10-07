@@ -88,7 +88,7 @@ func main() {
 		log.Fatalln(e)
 	}
 	k, _ := pem.Decode(b) // Decode PEM format
-	if e != nil {
+	if k == nil {
 		log.Fatalln(e)
 	}
 	//
