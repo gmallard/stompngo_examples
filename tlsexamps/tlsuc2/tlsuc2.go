@@ -107,7 +107,7 @@ func main() {
 	}
 	fmt.Println(exampid, "handshake complete ...")
 
-	DumpTLSConfig(testConfig)
+	DumpTLSConfig(testConfig, n)
 
 	// Connect Headers
 	ch := stompngo.Headers{"accept-version", "1.2",

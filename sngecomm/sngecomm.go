@@ -245,7 +245,7 @@ func ValueBetween(min, max int64) int64 {
 }
 
 // Dump a TLS Configuration Struct
-func DumpTLSConfig(c *tls.Config) {
+func DumpTLSConfig(c *tls.Config, n *tls.Conn) {
 	fmt.Println()
 	fmt.Printf("Rand: %v\n", c.Rand)
 	fmt.Printf("Time: %v\n", c.Time)
@@ -260,5 +260,31 @@ func DumpTLSConfig(c *tls.Config) {
 	fmt.Printf("PreferServerCipherSuites: %v\n", c.PreferServerCipherSuites)
 	fmt.Printf("SessionTicketsDisabled: %v\n", c.SessionTicketsDisabled)
 	fmt.Printf("SessionTicketKey: %v\n", c.SessionTicketKey)
+
+	// Idea Embellished From:
+	// https://groups.google.com/forum/#!topic/golang-nuts/TMNdOxugbTY
+	cs := n.ConnectionState()
+	fmt.Println("HandshakeComplete:", cs.HandshakeComplete)
+	fmt.Println("DidResume:", cs.DidResume)
+	fmt.Println("CipherSuite:", cs.CipherSuite)
+	fmt.Println("NegotiatedProtocol:", cs.NegotiatedProtocol)
+	fmt.Println("NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
+	fmt.Println("ServerName:", cs.ServerName)
+	// Portions of any Peer Certificates present
+	certs := cs.PeerCertificates
+	if certs == nil || len(certs) < 1 {
+		fmt.Println("Could not get server's certificate from the TLS connection.")
+		fmt.Println()
+		return
+	}
+	fmt.Println("Server Certs:")
+	for i, cert := range certs {
+		fmt.Printf("Certificate chain:%d\n", i)
+		fmt.Printf("Common Name:%s\n", cert.Subject.CommonName)
+		fmt.Printf("Alternate Name:%v\n", cert.DNSNames)
+		fmt.Printf("Valid Not Before:%s\n", cert.NotBefore.Local().String())
+		fmt.Println("" + strings.Repeat("=", 80) + "\n")
+	}
+
 	fmt.Println()
 }

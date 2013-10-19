@@ -59,8 +59,6 @@ func main() {
 	// Be polite, allow SNI (Server Virtual Hosting)
 	testConfig.ServerName = h
 
-	DumpTLSConfig(testConfig)
-
 	// Connect logic: use net.Dial and tls.Client
 	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
@@ -73,7 +71,7 @@ func main() {
 		log.Fatalln(e) // Handle this ......
 	}
 
-	DumpTLSConfig(testConfig)
+	DumpTLSConfig(testConfig, n)
 
 	// Connect Headers
 	ch := stompngo.Headers{"accept-version", "1.2",

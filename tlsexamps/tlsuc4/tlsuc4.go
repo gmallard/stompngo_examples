@@ -121,7 +121,7 @@ func main() {
 		log.Fatalln(e) // Handle this ......
 	}
 
-	DumpTLSConfig(testConfig)
+	DumpTLSConfig(testConfig, n)
 
 	fmt.Println(exampid, "handshake complete ...")
 
