@@ -26,7 +26,7 @@ import (
 	"net"
 )
 
-var exampid = "receive_11: "
+var exampid = "gorecv: "
 
 var nmsgs = 5
 
