@@ -25,6 +25,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/gmallard/stompngo"
+	"log"
 	"math/big"
 	"os"
 	"strconv"
@@ -290,4 +291,49 @@ func DumpTLSConfig(c *tls.Config, n *tls.Conn) {
 	}
 
 	fmt.Println()
+}
+
+// Handle a subscribe for the different protocol levels
+func Subscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.MessageData {
+	h := stompngo.Headers{"destination", d, "ack", a}
+	//
+	switch c.Protocol() {
+	case stompngo.SPL_12:
+		// Add required id header
+		h = h.Add("id", i)
+	case stompngo.SPL_11:
+		// Add required id header
+		h = h.Add("id", i)
+	case stompngo.SPL_10:
+		// Nothing else to do here
+	default:
+		log.Fatalln("subscribe invalid protocol level, should not happen")
+	}
+	//
+	r, e := c.Subscribe(h)
+	if e != nil {
+		log.Fatalln("subscribe failed", e)
+	}
+	return r
+}
+
+// Handle a unsubscribe for the different protocol levels
+func Unsubscribe(c *stompngo.Connection, d, i string) {
+	h := stompngo.Headers{}
+	//
+	switch c.Protocol() {
+	case stompngo.SPL_12:
+		h = h.Add("id", i)
+	case stompngo.SPL_11:
+		h = h.Add("id", i)
+	case stompngo.SPL_10:
+		h = h.Add("destination", d)
+	default:
+		log.Fatalln("unsubscribe invalid protocol level, should not happen")
+	}
+	e := c.Unsubscribe(h)
+	if e != nil {
+		log.Fatalln("unsubscribe failed", e)
+	}
+	return
 }
