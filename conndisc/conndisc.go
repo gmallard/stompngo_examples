@@ -25,9 +25,10 @@ Connect and Disconnect from a STOMP broker using TCP.
 		# Login is "guest"
 		# Passcode is "guest
 		# Virtual Host is "localhost"
+		# Protocol is 1.1
 		go run conndisc.go
 
-		# Connect to a broker using STOMP protocol level 1.0
+		# Connect to a broker using STOMP protocol level 1.0:
 		STOMP_PROTOCOL=1.0 go run conndisc.go
 
 		# Connect to a broker using a custom host and port:
