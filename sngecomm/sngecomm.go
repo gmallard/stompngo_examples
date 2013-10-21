@@ -293,7 +293,7 @@ func DumpTLSConfig(c *tls.Config, n *tls.Conn) {
 	fmt.Println()
 }
 
-// Handle a subscribe for the different protocol levels
+// Handle a subscribe for the different protocol levels.
 func Subscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.MessageData {
 	h := stompngo.Headers{"destination", d, "ack", a}
 	//
@@ -317,7 +317,7 @@ func Subscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.MessageDa
 	return r
 }
 
-// Handle a unsubscribe for the different protocol levels
+// Handle a unsubscribe for the different protocol levels.
 func Unsubscribe(c *stompngo.Connection, d, i string) {
 	h := stompngo.Headers{}
 	//
@@ -334,6 +334,27 @@ func Unsubscribe(c *stompngo.Connection, d, i string) {
 	e := c.Unsubscribe(h)
 	if e != nil {
 		log.Fatalln("unsubscribe failed", e)
+	}
+	return
+}
+
+// Handle ACKs for the different protocol levels.
+func Ack(c *stompngo.Connection, h stompngo.Headers, id string) {
+	ah := stompngo.Headers{}
+	//
+	switch c.Protocol() {
+	case stompngo.SPL_12:
+		ah = ah.Add("id", h.Value("ack"))
+	case stompngo.SPL_11:
+		ah = ah.Add("message-id", h.Value("message-id")).Add("subscription", id)
+	case stompngo.SPL_10:
+		ah = ah.Add("message-id", h.Value("message-id"))
+	default:
+		log.Fatalln("unsubscribe invalid protocol level, should not happen")
+	}
+	e := c.Ack(ah)
+	if e != nil {
+		log.Fatalln("ack failed", e, c.Protocol())
 	}
 	return
 }
