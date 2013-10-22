@@ -51,7 +51,7 @@ import (
 	"net"
 )
 
-var exampid = "connect: "
+var exampid = "conndisc: "
 
 // Connect to a STOMP broker and disconnect.
 func main() {
