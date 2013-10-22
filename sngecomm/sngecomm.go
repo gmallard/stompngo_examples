@@ -25,6 +25,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/gmallard/stompngo"
+	"log"
 	"math/big"
 	"os"
 	"strconv"
@@ -32,20 +33,19 @@ import (
 )
 
 var (
-	h10    = "localhost"                // default 1.0 host
-	p10    = "61613"                    // default 1.0 port (ActiveMQ on the author's machine)
-	h11    = "localhost"                // default 1.1 host (might also support 1.1+)
-	p11    = "61613"                    // default 1.1 port (ActiveMQ on the author's machine)
-	h12    = "localhost"                // default 1.2 host
-	p12    = "61613"                    // default 1.2 port (ActiveMQ on the author's machine)
-	ptls12 = "62614"                    // default 1.2 TLS port (Apollo on the author's machine)
-	nmsgs  = 1                          // Default number of messages to send
-	dest   = "/queue/snge.common.queue" // Default destination
-	nqs    = 1                          // Default number of queues for multi-queue demo(s)
-	scc    = 1                          // Default subscribe channel capacity
-	md     = ""                         // Additional message data, primed during init()
-	mdml   = 1024 * 32                  // Message data max length of variable message, 32K
-	dp     = "1.1"                      // Default protocol level
+	host     = "localhost" // default host
+	port     = "61613"     // default port
+	protocol = "1.1"       // Default protocol level
+	login    = "guest"     // Default login
+	passcode = "guest"     // Default passcode
+	vhost    = "localhost"
+	//
+	nmsgs = 1                          // Default number of messages to send
+	dest  = "/queue/snge.common.queue" // Default destination
+	nqs   = 1                          // Default number of queues for multi-queue demo(s)
+	scc   = 1                          // Default subscribe channel capacity
+	md    = ""                         // Additional message data, primed during init()
+	mdml  = 1024 * 32                  // Message data max length of variable message, 32K
 )
 
 // Initialization
@@ -65,61 +65,65 @@ func Partial() string {
 func Protocol() string {
 	p := os.Getenv("STOMP_PROTOCOL")
 	if p != "" {
-		dp = p
+		protocol = p
 	}
-	return dp
+	return protocol
 }
 
-// Override 1.0 Host and port for Dial if requested.
-func HostAndPort10() (string, string) {
+// Override Host and port for Dial if requested.
+func HostAndPort() (string, string) {
 	he := os.Getenv("STOMP_HOST")
 	if he != "" {
-		h10 = he
+		host = he
 	}
 	pe := os.Getenv("STOMP_PORT")
 	if pe != "" {
-		p10 = pe
+		port = pe
 	}
-	return h10, p10
+	return host, port
 }
 
-// Override 1.1 Host and port for Dial if requested.
-func HostAndPort11() (string, string) {
-	he := os.Getenv("STOMP_HOST")
-	if he != "" {
-		h11 = he
+// Override login
+func Login() string {
+	l := os.Getenv("STOMP_LOGIN")
+	if l != "" {
+		login = l
 	}
-	pe := os.Getenv("STOMP_PORT")
-	if pe != "" {
-		p11 = pe
+	if l == "NONE" {
+		login = ""
 	}
-	return h11, p11
+	return login
 }
 
-// Override 1.2 Host and port for Dial if requested.
-func HostAndPort12() (string, string) {
-	he := os.Getenv("STOMP_HOST")
-	if he != "" {
-		h12 = he
+// Override passcode
+func Passcode() string {
+	p := os.Getenv("STOMP_PASSCODE")
+	if p != "" {
+		passcode = p
 	}
-	pe := os.Getenv("STOMP_PORT")
-	if pe != "" {
-		p12 = pe
+	if p == "NONE" {
+		passcode = ""
 	}
-	return h12, p12
+	return passcode
 }
 
-// Override 1.2 Host and TLS port for Dial if requested.
-func HostAndTLSPort12() (string, string) {
-	he := os.Getenv("STOMP_HOST")
-	if he != "" {
-		h12 = he
+// Provide connect headers
+func ConnectHeaders() stompngo.Headers {
+	h := stompngo.Headers{}
+	l := Login()
+	if l != "" {
+		h = h.Add("login", l)
 	}
-	pe := os.Getenv("STOMP_TLSPORT")
-	if pe != "" {
-		ptls12 = pe
+	pc := Passcode()
+	if pc != "" {
+		h = h.Add("passcode", pc)
 	}
-	return h12, ptls12
+	//
+	p := Protocol()
+	if p != stompngo.SPL_10 { // 1.1 and 1.2
+		h = h.Add("accept-version", p).Add("host", Vhost())
+	}
+	return h
 }
 
 // Number of messages to send
@@ -212,10 +216,10 @@ func SetMAXPROCS() bool {
 // Virtual Host Name to use
 func Vhost() string {
 	d := os.Getenv("STOMP_VHOST")
-	if d == "" {
-		return "localhost"
+	if d != "" {
+		vhost = d
 	}
-	return d
+	return vhost
 }
 
 // Show connection metrics.
@@ -287,4 +291,70 @@ func DumpTLSConfig(c *tls.Config, n *tls.Conn) {
 	}
 
 	fmt.Println()
+}
+
+// Handle a subscribe for the different protocol levels.
+func Subscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.MessageData {
+	h := stompngo.Headers{"destination", d, "ack", a}
+	//
+	switch c.Protocol() {
+	case stompngo.SPL_12:
+		// Add required id header
+		h = h.Add("id", i)
+	case stompngo.SPL_11:
+		// Add required id header
+		h = h.Add("id", i)
+	case stompngo.SPL_10:
+		// Nothing else to do here
+	default:
+		log.Fatalln("subscribe invalid protocol level, should not happen")
+	}
+	//
+	r, e := c.Subscribe(h)
+	if e != nil {
+		log.Fatalln("subscribe failed", e)
+	}
+	return r
+}
+
+// Handle a unsubscribe for the different protocol levels.
+func Unsubscribe(c *stompngo.Connection, d, i string) {
+	h := stompngo.Headers{}
+	//
+	switch c.Protocol() {
+	case stompngo.SPL_12:
+		h = h.Add("id", i)
+	case stompngo.SPL_11:
+		h = h.Add("id", i)
+	case stompngo.SPL_10:
+		h = h.Add("destination", d)
+	default:
+		log.Fatalln("unsubscribe invalid protocol level, should not happen")
+	}
+	e := c.Unsubscribe(h)
+	if e != nil {
+		log.Fatalln("unsubscribe failed", e)
+	}
+	return
+}
+
+// Handle ACKs for the different protocol levels.
+func Ack(c *stompngo.Connection, h stompngo.Headers, id string) {
+	ah := stompngo.Headers{}
+	//
+	switch c.Protocol() {
+	case stompngo.SPL_12:
+		ah = ah.Add("id", h.Value("ack"))
+	case stompngo.SPL_11:
+		ah = ah.Add("message-id", h.Value("message-id")).Add("subscription", id)
+	case stompngo.SPL_10:
+		ah = ah.Add("message-id", h.Value("message-id"))
+	default:
+		log.Fatalln("unsubscribe invalid protocol level, should not happen")
+	}
+	e := c.Ack(ah)
+	if e != nil {
+		log.Fatalln("ack failed", e, c.Protocol())
+	}
+	return
 }

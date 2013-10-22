@@ -15,7 +15,7 @@
 //
 
 /*
-Connect and Disconnect from a STOMP 1.2 broker with a TLS connection, use case 3.
+Connect and Disconnect from a STOMP broker with a TLS connection, use case 3.
 
 	TLS Use Case 3 - broker *does* authenticate client, client does *not* authenticate broker
 
@@ -29,6 +29,7 @@ Connect and Disconnect from a STOMP 1.2 broker with a TLS connection, use case 3
 
 	Example use might be:
 
+		go build
 		./tlsuc3 -cliCertFile=/ad3/gma/sslwork/2013/client.crt -cliKeyFile=/ad3/gma/sslwork/2013/client.key
 
 */
@@ -39,7 +40,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gmallard/stompngo"
-	. "github.com/gmallard/stompngo_examples/sngecomm"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
 )
@@ -56,7 +57,7 @@ func init() {
 	flag.StringVar(&cliKeyFile, "cliKeyFile", "DUMMY_KEY", "Name of client key file")
 }
 
-// Connect to a STOMP 1.2 broker using TLS and disconnect.
+// Connect to a STOMP broker using TLS and disconnect.
 func main() {
 	fmt.Println(exampid, "starts ...")
 
@@ -70,7 +71,7 @@ func main() {
 	testConfig.InsecureSkipVerify = true // Do *not* check the broker's certificate
 
 	// Get host and port
-	h, p := HostAndTLSPort12()
+	h, p := sngecomm.HostAndPort()
 	fmt.Println(exampid, "host", h, "port", p)
 
 	// Be polite, allow SNI (Server Virtual Hosting)
@@ -98,13 +99,12 @@ func main() {
 		log.Fatalln(e) // Handle this ......
 	}
 
-	DumpTLSConfig(testConfig, n)
+	sngecomm.DumpTLSConfig(testConfig, n)
 
 	fmt.Println(exampid, "handshake complete ...")
 
 	// Connect Headers
-	ch := stompngo.Headers{"accept-version", "1.2",
-		"host", Vhost()}
+	ch := sngecomm.ConnectHeaders()
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
@@ -119,8 +119,7 @@ func main() {
 
 	// Polite Stomp disconnects are not required, but highly recommended.
 	// Empty headers here.
-	eh := stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

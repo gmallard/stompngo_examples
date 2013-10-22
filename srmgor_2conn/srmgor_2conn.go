@@ -40,7 +40,7 @@ import (
 	"time"
 )
 
-var exampid = "srmgor_11:"
+var exampid = "srmgor_2conn:"
 
 var wgsend sync.WaitGroup
 var wgrecv sync.WaitGroup
@@ -133,14 +133,8 @@ func receiver(conn *stompngo.Connection, qn, c int) {
 	qp := sngecomm.Dest() // queue name prefix
 	q := qp + "." + qns
 	fmt.Println(exampid, "recv queue name", q, qn)
-	u := stompngo.Uuid() // A unique subscription ID
-	h := stompngo.Headers{"destination", q, "id", u}
-	// Subscribe
-	r, e := conn.Subscribe(h)
-	if e != nil {
-		log.Fatalln(exampid, "recv subscribe error", e, qn)
-	}
-
+	id := stompngo.Uuid() // A unique subscription ID
+	r := sngecomm.Subscribe(conn, q, id, "auto")
 	// Many receivers running under the same connection can cause
 	// (wire read) performance issues.  This is *very* dependent on the broker
 	// being used, specifically the broker's algorithm for putting messages on
@@ -159,10 +153,8 @@ func receiver(conn *stompngo.Connection, qn, c int) {
 	<-dc // Wait until receive processing is done
 
 	// Unsubscribe
-	e = conn.Unsubscribe(h)
-	if e != nil {
-		log.Fatalln(exampid, "recv unsubscribe error", e, qn)
-	}
+	sngecomm.Unsubscribe(conn, q, id)
+
 	// Receiving is done
 	fmt.Println(exampid, "recv ends", qn)
 	wgrecv.Done()
@@ -172,15 +164,14 @@ func startSenders(qn int) {
 	fmt.Println(exampid, "startSenders starts", qn)
 
 	// Open
-	h, p := sngecomm.HostAndPort11() // a 1.1(+) connect
+	h, p := sngecomm.HostAndPort() // host and port
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(exampid, "startSenders netconnect error", e, qn) // Handle this ......
 	}
 
-	// Stomp connect, 1.1(+)
-	ch := stompngo.Headers{"host", sngecomm.Vhost(),
-		"accept-version", sngecomm.Protocol()}
+	// Stomp connect
+	ch := sngecomm.ConnectHeaders()
 	log.Println(exampid, "startSenders", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
@@ -196,8 +187,7 @@ func startSenders(qn int) {
 	wgsend.Wait()
 
 	// Disconnect from Stomp server
-	eh := stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Println(exampid, "startSenders disconnect error", e, qn) // Handle this ......
 	}
@@ -216,13 +206,12 @@ func startReceivers(qn int) {
 	fmt.Println(exampid, "startReceivers starts", qn)
 
 	// Open
-	h, p := sngecomm.HostAndPort11() // a 1.1(+) connect
+	h, p := sngecomm.HostAndPort() // host and port
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(exampid, "startReceivers nectonnr:", e, qn) // Handle this ......
 	}
-	ch := stompngo.Headers{"host", sngecomm.Vhost(),
-		"accept-version", sngecomm.Protocol()}
+	ch := sngecomm.ConnectHeaders()
 	log.Println(exampid, "startReceivers", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
@@ -238,8 +227,7 @@ func startReceivers(qn int) {
 	wgrecv.Wait()
 
 	// Disconnect from Stomp server
-	eh := stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Println(exampid, "startReceivers disconnect error", e, qn) // Handle this ......
 	}

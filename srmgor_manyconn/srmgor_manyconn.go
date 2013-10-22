@@ -22,6 +22,12 @@
 Send and receive many STOMP messages using multiple queues and goroutines
 to service each send or receive instance.  Each sender and receiver
 operates under a unique network connection.
+
+	Examples:
+
+		# A few queues and a few messages:
+		STOMP_NQS=5 STOMP_NMSGS=10 go run srmgor_manyconn.go
+
 */
 package main
 
@@ -37,7 +43,7 @@ import (
 	"time"
 )
 
-var exampid = "srmgor_11c:"
+var exampid = "srmgor_manyconn:"
 
 var wgsend sync.WaitGroup
 var wgrecv sync.WaitGroup
@@ -92,12 +98,8 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	q := qp + "." + qns
 	fmt.Println(exampid, "recv queue name:", q, qnum)
 	// Subscribe
-	u := stompngo.Uuid() // A unique subscription ID
-	h := stompngo.Headers{"destination", q, "id", u}
-	r, e := conn.Subscribe(h)
-	if e != nil {
-		log.Fatalln(exampid, "recv subscribe", e, nc.LocalAddr().String(), qnum)
-	}
+	id := stompngo.Uuid() // A unique subscription ID
+	r := sngecomm.Subscribe(conn, q, id, "auto")
 	// Receive messages
 	fmt.Println(exampid, "recv starts", nmsgs, qnum)
 	for n := 1; n <= nmsgs; n++ {
@@ -123,17 +125,14 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		}
 	}
 	// Unsubscribe
-	e = conn.Unsubscribe(h)
-	if e != nil {
-		log.Fatalln(exampid, "recv unsubscribe", e, nc.LocalAddr().String(), qnum)
-	}
+	sngecomm.Unsubscribe(conn, q, id)
 	//
 }
 
 func runReceiver(qnum int) {
 	fmt.Println(exampid, "recv start for queue number", qnum)
 	// Network Open
-	h, p := sngecomm.HostAndPort11() // a 1.1(+) connect
+	h, p := sngecomm.HostAndPort() // host and port
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(exampid, "recv nectonnr:", qnum, e) // Handle this ......
@@ -141,9 +140,8 @@ func runReceiver(qnum int) {
 	fmt.Println(exampid, "recv network open complete", qnum)
 	fmt.Println(exampid, "recv network local", n.LocalAddr().String(), qnum)
 	fmt.Println(exampid, "recv network remote", n.RemoteAddr().String(), qnum)
-	// Stomp connect, 1.1(+)
-	ch := stompngo.Headers{"host", sngecomm.Vhost(),
-		"accept-version", sngecomm.Protocol()}
+	// Stomp connect
+	ch := sngecomm.ConnectHeaders()
 	log.Println(exampid, "recv", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
@@ -174,7 +172,7 @@ func runReceiver(qnum int) {
 func runSender(qnum int) {
 	fmt.Println(exampid, "send start for queue number", qnum)
 	// Network Open
-	h, p := sngecomm.HostAndPort11() // a 1.1(+) connect
+	h, p := sngecomm.HostAndPort() // host and port
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(exampid, "send nectonnr:", qnum, e) // Handle this ......
@@ -182,9 +180,8 @@ func runSender(qnum int) {
 	fmt.Println(exampid, "send network open complete", qnum)
 	fmt.Println(exampid, "send network local", n.LocalAddr().String(), qnum)
 	fmt.Println(exampid, "send network remote", n.RemoteAddr().String(), qnum)
-	// Stomp connect, 1.1(+)
-	ch := stompngo.Headers{"host", sngecomm.Vhost(),
-		"accept-version", sngecomm.Protocol()}
+	// Stomp connect
+	ch := sngecomm.ConnectHeaders()
 	log.Println(exampid, "send", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {

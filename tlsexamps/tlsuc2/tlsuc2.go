@@ -15,7 +15,7 @@
 //
 
 /*
-Connect and Disconnect from a STOMP 1.2 broker with a TLS connection, use case 2.
+Connect and Disconnect from a STOMP broker with a TLS connection, use case 2.
 
 	TLS Use Case 2 - client *does* authenticate broker.
 
@@ -30,6 +30,7 @@ Connect and Disconnect from a STOMP 1.2 broker with a TLS connection, use case 2
 
 	Example use might be:
 
+		go build
 		./tlsuc2 -srvCAFile=/ad3/gma/sslwork/2013/TestCA.crt # PEM format file
 
 */
@@ -42,7 +43,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gmallard/stompngo"
-	. "github.com/gmallard/stompngo_examples/sngecomm"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 	"io/ioutil"
 	"log"
 	"net"
@@ -58,7 +59,7 @@ func init() {
 	flag.StringVar(&srvCAFile, "srvCAFile", "DUMMY", "Name of file with broker CA certificate")
 }
 
-// Connect to a STOMP 1.2 broker using TLS and disconnect.
+// Connect to a STOMP broker using TLS and disconnect.
 func main() {
 	fmt.Println(exampid, "starts ...")
 
@@ -71,7 +72,7 @@ func main() {
 	testConfig.InsecureSkipVerify = false // *Do* check the broker's certificate
 
 	// Get host and port
-	h, p := HostAndTLSPort12()
+	h, p := sngecomm.HostAndPort()
 	fmt.Println(exampid, "host", h, "port", p)
 
 	// Be polite, allow SNI (Server Virtual Hosting)
@@ -107,11 +108,10 @@ func main() {
 	}
 	fmt.Println(exampid, "handshake complete ...")
 
-	DumpTLSConfig(testConfig, n)
+	sngecomm.DumpTLSConfig(testConfig, n)
 
 	// Connect Headers
-	ch := stompngo.Headers{"accept-version", "1.2",
-		"host", Vhost()}
+	ch := sngecomm.ConnectHeaders()
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
@@ -126,8 +126,7 @@ func main() {
 
 	// Polite Stomp disconnects are not required, but highly recommended.
 	// Empty headers here.
-	eh := stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

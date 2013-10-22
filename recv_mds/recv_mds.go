@@ -23,6 +23,23 @@
 Output can demonstrate different broker's algorithms for balancing messages across
 multiple subscriptions to the same queue.  In this example all subscriptions
 share the same connection/session.
+
+Prime the queue for this demonstration using publish.go.
+
+	Examples:
+
+		# Prime a queue with messages:
+		STOMP_PORT=61613 STOMP_NMSGS=10 go run publish.go
+
+		# Review ActiveMQ balancing characteristics:
+		STOMP_PORT=61613 go run recv_mds.go
+
+		# Prime a queue with messages again:
+		STOMP_PORT=62613 STOMP_NMSGS=10 go run publish.go
+
+		# Review Apollo balancing characteristics:
+		STOMP_PORT=62613 go run recv_mds.go
+
 */
 package main
 
@@ -49,24 +66,13 @@ var (
 
 func recv(s int) {
 	// Setup Headers ...
-	u := stompngo.Uuid() // Use package convenience function for unique ID
-	h := stompngo.Headers{"destination", sngecomm.Dest(),
-		"id", u}
-	//
+	id := stompngo.Uuid() // Use package convenience function for unique ID
+	d := sngecomm.Dest()
+	var r <-chan stompngo.MessageData
 	if ack {
-		h = h.Add("ack", "client-individual")
-		if port == "61613" { // AMQ
-			fmt.Println(exampid, "AMQ Port detected")
-			h = h.Add("activemq.prefetchSize", "1")
-		}
+		r = sngecomm.Subscribe(conn, d, id, "client-individual")
 	} else {
-		h = h.Add("ack", "auto")
-	}
-	fmt.Println(exampid, s, h)
-	// Subscribe
-	r, e := conn.Subscribe(h)
-	if e != nil {
-		log.Fatalln(exampid, "recv subscribe error:", e, s)
+		r = sngecomm.Subscribe(conn, d, id, "auto")
 	}
 	// Receive loop
 	for {
@@ -75,43 +81,38 @@ func recv(s int) {
 			panic(d.Error)
 		}
 		m := d.Message.BodyString()
-		fmt.Println(exampid, s, m, u)
+		fmt.Println(exampid, "subnumber", s, m, id)
 		runtime.Gosched()
 		time.Sleep(1 * time.Second)
 		if ack {
-			ah := stompngo.Headers{"message-id", d.Message.Headers.Value("message-id"),
-				"subscription", u} // 1.1 ACK headers
-			// fmt.Println(exampid, "ACK Headers", ah)
-			e := conn.Ack(ah)
-			if e != nil {
-				log.Fatalln(e) // Handle this
-			}
+			sngecomm.Ack(conn, d.Message.Headers, id)
+			fmt.Println(exampid + "ACK complete ...")
 		}
 		runtime.Gosched()
 	}
 	wgrecv.Done() // Never get here, cancel via ^C
 }
 
-// Connect to a STOMP 1.1 broker, receive some messages and disconnect.
+// Connect to a STOMP broker, receive and ack some messages.
+// Disconnect never occurs, kill via ^C.
 func main() {
 	fmt.Println(exampid, "starts ...")
 
 	// Set up the connection.
-	h, port := sngecomm.HostAndPort11() //
+	h, port := sngecomm.HostAndPort() //
 	n, e := net.Dial("tcp", net.JoinHostPort(h, port))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid, "dial complete ...")
-	ch := stompngo.Headers{"accept-version", sngecomm.Protocol(),
-		"host", sngecomm.Vhost()}
+	ch := sngecomm.ConnectHeaders()
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid, "stomp connect complete ...", conn.Protocol())
 
-	wgrecv.Add(ns)
+	wgrecv.Add(ns) // Number of subscriptions, hard coded in this demonstartion
 	for i := 1; i <= ns; i++ {
 		go recv(i)
 	}
@@ -119,18 +120,4 @@ func main() {
 
 	wgrecv.Wait() // This will never complete, use ^C to cancel
 
-	// Disconnect from the Stomp server
-	e = conn.Disconnect(stompngo.Headers{})
-	if e != nil {
-		log.Fatalln(e) // Handle this ......
-	}
-	fmt.Println(exampid, "stomp disconnect complete ...")
-	// Close the network connection
-	e = n.Close()
-	if e != nil {
-		log.Fatalln(e) // Handle this ......
-	}
-	fmt.Println(exampid, "network close complete ...")
-
-	fmt.Println(exampid, "ends ...")
 }

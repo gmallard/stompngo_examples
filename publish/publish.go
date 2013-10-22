@@ -1,5 +1,5 @@
 //
-// Copyright © 2011-2013 Guy M. Allard
+// Copyright © 2013 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,31 @@
 //
 
 /*
-Send messages to a STOMP 1.2 broker.
+Publish messages to a STOMP broker.
+
+	Examples:
+
+		# Publish to a broker with all defaults:
+		# Host is "localhost"
+		# Port is 61613
+		# Login is "guest"
+		# Passcode is "guest
+		# Virtual Host is "localhost"
+		# Protocol is 1.1
+		go run publish.go
+
+		# Publish to a broker using STOMP protocol level 1.0:
+		STOMP_PROTOCOL=1.0 go run publish.go
+
+		# Publish to a broker using a custom host and port:
+		STOMP_HOST=tjjackson STOMP_PORT=62613 go run publish.go
+
+		# Publish to a broker using a custom port and virtual host:
+		STOMP_PORT=41613 STOMP_VHOST="/" go run publish.go
+
+		# Publish to a broker using a custom login and passcode:
+		STOMP_LOGIN="userid" STOMP_PASSCODE="t0ps3cr3t" go run publish.go
+
 */
 package main
 
@@ -27,22 +51,21 @@ import (
 	"net"
 )
 
-var exampid = "send_12: "
+var exampid = "publish: "
 
-// Connect to a STOMP 1.2 broker, send some messages and disconnect.
+// Connect to a STOMP broker, publish some messages and disconnect.
 func main() {
 	fmt.Println(exampid + "starts ...")
 
 	// Open a net connection
-	h, p := sngecomm.HostAndPort12() // a 1.2 connect
+	h, p := sngecomm.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "dial complete ...")
 
-	ch := stompngo.Headers{"accept-version", "1.2",
-		"host", sngecomm.Vhost()}
+	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
@@ -50,7 +73,6 @@ func main() {
 	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
 	// *NOTE* your application functionaltiy goes here!
-	// Sending to a 1.2 broker is usally _exactly_ like sending to a 1.0 broker.
 	s := stompngo.Headers{"destination", sngecomm.Dest()} // send headers
 	m := exampid + " message: "
 	for i := 1; i <= sngecomm.Nmsgs(); i++ {

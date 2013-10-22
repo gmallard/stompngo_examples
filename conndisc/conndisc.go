@@ -1,5 +1,5 @@
 //
-// Copyright © 2012-2013 Guy M. Allard
+// Copyright © 2013 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,35 @@
 //
 
 /*
-Connect and Disconnect from a STOMP 1.0 broker with a TLS connection.
+Connect and Disconnect from a STOMP broker using TCP.
+
+	Examples:
+
+		# Connect to a broker with all defaults:
+		# Host is "localhost"
+		# Port is 61613
+		# Login is "guest"
+		# Passcode is "guest
+		# Virtual Host is "localhost"
+		# Protocol is 1.1
+		go run conndisc.go
+
+		# Connect to a broker using STOMP protocol level 1.0:
+		STOMP_PROTOCOL=1.0 go run conndisc.go
+
+		# Connect to a broker using a custom host and port:
+		STOMP_HOST=tjjackson STOMP_PORT=62613 go run conndisc.go
+
+		# Connect to a broker using a custom port and virtual host:
+		STOMP_PORT=41613 STOMP_VHOST="/" go run conndisc.go
+
+		# Connect to a broker using a custom login and passcode:
+		STOMP_LOGIN="userid" STOMP_PASSCODE="t0ps3cr3t" go run conndisc.go
+
 */
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"github.com/gmallard/stompngo"
 	. "github.com/gmallard/stompngo_examples/sngecomm"
@@ -28,27 +51,15 @@ import (
 	"net"
 )
 
-var (
-	exampid    = "connect_ssl_10: "
-	testConfig *tls.Config
-)
+var exampid = "conndisc: "
 
-// Connect to a STOMP 1.0 broker using TLS and disconnect.
+// Connect to a STOMP broker and disconnect.
 func main() {
 	fmt.Println(exampid + "starts ...")
 
-	// TLS Configuration.  This configuration assumes that:
-	// a) The server used does *not* require client certificates
-	// b) This client has no need to authenticate the server
-	// Note that the tls.Config structure can be modified to support any
-	// authentication scheme, including two-way/mutual authentication
-	testConfig = new(tls.Config)
-	testConfig.InsecureSkipVerify = true // Do *not* check the server's certificate
-
 	// Open a net connection
-	h, p := HostAndPort10()
-	// Use tls.Dial, not net.Dial
-	n, e := tls.Dial("tcp", net.JoinHostPort(h, p), testConfig)
+	h, p := HostAndPort()
+	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
@@ -56,25 +67,22 @@ func main() {
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
-	//
-	// Empty Headers are useful for a number of API method calls, and we
-	// use them to connect to a Stomp 1.0 broker.
-	eh := stompngo.Headers{}
+	ch := ConnectHeaders()
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
-	// b) the (empty) Headers
-	conn, e := stompngo.Connect(n, eh)
+	// b) the Headers
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...")
+	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
 
 	// *NOTE* your application functionaltiy goes here!
 
 	// Polite Stomp disconnects are not required, but highly recommended.
-	// Empty headers again in this example.
-	e = conn.Disconnect(eh)
+	// Empty headers here for the DISCONNECT
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

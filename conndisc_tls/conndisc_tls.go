@@ -1,5 +1,5 @@
 //
-// Copyright © 2012-2013 Guy M. Allard
+// Copyright © 2013 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,16 @@
 //
 
 /*
-Connect and Disconnect from a STOMP 1.1 broker with a TLS connection.
+Connect and Disconnect from a STOMP broker using TLS.
+
+All examples in the 'conndisc' directory also apply here.  This example shows
+that TLS is requested by using a specific port and tls.Dial.
+
+	Example:
+
+		# Connect to a broker using TLS:
+		STOMP_PORT=61612 go run conndisc_tls.go
+
 */
 package main
 
@@ -29,69 +38,61 @@ import (
 )
 
 var (
-	exampid    = "connect_ssl_11:"
+	exampid    = "conndisc_tls: "
 	testConfig *tls.Config
 )
 
-// Connect to a STOMP 1.1 broker using TLS and disconnect.
+// Connect to a STOMP 1.0 broker using TLS and disconnect.
 func main() {
-	fmt.Println(exampid, "starts ...")
+	fmt.Println(exampid + "starts ...")
 
 	// TLS Configuration.  This configuration assumes that:
 	// a) The server used does *not* require client certificates
 	// b) This client has no need to authenticate the server
 	// Note that the tls.Config structure can be modified to support any
-	// authentication scheme, including two-way/mutual authentication
+	// authentication scheme, including two-way/mutual authentication. Examples
+	// are provided elsewhere in this project.
 	testConfig = new(tls.Config)
 	testConfig.InsecureSkipVerify = true // Do *not* check the server's certificate
 
 	// Open a net connection
-	h, p := HostAndPort11()
-
-	// Alternative connect logic: use net.Dial and tls.Client
-	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	h, p := HostAndPort()
+	// Use tls.Dial, not net.Dial
+	n, e := tls.Dial("tcp", net.JoinHostPort(h, p), testConfig)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid, "dial complete ...")
-	n := tls.Client(t, testConfig)
-	e = n.Handshake()
-	if e != nil {
-		log.Fatalln(e) // Handle this ......
-	}
+	fmt.Println(exampid + "dial complete ...")
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
-	//
-	ch := stompngo.Headers{"accept-version", "1.1",
-		"host", Vhost()}
+	ch := ConnectHeaders()
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
-	// b) the (empty) Headers
+	// b) the Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid, "stomp connect complete ...")
+	fmt.Println(exampid + "stomp connect complete ...")
 
 	// *NOTE* your application functionaltiy goes here!
 
 	// Polite Stomp disconnects are not required, but highly recommended.
-	// Empty headers again here.
-	eh := stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	// Empty headers for this DISCONNECT.
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid, "stomp disconnect complete ...")
+	fmt.Println(exampid + "stomp disconnect complete ...")
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid, "network close complete ...")
+	fmt.Println(exampid + "network close complete ...")
 
-	fmt.Println(exampid, "ends ...")
+	fmt.Println(exampid + "ends ...")
 }

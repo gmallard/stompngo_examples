@@ -15,7 +15,31 @@
 //
 
 /*
-Receive messages from a STOMP 1.0 broker.
+Receive messages from a STOMP broker, and ACK them.
+
+	Examples:
+
+		# ACK messages from a broker with all defaults:
+		# Host is "localhost"
+		# Port is 61613
+		# Login is "guest"
+		# Passcode is "guest
+		# Virtual Host is "localhost"
+		# Protocol is 1.1
+		go run ack.go
+
+		# ACK messages from a broker using STOMP protocol level 1.0:
+		STOMP_PROTOCOL=1.0 go run ack.go
+
+		# ACK messages from a broker using a custom host and port:
+		STOMP_HOST=tjjackson STOMP_PORT=62613 go run ack.go
+
+		# ACK messages from a broker using a custom port and virtual host:
+		STOMP_PORT=41613 STOMP_VHOST="/" go run ack.go
+
+		# ACK messages from a broker using a custom login and passcode:
+		STOMP_LOGIN="userid" STOMP_PASSCODE="t0ps3cr3t" go run ack.go
+
 */
 package main
 
@@ -27,42 +51,34 @@ import (
 	"net"
 )
 
-var exampid = "receive_10: "
+var exampid = "ack: "
 
-// Connect to a STOMP 1.0 broker, receive some messages and disconnect.
+// Connect to a STOMP broker, receive some messages, ACK them, and disconnect.
 func main() {
 	fmt.Println(exampid + "starts ...")
 
 	// Set up the connection.
-	h, p := sngecomm.HostAndPort10()
+	h, p := sngecomm.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "dial complete ...")
-	eh := stompngo.Headers{}
-	conn, e := stompngo.Connect(n, eh)
+	ch := sngecomm.ConnectHeaders()
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
-	// Setup Headers ...
-	s := stompngo.Headers{"destination", sngecomm.Dest()} // subscribe/unsubscribe headers
-
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.
-	// Stomp 1.0 allows subscribing without a unique subscription id, and we
-	// do that here.
-	// Subscribe returns:
-	// a) A channel of MessageData struct
-	// b) A possible error.  Always check for errors.  They can be logical
-	// errors detected by the stompngo package, or even hard network errors, for
-	// example the broker just crashed.
-	r, e := conn.Subscribe(s)
-	if e != nil {
-		log.Fatalln(e) // Handle this ...
-	}
+	// Subscribe returns a channel of MessageData struct.
+	// Here we use a common utility routine to handle the differing subscribe
+	// requirements of each protocol level.
+	d := sngecomm.Dest()
+	id := stompngo.Uuid()
+	r := sngecomm.Subscribe(conn, d, id, "client")
 	fmt.Println(exampid + "stomp subscribe complete ...")
 	// Read data from the returned channel
 	for i := 1; i <= sngecomm.Nmsgs(); i++ {
@@ -84,16 +100,20 @@ func main() {
 			fmt.Printf("Header: %s:%s\n", h[j], h[j+1])
 		}
 		fmt.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
+		// ACK the message just received.
+		// Agiain we use a utility routine to handle the different requirements
+		// of the protocol versions.
+		sngecomm.Ack(conn, m.Message.Headers, id)
+		fmt.Println(exampid + "ACK complete ...")
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
-	e = conn.Unsubscribe(s)
-	if e != nil {
-		log.Fatalln(e) // Handle this ...
-	}
+	// Again we use a utility routine to handle the different protocol level
+	// requirements.
+	sngecomm.Unsubscribe(conn, d, id)
 	fmt.Println(exampid + "stomp unsubscribe complete ...")
 
 	// Disconnect from the Stomp server
-	e = conn.Disconnect(eh)
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}

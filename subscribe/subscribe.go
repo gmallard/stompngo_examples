@@ -1,5 +1,5 @@
 //
-// Copyright © 2011-2013 Guy M. Allard
+// Copyright © 2013 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,31 @@
 //
 
 /*
-Receive messages from a STOMP 1.1 broker.
+Subscribe and receive messages from a STOMP broker.
+
+	Examples:
+
+		# Subscribe to a broker with all defaults:
+		# Host is "localhost"
+		# Port is 61613
+		# Login is "guest"
+		# Passcode is "guest
+		# Virtual Host is "localhost"
+		# Protocol is 1.1
+		go run subscribe.go
+
+		# Subscribe to a broker using STOMP protocol level 1.2:
+		STOMP_PROTOCOL=1.2 go run subscribe.go
+
+		# Subscribe to a broker using a custom host and port:
+		STOMP_HOST=tjjackson STOMP_PORT=62613 go run subscribe.go
+
+		# Subscribe to a broker using a custom port and virtual host:
+		STOMP_PORT=41613 STOMP_VHOST="/" go run subscribe.go
+
+		# Subscribe to a broker using a custom login and passcode:
+		STOMP_LOGIN="userid" STOMP_PASSCODE="t0ps3cr3t" go run subscribe.go
+
 */
 package main
 
@@ -27,46 +51,34 @@ import (
 	"net"
 )
 
-var exampid = "receive_11: "
+var exampid = "subscribe: "
 
-// Connect to a STOMP 1.1 broker, receive some messages and disconnect.
+// Connect to a STOMP broker, subscribe and receive some messages and disconnect.
 func main() {
 	fmt.Println(exampid + "starts ...")
 
 	// Set up the connection.
-	h, p := sngecomm.HostAndPort11() // A 1.1 connection
+	h, p := sngecomm.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid + "dial complete ...")
-	ch := stompngo.Headers{"accept-version", "1.1",
-		"host", sngecomm.Vhost()}
+	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
-	// Setup Headers ...
-	u := stompngo.Uuid() // Use package convenience function for unique ID
-	s := stompngo.Headers{"destination", sngecomm.Dest(),
-		"id", u} // subscribe/unsubscribe headers
-
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.
-	// Stomp 1.1 demands subscribing with a unique subscription id, and we
-	// do that here.
-	// Subscribe returns:
-	// a) A channel of MessageData struct.  Note that with this package, the
-	// channel is unique (based on the unique subscription id).
-	// b) A possible error.  Always check for errors.  They can be logical
-	// errors detected by the stompngo package, or even hard network errors, for
-	// example the broker just crashed.
-	r, e := conn.Subscribe(s)
-	if e != nil {
-		log.Fatalln(e) // Handle this ...
-	}
+	// Subscribe returns a channel of MessageData struct.
+	// Here we use a common utility routine to handle the differing subscribe
+	// requirements of each protocol level.
+	d := sngecomm.Dest()
+	i := stompngo.Uuid()
+	r := sngecomm.Subscribe(conn, d, i, "auto")
 	fmt.Println(exampid + "stomp subscribe complete ...")
 	// Read data from the returned channel
 	for i := 1; i <= sngecomm.Nmsgs(); i++ {
@@ -88,26 +100,12 @@ func main() {
 			fmt.Printf("Header: %s:%s\n", h[j], h[j+1])
 		}
 		fmt.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
-		// One item to note:  Stomp 1.1 servers _must_ return a 'subscription'
-		// header in each message, where the value of the 'subscription' header
-		// matches the unique subscription id supplied on subscribe.  With _some_
-		// stomp client libraries, this allows you to categorize messages by
-		// 'subscription'.  That is not required with this package!!!  This
-		// because of the unique MessageData channels returned by Subscribe.
-		// But check that this is the case for demonstration purposes.
-		if h.Value("subscription") != u {
-			fmt.Printf("Error condition, expected [%s], received [%s]\n", u, h.Value("subscription"))
-			log.Fatalln("Bad subscription header")
-		}
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
-	// With Stomp 1.1, the same unique ID is required on UNSUBSCRIBE.  Failure
-	// to provide it will result in an error return.
-	e = conn.Unsubscribe(s)
-	if e != nil {
-		log.Fatalln(e) // Handle this ...
-	}
-	fmt.Println(exampid + "stomp unsubscribe complete ...")
+	// Again we use a utility routine to handle the different protocol level
+	// requirements.
+	sngecomm.Unsubscribe(conn, d, i)
+	fmt.Println(exampid + "unsubscribe complete")
 
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})

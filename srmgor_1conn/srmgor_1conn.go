@@ -39,7 +39,7 @@ import (
 	"time"
 )
 
-var exampid = "srmgor_11s:"
+var exampid = "srmgor_1conn:"
 
 var wgsend sync.WaitGroup
 var wgrecv sync.WaitGroup
@@ -103,13 +103,9 @@ func receiver(qn, c int) {
 	qp := sngecomm.Dest() // queue name prefix
 	q := qp + "." + qns
 	fmt.Println(exampid, "recv queue name:", q, qn)
-	u := stompngo.Uuid() // A unique subscription ID
-	h := stompngo.Headers{"destination", q, "id", u}
+	id := stompngo.Uuid() // A unique subscription ID
 	// Subscribe
-	r, e := conn.Subscribe(h)
-	if e != nil {
-		log.Fatalln(exampid, "recv subscribe error:", e, qn)
-	}
+	r := sngecomm.Subscribe(conn, q, id, "auto")
 	// Receive loop
 	for i := 1; i <= c; i++ {
 		fmt.Println(exampid, "recv chanchek", "q", qns, "len", len(r), "cap", cap(r))
@@ -135,10 +131,8 @@ func receiver(qn, c int) {
 		}
 	}
 	// Unsubscribe
-	e = conn.Unsubscribe(h)
-	if e != nil {
-		log.Fatalln(exampid, "recv unsubscribe error", e, qn)
-	}
+	sngecomm.Unsubscribe(conn, q, id)
+
 	// Receiving is done
 	fmt.Println(exampid, "recv ends", qn)
 	wgrecv.Done()
@@ -192,7 +186,7 @@ func main() {
 	q := sngecomm.Nqs()
 	fmt.Println(exampid, "main Nqs:", q)
 	// Open net and stomp connections
-	h, p := sngecomm.HostAndPort11() // a 1.1 connect
+	h, p := sngecomm.HostAndPort() // network connection host and port
 	var e error
 	// Network open
 	n, e = net.Dial("tcp", net.JoinHostPort(h, p))
@@ -200,8 +194,7 @@ func main() {
 		log.Fatalln(exampid, "main dial error", e) // Handle this ......
 	}
 	// Stomp connect, 1.1(+)
-	ch := stompngo.Headers{"host", sngecomm.Vhost(),
-		"accept-version", sngecomm.Protocol()}
+	ch := sngecomm.ConnectHeaders()
 	log.Println(exampid, "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
@@ -228,8 +221,7 @@ func main() {
 	go startSenders(q)
 	wgall.Wait()
 	// Disconnect from Stomp server
-	eh := stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(exampid, "main disconnect error", e) // Handle this ......
 	}
