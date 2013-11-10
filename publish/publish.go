@@ -72,6 +72,7 @@ func main() {
 	}
 	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
+	fmt.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
 	s := stompngo.Headers{"destination", sngecomm.Dest()} // send headers
 	m := exampid + " message: "

@@ -71,6 +71,7 @@ func main() {
 	}
 	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
+	fmt.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.
 	// Subscribe returns a channel of MessageData struct.
