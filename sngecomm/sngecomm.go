@@ -21,6 +21,7 @@ project.
 package sngecomm
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
@@ -44,21 +45,49 @@ var (
 	dest  = "/queue/snge.common.queue" // Default destination
 	nqs   = 1                          // Default number of queues for multi-queue demo(s)
 	scc   = 1                          // Default subscribe channel capacity
-	md    = ""                         // Additional message data, primed during init()
 	mdml  = 1024 * 32                  // Message data max length of variable message, 32K
+	md    = make([]byte, 1)            // Additional message data, primed during init()
+	//
+	sendFact float64 = 1.0 // Send sleep time factor
+	recvFact float64 = 1.0 // Receive sleep time factor
 )
 
 // Initialization
 func init() {
 	p := "_123456789ABCDEF"
 	c := mdml / len(p)
-	md = strings.Repeat(p, c) // A long string
+	b := []byte(p)
+	md = bytes.Repeat(b, c) // A long string
+	//
+	if os.Getenv("STOMP_SENDFACT") != "" {
+		f, e := strconv.ParseFloat(os.Getenv("STOMP_SENDFACT"), 64)
+		if e == nil {
+			sendFact = f
+		}
+	}
+	//
+	if os.Getenv("STOMP_RECVFACT") != "" {
+		f, e := strconv.ParseFloat(os.Getenv("STOMP_RECVFACT"), 64)
+		if e == nil {
+			recvFact = f
+		}
+	}
+}
+
+// Get Send Sleep Factor
+func SendFactor() float64 {
+	return sendFact
+}
+
+// Get Recv Sleep Factor
+func RecvFactor() float64 {
+	return recvFact
 }
 
 // Get partial string, random length
-func Partial() string {
-	r := int(ValueBetween(1, int64(mdml-1)))
-	return string(md[0:r])
+func Partial() []byte {
+	r := int(ValueBetween(1, int64(mdml-1), 1.0))
+	return md[0:r]
 }
 
 // Override default protocol level
@@ -243,9 +272,9 @@ func ShowStats(exampid, tag string, conn *stompngo.Connection) {
 }
 
 // Get a value between min amd max
-func ValueBetween(min, max int64) int64 {
-	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
-	return br.Add(big.NewInt(min), br).Int64()
+func ValueBetween(min, max int64, fact float64) int64 {
+	rt, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
+	return int64(fact * float64(min+rt.Int64()))
 }
 
 // Dump a TLS Configuration Struct
@@ -357,4 +386,14 @@ func Ack(c *stompngo.Connection, h stompngo.Headers, id string) {
 		log.Fatalln("ack failed", e, c.Protocol())
 	}
 	return
+}
+
+func ShowRunParms() {
+	fmt.Println("host", os.Getenv("STOMP_HOST"), "alt", host)
+	fmt.Println("port", os.Getenv("STOMP_PORT"), "alt", port)
+	fmt.Println("protocol", Protocol())
+	fmt.Println("vhost", Vhost())
+	fmt.Println("nqs", Nqs())
+	fmt.Println("nmsgs", Nmsgs())
+	fmt.Println("subchancap", SubChanCap())
 }

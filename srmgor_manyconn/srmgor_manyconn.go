@@ -38,7 +38,7 @@ import (
 	"log"
 	"net"
 	"runtime"
-	"strings"
+	// "strings"
 	"sync"
 	"time"
 )
@@ -53,13 +53,14 @@ var wgrecv sync.WaitGroup
 // Vary these for experimental purposes.  YMMV.
 var max int64 = 1e9      // Max stagger time (nanoseconds)
 var min int64 = max / 10 // Min stagger time (nanoseconds)
-// Vary these for experimental purposes.  YMMV.
-var send_factor int64 = 1 // Send factor time
-var recv_factor int64 = 1 // Receive factor time
 
 // Wait flags
 var send_wait = true
 var recv_wait = true
+
+// Sleep multipliers
+var sendFact float64 = 1.0
+var recvFact float64 = 1.0
 
 // Number of messages
 var nmsgs = 1
@@ -69,7 +70,8 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	qp := sngecomm.Dest()          // queue name prefix
 	q := qp + "." + qns
 	fmt.Println(exampid, "send queue name:", q, qnum)
-	h := stompngo.Headers{"destination", q} // send Headers
+	h := stompngo.Headers{"destination", q,
+		"qnum", qns} // send Headers
 	if sngecomm.Persistent() {
 		h = h.Add("persistent", "true")
 	}
@@ -77,17 +79,21 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	// Send messages
 	for n := 1; n <= nmsgs; n++ {
 		si := fmt.Sprintf("%d", n)
+		sh := append(h, "msgnum", si)
 		// Generate a message to send ...............
-		mp := exampid + "|" + "payload" + "|qnum:" + qns + "|msgnum:" + si + " :"
-		m := mp + sngecomm.Partial() // Variable length
-		fmt.Println(exampid, "send message", mp, qnum)
-		e := conn.Send(h, m)
+		fmt.Println(exampid, "send message", qnum, si)
+		e := conn.Send(sh, string(sngecomm.Partial()))
 		if e != nil {
 			log.Fatalln(exampid, "send:", e, nc.LocalAddr().String(), qnum)
 		}
+		if n == nmsgs {
+			break
+		}
 		if send_wait {
-			runtime.Gosched()                                                              // yield for this example
-			time.Sleep(time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))) // Time to build next message
+			runtime.Gosched() // yield for this example
+			d := time.Duration(sngecomm.ValueBetween(min, max, sendFact))
+			fmt.Println(exampid, "send", "sleep", int64(d)/1000000, "ms")
+			time.Sleep(d) // Time to build next message
 		}
 	}
 }
@@ -108,22 +114,26 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 			log.Fatalln(exampid, "recv read:", d.Error, nc.LocalAddr().String(), qnum)
 		}
 
-		// Process the inbound message .................
-		m := d.Message.BodyString()
-		li := strings.LastIndex(m, ":")
-		fmt.Println(exampid, "recv message", string(m[0:li]), qnum)
-
 		// Sanity check the queue and message numbers
 		mns := fmt.Sprintf("%d", n) // message number
-		t := "|qnum:" + qns + "|msgnum:" + mns
-		if !strings.Contains(m, t) {
-			log.Fatalln(exampid, "recv bad message", m, t, nc.LocalAddr().String(), qnum)
+		if !d.Message.Headers.ContainsKV("qnum", qns) || !d.Message.Headers.ContainsKV("msgnum", mns) {
+			log.Fatalln("Bad Headers", d.Message.Headers, qns, mns)
 		}
+
+		// Process the inbound message .................
+		fmt.Println(exampid, "recv message", string(d.Message.Body[0:16]), qnum, d.Message.Headers.Value("msgnum"))
+		if n == nmsgs {
+			break
+		}
+		//
 		if recv_wait {
-			runtime.Gosched()                                                              // yield for this example
-			time.Sleep(time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))) // Time to build next message
+			runtime.Gosched() // yield for this example
+			d := time.Duration(sngecomm.ValueBetween(min, max, recvFact))
+			fmt.Println(exampid, "recv", "sleep", int64(d)/1000000, "ms")
+			time.Sleep(d) // Time to build next message
 		}
 	}
+	fmt.Println(exampid, "recv done:", q)
 	// Unsubscribe
 	sngecomm.Unsubscribe(conn, q, id)
 	//
@@ -210,6 +220,7 @@ func runSender(qnum int) {
 }
 
 func main() {
+	tn := time.Now()
 	fmt.Println(exampid, "starts")
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
@@ -221,6 +232,9 @@ func main() {
 	//
 	send_wait = sngecomm.SendWait()
 	recv_wait = sngecomm.RecvWait()
+	sendFact = sngecomm.SendFactor()
+	recvFact = sngecomm.RecvFactor()
+	fmt.Println("Sleep Factors", "send", sendFact, "recv", recvFact)
 	//
 	numq := sngecomm.Nqs()
 	fmt.Println(exampid, "numq:", numq)
@@ -246,5 +260,5 @@ func main() {
 	wgrecv.Wait()
 	fmt.Println(exampid, "receivers complete")
 	//
-	fmt.Println(exampid, "ends")
+	fmt.Println(exampid, "ends", time.Since(tn))
 }
