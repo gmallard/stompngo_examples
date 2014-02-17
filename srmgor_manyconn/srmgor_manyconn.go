@@ -69,22 +69,22 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	qns := fmt.Sprintf("%d", qnum) // queue number
 	qp := sngecomm.Dest()          // queue name prefix
 	q := qp + "." + qns
-	fmt.Println(exampid, "send queue name:", q, qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send queue name:", q, qnum)
 	h := stompngo.Headers{"destination", q,
 		"qnum", qns} // send Headers
 	if sngecomm.Persistent() {
 		h = h.Add("persistent", "true")
 	}
-	fmt.Println(exampid, "send starts", nmsgs, qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send starts", nmsgs, qnum)
 	// Send messages
 	for n := 1; n <= nmsgs; n++ {
 		si := fmt.Sprintf("%d", n)
 		sh := append(h, "msgnum", si)
 		// Generate a message to send ...............
-		fmt.Println(exampid, "send message", qnum, si)
+		fmt.Println(sngecomm.ExampIdNow(exampid), "send message", qnum, si)
 		e := conn.Send(sh, string(sngecomm.Partial()))
 		if e != nil {
-			log.Fatalln(exampid, "send:", e, nc.LocalAddr().String(), qnum)
+			log.Fatalln(sngecomm.ExampIdNow(exampid), "send:", e, nc.LocalAddr().String(), qnum)
 		}
 		if n == nmsgs {
 			break
@@ -92,7 +92,7 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if send_wait {
 			runtime.Gosched() // yield for this example
 			d := time.Duration(sngecomm.ValueBetween(min, max, sendFact))
-			fmt.Println(exampid, "send", "sleep", int64(d)/1000000, "ms")
+			fmt.Println(sngecomm.ExampIdNow(exampid), "send", "sleep", int64(d)/1000000, "ms")
 			time.Sleep(d) // Time to build next message
 		}
 	}
@@ -102,16 +102,16 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	qns := fmt.Sprintf("%d", qnum) // queue number
 	qp := sngecomm.Dest()          // queue name prefix
 	q := qp + "." + qns
-	fmt.Println(exampid, "recv queue name:", q, qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv queue name:", q, qnum)
 	// Subscribe
 	id := stompngo.Uuid() // A unique subscription ID
 	r := sngecomm.Subscribe(conn, q, id, "auto")
 	// Receive messages
-	fmt.Println(exampid, "recv starts", nmsgs, qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv starts", nmsgs, qnum)
 	for n := 1; n <= nmsgs; n++ {
 		d := <-r
 		if d.Error != nil {
-			log.Fatalln(exampid, "recv read:", d.Error, nc.LocalAddr().String(), qnum)
+			log.Fatalln(sngecomm.ExampIdNow(exampid), "recv read:", d.Error, nc.LocalAddr().String(), qnum)
 		}
 
 		// Sanity check the queue and message numbers
@@ -121,7 +121,11 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		}
 
 		// Process the inbound message .................
-		fmt.Println(exampid, "recv message", string(d.Message.Body[0:16]), qnum, d.Message.Headers.Value("msgnum"))
+		sl := 16
+		if len(d.Message.Body) < sl {
+			sl = len(d.Message.Body)
+		}
+		fmt.Println(sngecomm.ExampIdNow(exampid), "recv message", string(d.Message.Body[0:sl]), qnum, d.Message.Headers.Value("msgnum"))
 		if n == nmsgs {
 			break
 		}
@@ -129,136 +133,136 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if recv_wait {
 			runtime.Gosched() // yield for this example
 			d := time.Duration(sngecomm.ValueBetween(min, max, recvFact))
-			fmt.Println(exampid, "recv", "sleep", int64(d)/1000000, "ms")
+			fmt.Println(sngecomm.ExampIdNow(exampid), "recv", "sleep", int64(d)/1000000, "ms")
 			time.Sleep(d) // Time to build next message
 		}
 	}
-	fmt.Println(exampid, "recv done:", q)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv done:", q)
 	// Unsubscribe
 	sngecomm.Unsubscribe(conn, q, id)
 	//
 }
 
 func runReceiver(qnum int) {
-	fmt.Println(exampid, "recv start for queue number", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv start for queue number", qnum)
 	// Network Open
 	h, p := sngecomm.HostAndPort() // host and port
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln(exampid, "recv nectonnr:", qnum, e) // Handle this ......
+		log.Fatalln(sngecomm.ExampIdNow(exampid), "recv nectonnr:", qnum, e) // Handle this ......
 	}
-	fmt.Println(exampid, "recv network open complete", qnum)
-	fmt.Println(exampid, "recv network local", n.LocalAddr().String(), qnum)
-	fmt.Println(exampid, "recv network remote", n.RemoteAddr().String(), qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv network open complete", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv network local", n.LocalAddr().String(), qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv network remote", n.RemoteAddr().String(), qnum)
 	// Stomp connect
 	ch := sngecomm.ConnectHeaders()
-	log.Println(exampid, "recv", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
+	log.Println(sngecomm.ExampIdNow(exampid), "recv", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(exampid, "recv stompconnect:", qnum, e) // Handle this ......
+		log.Fatalln(sngecomm.ExampIdNow(exampid), "recv stompconnect:", qnum, e) // Handle this ......
 	}
-	fmt.Println(exampid, "recv connection complete:", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv connection complete:", qnum)
 	// Receives
 	receiveMessages(conn, qnum, n)
-	fmt.Println(exampid, "recv receives complete:", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv receives complete:", qnum)
 	// Disconnect from Stomp server
 	eh := stompngo.Headers{"recv_discqueue", fmt.Sprintf("%d", qnum)}
 	e = conn.Disconnect(eh)
 	if e != nil {
-		log.Fatalln(exampid, "recv disconnects:", qnum, e) // Handle this ......
+		log.Fatalln(sngecomm.ExampIdNow(exampid), "recv disconnects:", qnum, e) // Handle this ......
 	}
-	fmt.Println(exampid, "recv disconnected:", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv disconnected:", qnum)
 	// Network close
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(exampid, "recv netcloser", qnum, e) // Handle this ......
+		log.Fatalln(sngecomm.ExampIdNow(exampid), "recv netcloser", qnum, e) // Handle this ......
 	}
-	fmt.Println(exampid, "recv network close complete", qnum)
-	fmt.Println(exampid, "recv end for queue number", qnum)
-	sngecomm.ShowStats(exampid, "recv "+fmt.Sprintf("%d", qnum), conn)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv network close complete", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "recv end for queue number", qnum)
+	sngecomm.ShowStats(sngecomm.ExampIdNow(exampid), "recv "+fmt.Sprintf("%d", qnum), conn)
 	wgrecv.Done()
 }
 
 func runSender(qnum int) {
-	fmt.Println(exampid, "send start for queue number", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send start for queue number", qnum)
 	// Network Open
 	h, p := sngecomm.HostAndPort() // host and port
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln(exampid, "send nectonnr:", qnum, e) // Handle this ......
+		log.Fatalln(sngecomm.ExampIdNow(exampid), "send nectonnr:", qnum, e) // Handle this ......
 	}
-	fmt.Println(exampid, "send network open complete", qnum)
-	fmt.Println(exampid, "send network local", n.LocalAddr().String(), qnum)
-	fmt.Println(exampid, "send network remote", n.RemoteAddr().String(), qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send network open complete", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send network local", n.LocalAddr().String(), qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send network remote", n.RemoteAddr().String(), qnum)
 	// Stomp connect
 	ch := sngecomm.ConnectHeaders()
-	log.Println(exampid, "send", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
+	log.Println(sngecomm.ExampIdNow(exampid), "send", "vhost:", sngecomm.Vhost(), "protocol:", sngecomm.Protocol())
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(exampid, "send stompconnect:", qnum, e) // Handle this ......
+		log.Fatalln(sngecomm.ExampIdNow(exampid), "send stompconnect:", qnum, e) // Handle this ......
 	}
-	fmt.Println(exampid, "send connection complete:", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send connection complete:", qnum)
 	//
 	sendMessages(conn, qnum, n)
-	fmt.Println(exampid, "send sends complete:", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send sends complete:", qnum)
 	// Disconnect from Stomp server
 	eh := stompngo.Headers{"send_discqueue", fmt.Sprintf("%d", qnum)}
 	e = conn.Disconnect(eh)
 	if e != nil {
-		log.Fatalln(exampid, "send disconnects:", qnum, e) // Handle this ......
+		log.Fatalln(sngecomm.ExampIdNow(exampid), "send disconnects:", qnum, e) // Handle this ......
 	}
-	fmt.Println(exampid, "send disconnected:", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send disconnected:", qnum)
 	// Network close
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(exampid, "send netcloser", qnum, e) // Handle this ......
+		log.Fatalln(sngecomm.ExampIdNow(exampid), "send netcloser", qnum, e) // Handle this ......
 	}
-	fmt.Println(exampid, "send network close complete", qnum)
-	fmt.Println(exampid, "send end for queue number", qnum)
-	sngecomm.ShowStats(exampid, "send "+fmt.Sprintf("%d", qnum), conn)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send network close complete", qnum)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "send end for queue number", qnum)
+	sngecomm.ShowStats(sngecomm.ExampIdNow(exampid), "send "+fmt.Sprintf("%d", qnum), conn)
 	wgsend.Done()
 }
 
 func main() {
 	tn := time.Now()
-	fmt.Println(exampid, "starts")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "starts")
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
-		fmt.Println(exampid, "number of CPUs is:", nc)
+		fmt.Println(sngecomm.ExampIdNow(exampid), "number of CPUs is:", nc)
 		c := runtime.GOMAXPROCS(nc)
-		fmt.Println(exampid, "previous number of GOMAXPROCS is:", c)
-		fmt.Println(exampid, "current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+		fmt.Println(sngecomm.ExampIdNow(exampid), "previous number of GOMAXPROCS is:", c)
+		fmt.Println(sngecomm.ExampIdNow(exampid), "current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	}
 	//
 	send_wait = sngecomm.SendWait()
 	recv_wait = sngecomm.RecvWait()
 	sendFact = sngecomm.SendFactor()
 	recvFact = sngecomm.RecvFactor()
-	fmt.Println("Sleep Factors", "send", sendFact, "recv", recvFact)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "Sleep Factors", "send", sendFact, "recv", recvFact)
 	//
 	numq := sngecomm.Nqs()
-	fmt.Println(exampid, "numq:", numq)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "numq:", numq)
 	nmsgs = sngecomm.Nmsgs() // message count
-	fmt.Println(exampid, "nmsgs:", nmsgs)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "nmsgs:", nmsgs)
 	//
-	fmt.Println(exampid, "starting receivers")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "starting receivers")
 	for q := 1; q <= numq; q++ {
 		wgrecv.Add(1)
 		go runReceiver(q)
 	}
-	fmt.Println(exampid, "started receivers")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "started receivers")
 	//
-	fmt.Println(exampid, "starting senders")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "starting senders")
 	for q := 1; q <= numq; q++ {
 		wgsend.Add(1)
 		go runSender(q)
 	}
-	fmt.Println(exampid, "started senders")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "started senders")
 	//
 	wgsend.Wait()
-	fmt.Println(exampid, "senders complete")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "senders complete")
 	wgrecv.Wait()
-	fmt.Println(exampid, "receivers complete")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "receivers complete")
 	//
-	fmt.Println(exampid, "ends", time.Since(tn))
+	fmt.Println(sngecomm.ExampIdNow(exampid), "ends", time.Since(tn))
 }

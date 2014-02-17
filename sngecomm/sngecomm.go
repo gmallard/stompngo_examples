@@ -31,6 +31,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -72,6 +73,11 @@ func init() {
 			recvFact = f
 		}
 	}
+}
+
+// Timestamp example ids
+func ExampIdNow(s string) string {
+	return time.Now().String() + " " + s
 }
 
 // Get Send Sleep Factor
