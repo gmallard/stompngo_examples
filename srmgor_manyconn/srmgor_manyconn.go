@@ -76,6 +76,8 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		h = h.Add("persistent", "true")
 	}
 	fmt.Println(sngecomm.ExampIdNow(exampid), "send starts", nmsgs, qnum)
+	//
+	tmr := time.NewTimer(100 * time.Hour)
 	// Send messages
 	for n := 1; n <= nmsgs; n++ {
 		si := fmt.Sprintf("%d", n)
@@ -92,8 +94,9 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if send_wait {
 			runtime.Gosched() // yield for this example
 			d := time.Duration(sngecomm.ValueBetween(min, max, sendFact))
-			fmt.Println(sngecomm.ExampIdNow(exampid), "send", "sleep", int64(d)/1000000, "ms")
-			time.Sleep(d) // Time to build next message
+			fmt.Println(sngecomm.ExampIdNow(exampid), "send", "stagger", int64(d)/1000000, "ms")
+			tmr.Reset(d)
+			_ = <-tmr.C
 		}
 	}
 }
@@ -108,6 +111,8 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	r := sngecomm.Subscribe(conn, q, id, "auto")
 	// Receive messages
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv starts", nmsgs, qnum)
+	//
+	tmr := time.NewTimer(100 * time.Hour)
 	for n := 1; n <= nmsgs; n++ {
 		d := <-r
 		if d.Error != nil {
@@ -133,8 +138,9 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if recv_wait {
 			runtime.Gosched() // yield for this example
 			d := time.Duration(sngecomm.ValueBetween(min, max, recvFact))
-			fmt.Println(sngecomm.ExampIdNow(exampid), "recv", "sleep", int64(d)/1000000, "ms")
-			time.Sleep(d) // Time to build next message
+			fmt.Println(sngecomm.ExampIdNow(exampid), "recv", "stagger", int64(d)/1000000, "ms")
+			tmr.Reset(d)
+			_ = <-tmr.C
 		}
 	}
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv done:", q)
