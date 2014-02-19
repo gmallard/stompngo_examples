@@ -51,6 +51,8 @@ var (
 	//
 	sendFact float64 = 1.0 // Send sleep time factor
 	recvFact float64 = 1.0 // Receive sleep time factor
+	//
+	conn2Buffer int = -1 // 2 connection buffer. < 0 means use queue size.
 )
 
 // Initialization
@@ -73,6 +75,18 @@ func init() {
 			recvFact = f
 		}
 	}
+	//
+	if os.Getenv("STOMP_CONN2BUFFER") != "" {
+		s, e := strconv.ParseInt(os.Getenv("STOMP_CONN2BUFFER"), 10, 32)
+		if e == nil {
+			conn2Buffer = int(s)
+		}
+	}
+}
+
+// 2 Connection Buffer Size
+func Conn2Buffer() int {
+	return conn2Buffer
 }
 
 // Timestamp example ids
