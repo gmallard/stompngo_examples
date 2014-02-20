@@ -28,13 +28,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/davecheney/profile"
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	//	"os"
 	"net"
 	"runtime"
-	"strings"
 	"sync"
 	"time"
 )
@@ -50,17 +50,20 @@ var wgall sync.WaitGroup
 // Vary these for experimental purposes.  YMMV.
 var max int64 = 1e9      // Max stagger time (nanoseconds)
 var min int64 = max / 10 // Min stagger time (nanoseconds)
-// Vary these for experimental purposes.  YMMV.
-var send_factor int64 = 1 // Send factor time
-var recv_factor int64 = 1 // Receive factor time
 
 // Wait flags
-var send_wait = true
-var recv_wait = true
+var sendWait = true
+var recvWait = true
+
+// Sleep multipliers
+var sendFact float64 = 1.0
+var recvFact float64 = 1.0
 
 //
 var n net.Conn                // Network Connection
 var conn *stompngo.Connection // Stomp Connection
+
+var lhl = 44
 
 // Send messages to a particular queue
 func sender(qn, c int) {
@@ -71,27 +74,29 @@ func sender(qn, c int) {
 	qp := sngecomm.Dest() // queue name prefix
 	q := qp + "." + qns
 	fmt.Println(exampid, time.Now(), id, "send queue name:", q, qn)
-	h := stompngo.Headers{"destination", q, "senderId", id} // send Headers
+	h := stompngo.Headers{"destination", q, "senderId", id,
+		"qnum", qns} // send Headers
 	if sngecomm.Persistent() {
 		h = h.Add("persistent", "true")
 	}
+	//
+	tmr := time.NewTimer(100 * time.Hour)
 	// Send loop
 	for i := 1; i <= c; i++ {
 		si := fmt.Sprintf("%d", i)
+		sh := append(h, "msgnum", si)
 		// Generate a message to send ...............
-		mp := exampid + "|" + "payload" + "|qnum:" + qns + "|msgnum:" + si + " :"
-		m := mp + sngecomm.Partial() // Variable length message
-		fmt.Println(exampid, time.Now(), id, "send msg", mp, qn, len(m))
-		e := conn.Send(h, m)
+		fmt.Println(sngecomm.ExampIdNow(exampid), "send message", qns, si)
+		e := conn.Send(sh, string(sngecomm.Partial()))
 		if e != nil {
 			log.Fatalln(exampid, time.Now(), id, "send error", e, qn)
 		}
-		if send_wait {
+		if sendWait {
 			runtime.Gosched()
-			sld := time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))
-			fmt.Println(exampid, time.Now(), id, "send", "sleeps", sld)
-			time.Sleep(sld) // Time to build next message
-			runtime.Gosched()
+			d := time.Duration(sngecomm.ValueBetween(min, max, sendFact))
+			fmt.Println(sngecomm.ExampIdNow(exampid), "send", "stagger", int64(d)/1000000, "ms")
+			tmr.Reset(d)
+			_ = <-tmr.C
 		}
 	}
 	// Sending is done
@@ -110,6 +115,8 @@ func receiver(qn, c int) {
 	fmt.Println(exampid, time.Now(), id, "recv queue name:", q, qn)
 	// Subscribe
 	r := sngecomm.Subscribe(conn, q, id, "auto")
+	//
+	tmr := time.NewTimer(100 * time.Hour)
 	// Receive loop
 	for i := 1; i <= c; i++ {
 		fmt.Println(exampid, time.Now(), id, "recv chanchek", "q", qns, "len", len(r), "cap", cap(r))
@@ -119,22 +126,24 @@ func receiver(qn, c int) {
 		}
 
 		// Process the inbound message .................
-		m := d.Message.BodyString()
-		li := strings.LastIndex(m, ":")
-		fmt.Println(exampid, time.Now(), id, "recv message", string(m[0:li]), qn)
+		osl := lhl
+		if len(d.Message.Body) < osl {
+			osl = len(d.Message.Body)
+		}
+		os := string(d.Message.Body[0:osl])
+		fmt.Println(exampid, time.Now(), id, "recv message", os, qn)
 
 		// Sanity check the queue and message numbers
 		mns := fmt.Sprintf("%d", i) // message number
-		t := "|qnum:" + qns + "|msgnum:" + mns
-		if !strings.Contains(m, t) {
-			log.Fatalln(exampid, time.Now(), id, "recv bad message", m, t, qn)
+		if !d.Message.Headers.ContainsKV("qnum", qns) || !d.Message.Headers.ContainsKV("msgnum", mns) {
+			log.Fatalln("Bad Headers", d.Message.Headers, qns, mns)
 		}
-		if recv_wait {
+		if recvWait {
 			runtime.Gosched()
-			sld := time.Duration(send_factor * (sngecomm.ValueBetween(min, max) / 2))
-			fmt.Println(exampid, time.Now(), id, "recv", "sleeps", sld)
-			time.Sleep(sld) // Time to build next message
-			runtime.Gosched()
+			d := time.Duration(sngecomm.ValueBetween(min, max, recvFact))
+			fmt.Println(sngecomm.ExampIdNow(exampid), "recv", "stagger", int64(d)/1000000, "ms")
+			tmr.Reset(d)
+			_ = <-tmr.C
 		}
 	}
 	// Unsubscribe
@@ -178,6 +187,15 @@ func startReceivers(qn int) {
 // Show a number of writers and readers operating concurrently from unique
 // destinations.
 func main() {
+	sngecomm.ShowRunParms()
+	cfg := profile.Config{
+		MemProfile:     true,
+		CPUProfile:     true,
+		BlockProfile:   true,
+		NoShutdownHook: false, // Hook SIGINT
+	}
+	pp := profile.Start(&cfg)
+	//
 	start := time.Now()
 	fmt.Println(exampid, time.Now(), "main starts")
 	if sngecomm.SetMAXPROCS() {
@@ -188,8 +206,11 @@ func main() {
 		fmt.Println(exampid, time.Now(), "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	}
 	// Wait flags
-	send_wait = sngecomm.SendWait()
-	recv_wait = sngecomm.RecvWait()
+	sendWait = sngecomm.SendWait()
+	recvWait = sngecomm.RecvWait()
+	sendFact = sngecomm.SendFactor()
+	recvFact = sngecomm.RecvFactor()
+	fmt.Println(sngecomm.ExampIdNow(exampid), "Sleep Factors", "send", sendFact, "recv", recvFact)
 	// Number of queues
 	q := sngecomm.Nqs()
 	fmt.Println(exampid, time.Now(), "main Nqs:", q)
@@ -224,10 +245,13 @@ func main() {
 	// conn.SetLogger(l)
 
 	// Run everything
+
 	wgall.Add(2)
 	go startReceivers(q)
 	go startSenders(q)
 	wgall.Wait()
+	pp.Stop()
+
 	// Disconnect from Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
