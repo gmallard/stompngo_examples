@@ -75,6 +75,8 @@ func sender(conn *stompngo.Connection, qn, c int) {
 	if sngecomm.Persistent() {
 		h = h.Add("persistent", "true")
 	}
+	//
+	tmr := time.NewTimer(100 * time.Hour)
 	// Send loop
 	for i := 1; i <= c; i++ {
 		si := fmt.Sprintf("%d", i)
@@ -90,8 +92,9 @@ func sender(conn *stompngo.Connection, qn, c int) {
 		if send_wait {
 			runtime.Gosched() // yield for this example
 			d := time.Duration(sngecomm.ValueBetween(min, max, sendFact))
-			fmt.Println(sngecomm.ExampIdNow(exampid), "send", "sleep", int64(d)/1000000, "ms")
-			time.Sleep(d) // Time to build next message
+			fmt.Println(sngecomm.ExampIdNow(exampid), "send", "stagger", int64(d)/1000000, "ms")
+			tmr.Reset(d)
+			_ = <-tmr.C
 		}
 	}
 	// Sending is done
@@ -101,6 +104,8 @@ func sender(conn *stompngo.Connection, qn, c int) {
 
 // Asynchronously process all messages for a given subscription.
 func receiveWorker(mc <-chan stompngo.MessageData, qns string, c int, d chan<- bool) {
+	//
+	tmr := time.NewTimer(100 * time.Hour)
 	// Receive loop
 	for i := 1; i <= c; i++ {
 		d := <-mc
@@ -126,8 +131,9 @@ func receiveWorker(mc <-chan stompngo.MessageData, qns string, c int, d chan<- b
 		if recv_wait {
 			runtime.Gosched() // yield for this example
 			d := time.Duration(sngecomm.ValueBetween(min, max, recvFact))
-			fmt.Println(sngecomm.ExampIdNow(exampid), "recv", "sleep", int64(d)/1000000, "ms")
-			time.Sleep(d) // Time to build next message
+			fmt.Println(sngecomm.ExampIdNow(exampid), "recv", "stagger", int64(d)/1000000, "ms")
+			tmr.Reset(d)
+			_ = <-tmr.C
 		}
 	}
 	//
