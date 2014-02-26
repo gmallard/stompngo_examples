@@ -35,7 +35,7 @@ import (
 	"net"
 	//
 	"github.com/gmallard/stompngo"
-	. "github.com/gmallard/stompngo_examples/sngecomm"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var (
@@ -57,7 +57,7 @@ func main() {
 	testConfig.InsecureSkipVerify = true // Do *not* check the server's certificate
 
 	// Open a net connection
-	h, p := HostAndPort()
+	h, p := sngecomm.HostAndPort()
 	// Use tls.Dial, not net.Dial
 	n, e := tls.Dial("tcp", net.JoinHostPort(h, p), testConfig)
 	if e != nil {
@@ -67,7 +67,7 @@ func main() {
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
-	ch := ConnectHeaders()
+	ch := sngecomm.ConnectHeaders()
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
