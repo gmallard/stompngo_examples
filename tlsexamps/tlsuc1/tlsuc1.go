@@ -76,7 +76,7 @@ func main() {
 		log.Fatalln(e) // Handle this ......
 	}
 
-	sngecomm.DumpTLSConfig(testConfig, n)
+	sngecomm.DumpTLSConfig(exampid, testConfig, n)
 
 	// Connect Headers
 	ch := sngecomm.ConnectHeaders()

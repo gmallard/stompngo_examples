@@ -108,7 +108,7 @@ func main() {
 	}
 	fmt.Println(exampid, "handshake complete ...")
 
-	sngecomm.DumpTLSConfig(testConfig, n)
+	sngecomm.DumpTLSConfig(exampid, testConfig, n)
 
 	// Connect Headers
 	ch := sngecomm.ConnectHeaders()
