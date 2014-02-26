@@ -39,10 +39,11 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
-	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
+	//
+	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var (

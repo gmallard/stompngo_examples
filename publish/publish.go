@@ -45,10 +45,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
+	//
+	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var exampid = "publish: "

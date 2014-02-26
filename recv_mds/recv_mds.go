@@ -45,13 +45,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
 	"runtime"
 	"sync"
 	"time"
+	//
+	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var (

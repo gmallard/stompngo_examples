@@ -31,10 +31,11 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/gmallard/stompngo"
-	. "github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
+	//
+	"github.com/gmallard/stompngo"
+	. "github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var (

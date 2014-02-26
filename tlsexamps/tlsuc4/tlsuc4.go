@@ -41,11 +41,12 @@ import (
 	"encoding/pem"
 	"flag"
 	"fmt"
-	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/sngecomm"
 	"io/ioutil"
 	"log"
 	"net"
+	//
+	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var (
