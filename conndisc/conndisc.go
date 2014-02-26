@@ -76,7 +76,7 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...", conn.Protocol())
+	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
 	// *NOTE* your application functionaltiy goes here!
 

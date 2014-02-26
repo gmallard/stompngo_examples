@@ -1,5 +1,5 @@
 //
-// Copyright © 2011-2013 Guy M. Allard
+// Copyright © 2011-2014 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,15 +21,19 @@ project.
 package sngecomm
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
-	"github.com/gmallard/stompngo"
 	"log"
 	"math/big"
 	"os"
 	"strconv"
 	"strings"
+	"time"
+	//
+	"github.com/davecheney/profile"
+	"github.com/gmallard/stompngo"
 )
 
 var (
@@ -44,21 +48,117 @@ var (
 	dest  = "/queue/snge.common.queue" // Default destination
 	nqs   = 1                          // Default number of queues for multi-queue demo(s)
 	scc   = 1                          // Default subscribe channel capacity
-	md    = ""                         // Additional message data, primed during init()
 	mdml  = 1024 * 32                  // Message data max length of variable message, 32K
+	md    = make([]byte, 1)            // Additional message data, primed during init()
+	//
+	sendFact float64 = 1.0 // Send sleep time factor
+	recvFact float64 = 1.0 // Receive sleep time factor
+	//
+	conn2Buffer int = -1 // 2 connection buffer. < 0 means use queue size.
+	//
+	ackMode = "auto" // The default ack mode
+	//
+	pprof = false // Do not do profiling
 )
 
 // Initialization
 func init() {
 	p := "_123456789ABCDEF"
 	c := mdml / len(p)
-	md = strings.Repeat(p, c) // A long string
+	b := []byte(p)
+	md = bytes.Repeat(b, c) // A long string
+	//
+	if s := os.Getenv("STOMP_SENDFACT"); s != "" {
+		f, e := strconv.ParseFloat(s, 64)
+		if e == nil {
+			sendFact = f
+		}
+	}
+	//
+	if s := os.Getenv("STOMP_RECVFACT"); s != "" {
+		f, e := strconv.ParseFloat(s, 64)
+		if e == nil {
+			recvFact = f
+		}
+	}
+	//
+	if s := os.Getenv("STOMP_CONN2BUFFER"); s != "" {
+		s, e := strconv.ParseInt(s, 10, 32)
+		if e == nil {
+			conn2Buffer = int(s)
+		}
+	}
+	//
+	if am := os.Getenv("STOMP_ACKMODE"); am != "" {
+		if am == "auto" || am == "client" || am == "client-individual" {
+			ackMode = am
+		}
+	}
+	//
+	if am := os.Getenv("STOMP_PPROF"); am != "" {
+		pprof = true
+	}
+	//
+	if s := os.Getenv("STOMP_MDML"); s != "" {
+		i, e := strconv.ParseInt(s, 10, 32)
+		if e == nil {
+			mdml = int(i)
+		}
+	}
+}
+
+// Max Data Message Length
+func Mdml() int {
+	return int(mdml)
+}
+
+// Start profiling if required
+func StartProf() {
+	if Pprof() {
+		cfg := profile.Config{
+			MemProfile:     true,
+			CPUProfile:     true,
+			BlockProfile:   true,
+			NoShutdownHook: false, // Hook SIGINT
+		}
+		defer profile.Start(&cfg).Stop()
+	}
+}
+
+// Use profiling or not
+func Pprof() bool {
+	return pprof
+}
+
+// ACK mode for those examples that use it.
+func AckMode() string {
+	return ackMode
+}
+
+// 2 Connection Buffer Size
+func Conn2Buffer() int {
+	return conn2Buffer
+}
+
+// Timestamp example ids
+func ExampIdNow(s string) string {
+	return time.Now().String() + " " + s
+}
+
+// Get Send Sleep Factor
+func SendFactor() float64 {
+	return sendFact
+}
+
+// Get Recv Sleep Factor
+func RecvFactor() float64 {
+	return recvFact
 }
 
 // Get partial string, random length
-func Partial() string {
-	r := int(ValueBetween(1, int64(mdml-1)))
-	return string(md[0:r])
+func Partial() []byte {
+	r := int(ValueBetween(1, int64(mdml-1), 1.0))
+	return md[0:r]
 }
 
 // Override default protocol level
@@ -230,50 +330,50 @@ func ShowStats(exampid, tag string, conn *stompngo.Connection) {
 	bw := conn.BytesWritten()
 	s := conn.Running().Seconds()
 	n := conn.Running().Nanoseconds()
-	fmt.Println(exampid, tag, "frame read count", r)
-	fmt.Println(exampid, tag, "bytes read", br)
-	fmt.Println(exampid, tag, "frame write count", w)
-	fmt.Println(exampid, tag, "bytes written", bw)
-	fmt.Println(exampid, tag, "current duration(ns)", n)
-	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "current duration(sec)", s)
-	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "frame reads/sec", float64(r)/s)
-	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes read/sec", float64(br)/s)
-	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "frame writes/sec", float64(w)/s)
-	fmt.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes written/sec", float64(bw)/s)
+	fmt.Println(ExampIdNow(exampid), tag, "frame read count", r)
+	fmt.Println(ExampIdNow(exampid), tag, "bytes read", br)
+	fmt.Println(ExampIdNow(exampid), tag, "frame write count", w)
+	fmt.Println(ExampIdNow(exampid), tag, "bytes written", bw)
+	fmt.Println(ExampIdNow(exampid), tag, "current duration(ns)", n)
+	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "current duration(sec)", s)
+	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "frame reads/sec", float64(r)/s)
+	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "bytes read/sec", float64(br)/s)
+	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "frame writes/sec", float64(w)/s)
+	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "bytes written/sec", float64(bw)/s)
 }
 
 // Get a value between min amd max
-func ValueBetween(min, max int64) int64 {
-	br, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
-	return br.Add(big.NewInt(min), br).Int64()
+func ValueBetween(min, max int64, fact float64) int64 {
+	rt, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
+	return int64(fact * float64(min+rt.Int64()))
 }
 
 // Dump a TLS Configuration Struct
-func DumpTLSConfig(c *tls.Config, n *tls.Conn) {
+func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 	fmt.Println()
-	fmt.Printf("Rand: %v\n", c.Rand)
-	fmt.Printf("Time: %v\n", c.Time)
-	fmt.Printf("Certificates: %v\n", c.Certificates)
-	fmt.Printf("NameToCertificate: %v\n", c.NameToCertificate)
-	fmt.Printf("RootCAs: %v\n", c.RootCAs)
-	fmt.Printf("NextProtos: %v\n", c.NextProtos)
-	fmt.Printf("ServerName: %v\n", c.ServerName)
-	fmt.Printf("ClientAuth: %v\n", c.ClientAuth)
-	fmt.Printf("ClientCAs: %v\n", c.ClientCAs)
-	fmt.Printf("CipherSuites: %v\n", c.CipherSuites)
-	fmt.Printf("PreferServerCipherSuites: %v\n", c.PreferServerCipherSuites)
-	fmt.Printf("SessionTicketsDisabled: %v\n", c.SessionTicketsDisabled)
-	fmt.Printf("SessionTicketKey: %v\n", c.SessionTicketKey)
+	fmt.Printf("%s Rand: %v\n", ExampIdNow(exampid), c.Rand)
+	fmt.Printf("%s Time: %v\n", ExampIdNow(exampid), c.Time)
+	fmt.Printf("%s Certificates: %v\n", ExampIdNow(exampid), c.Certificates)
+	fmt.Printf("%s NameToCertificate: %v\n", ExampIdNow(exampid), c.NameToCertificate)
+	fmt.Printf("%s RootCAs: %v\n", ExampIdNow(exampid), c.RootCAs)
+	fmt.Printf("%s NextProtos: %v\n", ExampIdNow(exampid), c.NextProtos)
+	fmt.Printf("%s ServerName: %v\n", ExampIdNow(exampid), c.ServerName)
+	fmt.Printf("%s ClientAuth: %v\n", ExampIdNow(exampid), c.ClientAuth)
+	fmt.Printf("%s ClientCAs: %v\n", ExampIdNow(exampid), c.ClientCAs)
+	fmt.Printf("%s CipherSuites: %v\n", ExampIdNow(exampid), c.CipherSuites)
+	fmt.Printf("%s PreferServerCipherSuites: %v\n", ExampIdNow(exampid), c.PreferServerCipherSuites)
+	fmt.Printf("%s SessionTicketsDisabled: %v\n", ExampIdNow(exampid), c.SessionTicketsDisabled)
+	fmt.Printf("%s SessionTicketKey: %v\n", ExampIdNow(exampid), c.SessionTicketKey)
 
 	// Idea Embellished From:
 	// https://groups.google.com/forum/#!topic/golang-nuts/TMNdOxugbTY
 	cs := n.ConnectionState()
-	fmt.Println("HandshakeComplete:", cs.HandshakeComplete)
-	fmt.Println("DidResume:", cs.DidResume)
-	fmt.Println("CipherSuite:", cs.CipherSuite)
-	fmt.Println("NegotiatedProtocol:", cs.NegotiatedProtocol)
-	fmt.Println("NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
-	fmt.Println("ServerName:", cs.ServerName)
+	fmt.Println(ExampIdNow(exampid), "HandshakeComplete:", cs.HandshakeComplete)
+	fmt.Println(ExampIdNow(exampid), "DidResume:", cs.DidResume)
+	fmt.Println(ExampIdNow(exampid), "CipherSuite:", cs.CipherSuite)
+	fmt.Println(ExampIdNow(exampid), "NegotiatedProtocol:", cs.NegotiatedProtocol)
+	fmt.Println(ExampIdNow(exampid), "NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
+	fmt.Println(ExampIdNow(exampid), "ServerName:", cs.ServerName)
 	// Portions of any Peer Certificates present
 	certs := cs.PeerCertificates
 	if certs == nil || len(certs) < 1 {
@@ -281,7 +381,7 @@ func DumpTLSConfig(c *tls.Config, n *tls.Conn) {
 		fmt.Println()
 		return
 	}
-	fmt.Println("Server Certs:")
+	fmt.Println(ExampIdNow(exampid), "Server Certs:")
 	for i, cert := range certs {
 		fmt.Printf("Certificate chain:%d\n", i)
 		fmt.Printf("Common Name:%s\n", cert.Subject.CommonName)
@@ -357,4 +457,18 @@ func Ack(c *stompngo.Connection, h stompngo.Headers, id string) {
 		log.Fatalln("ack failed", e, c.Protocol())
 	}
 	return
+}
+
+func ShowRunParms(exampid string) {
+	fmt.Println(ExampIdNow(exampid), "HOST", os.Getenv("STOMP_HOST"), "alt", host)
+	fmt.Println(ExampIdNow(exampid), "PORT", os.Getenv("STOMP_PORT"), "alt", port)
+	fmt.Println(ExampIdNow(exampid), "PROTOCOL", Protocol())
+	fmt.Println(ExampIdNow(exampid), "VHOST", Vhost())
+	fmt.Println(ExampIdNow(exampid), "NQS", Nqs())
+	fmt.Println(ExampIdNow(exampid), "NMSGS", Nmsgs())
+	fmt.Println(ExampIdNow(exampid), "SUBCHANCAP", SubChanCap())
+	fmt.Println(ExampIdNow(exampid), "RECVFACT", RecvFactor())
+	fmt.Println(ExampIdNow(exampid), "SENDFACT", SendFactor())
+	fmt.Println(ExampIdNow(exampid), "CON2BUFFER", Conn2Buffer())
+	fmt.Println(ExampIdNow(exampid), "ACKMODE", AckMode())
 }
