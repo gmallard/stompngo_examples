@@ -1,5 +1,5 @@
 //
-// Copyright © 2011-2013 Guy M. Allard
+// Copyright © 2011-2014 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,15 +28,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
-	"os"
 	"runtime"
-	"runtime/pprof"
 	"sync"
 	"time"
+	//
+	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var exampid = "srmgor_2conn:"
@@ -221,7 +220,7 @@ func startSenders(qn int) {
 	}
 
 	fmt.Println(sngecomm.ExampIdNow(exampid), "startSenders ends", qn)
-	sngecomm.ShowStats(sngecomm.ExampIdNow(exampid), "startSenders", conn)
+	sngecomm.ShowStats(exampid, "startSenders", conn)
 	wgall.Done()
 }
 
@@ -261,25 +260,17 @@ func startReceivers(qn int) {
 	}
 
 	fmt.Println(sngecomm.ExampIdNow(exampid), "startReceivers ends", qn)
-	sngecomm.ShowStats(sngecomm.ExampIdNow(exampid), "startReceivers", conn)
+	sngecomm.ShowStats(exampid, "startReceivers", conn)
 	wgall.Done()
 }
 
 // Show a number of writers and readers operating concurrently from unique
 // destinations.
 func main() {
+	sngecomm.ShowRunParms(exampid)
+	sngecomm.StartProf()
 	tn := time.Now()
 	fmt.Println(sngecomm.ExampIdNow(exampid), "main starts")
-
-	flag.Parse()
-	if *cpuprofile != "" {
-		f, err := os.Create(*cpuprofile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
-	}
 
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
@@ -293,10 +284,9 @@ func main() {
 	recv_wait = sngecomm.RecvWait()
 	sendFact = sngecomm.SendFactor()
 	recvFact = sngecomm.RecvFactor()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "Sleep Factors", "send", sendFact, "recv", recvFact)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main Sleep Factors", "send", sendFact, "recv", recvFact)
 	//
 	q := sngecomm.Nqs()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "main Nqs:", q)
 	//
 	wgall.Add(2)
 	go startReceivers(q)

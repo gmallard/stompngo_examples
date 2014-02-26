@@ -25,13 +25,15 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
-	"github.com/gmallard/stompngo"
 	"log"
 	"math/big"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+	//
+	"github.com/davecheney/profile"
+	"github.com/gmallard/stompngo"
 )
 
 var (
@@ -108,6 +110,19 @@ func init() {
 // Max Data Message Length
 func Mdml() int {
 	return int(mdml)
+}
+
+// Start profiling if required
+func StartProf() {
+	if Pprof() {
+		cfg := profile.Config{
+			MemProfile:     true,
+			CPUProfile:     true,
+			BlockProfile:   true,
+			NoShutdownHook: false, // Hook SIGINT
+		}
+		defer profile.Start(&cfg).Stop()
+	}
 }
 
 // Use profiling or not

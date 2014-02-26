@@ -1,5 +1,5 @@
 //
-// Copyright © 2012-2013 Guy M. Allard
+// Copyright © 2012-2014 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,14 +33,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/gmallard/stompngo"
-	"github.com/gmallard/stompngo_examples/sngecomm"
 	"log"
 	"net"
 	"runtime"
-	// "strings"
 	"sync"
 	"time"
+	//
+	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var exampid = "srmgor_manyconn:"
@@ -168,6 +168,8 @@ func runReceiver(qnum int) {
 		log.Fatalln(sngecomm.ExampIdNow(exampid), "recv stompconnect:", qnum, e) // Handle this ......
 	}
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv connection complete:", qnum)
+	//
+	conn.SetSubChanCap(sngecomm.SubChanCap()) // Experiment with this value, YMMV
 	// Receives
 	receiveMessages(conn, qnum, n)
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv receives complete:", qnum)
@@ -185,7 +187,7 @@ func runReceiver(qnum int) {
 	}
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv network close complete", qnum)
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv end for queue number", qnum)
-	sngecomm.ShowStats(sngecomm.ExampIdNow(exampid), "recv "+fmt.Sprintf("%d", qnum), conn)
+	sngecomm.ShowStats(exampid, "recv "+fmt.Sprintf("%d", qnum), conn)
 	wgrecv.Done()
 }
 
@@ -225,50 +227,50 @@ func runSender(qnum int) {
 	}
 	fmt.Println(sngecomm.ExampIdNow(exampid), "send network close complete", qnum)
 	fmt.Println(sngecomm.ExampIdNow(exampid), "send end for queue number", qnum)
-	sngecomm.ShowStats(sngecomm.ExampIdNow(exampid), "send "+fmt.Sprintf("%d", qnum), conn)
+	sngecomm.ShowStats(exampid, "send "+fmt.Sprintf("%d", qnum), conn)
 	wgsend.Done()
 }
 
 func main() {
+	sngecomm.ShowRunParms(exampid)
+	sngecomm.StartProf()
 	tn := time.Now()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "starts")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main starts")
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
-		fmt.Println(sngecomm.ExampIdNow(exampid), "number of CPUs is:", nc)
+		fmt.Println(sngecomm.ExampIdNow(exampid), "main number of CPUs is:", nc)
 		c := runtime.GOMAXPROCS(nc)
-		fmt.Println(sngecomm.ExampIdNow(exampid), "previous number of GOMAXPROCS is:", c)
-		fmt.Println(sngecomm.ExampIdNow(exampid), "current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+		fmt.Println(sngecomm.ExampIdNow(exampid), "main previous number of GOMAXPROCS is:", c)
+		fmt.Println(sngecomm.ExampIdNow(exampid), "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	}
 	//
 	send_wait = sngecomm.SendWait()
 	recv_wait = sngecomm.RecvWait()
 	sendFact = sngecomm.SendFactor()
 	recvFact = sngecomm.RecvFactor()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "Sleep Factors", "send", sendFact, "recv", recvFact)
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main Sleep Factors", "send", sendFact, "recv", recvFact)
 	//
 	numq := sngecomm.Nqs()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "numq:", numq)
 	nmsgs = sngecomm.Nmsgs() // message count
-	fmt.Println(sngecomm.ExampIdNow(exampid), "nmsgs:", nmsgs)
 	//
-	fmt.Println(sngecomm.ExampIdNow(exampid), "starting receivers")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main starting receivers")
 	for q := 1; q <= numq; q++ {
 		wgrecv.Add(1)
 		go runReceiver(q)
 	}
-	fmt.Println(sngecomm.ExampIdNow(exampid), "started receivers")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main started receivers")
 	//
-	fmt.Println(sngecomm.ExampIdNow(exampid), "starting senders")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main starting senders")
 	for q := 1; q <= numq; q++ {
 		wgsend.Add(1)
 		go runSender(q)
 	}
-	fmt.Println(sngecomm.ExampIdNow(exampid), "started senders")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main started senders")
 	//
 	wgsend.Wait()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "senders complete")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main senders complete")
 	wgrecv.Wait()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "receivers complete")
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main receivers complete")
 	//
-	fmt.Println(sngecomm.ExampIdNow(exampid), "ends", time.Since(tn))
+	fmt.Println(sngecomm.ExampIdNow(exampid), "main ends", time.Since(tn))
 }
