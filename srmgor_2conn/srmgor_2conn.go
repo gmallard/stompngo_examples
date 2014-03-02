@@ -268,7 +268,17 @@ func startReceivers(qn int) {
 // destinations.
 func main() {
 	sngecomm.ShowRunParms(exampid)
-	sngecomm.StartProf()
+
+	if sngecomm.Pprof() {
+		cfg := profile.Config{
+			MemProfile:     true,
+			CPUProfile:     true,
+			BlockProfile:   true,
+			NoShutdownHook: false, // Hook SIGINT
+		}
+		defer profile.Start(&cfg).Stop()
+	}
+
 	tn := time.Now()
 	fmt.Println(sngecomm.ExampIdNow(exampid), "main starts")
 

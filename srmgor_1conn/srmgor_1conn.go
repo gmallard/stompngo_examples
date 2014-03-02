@@ -34,6 +34,7 @@ import (
 	"sync"
 	"time"
 	//
+	"github.com/davecheney/profile"
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
@@ -205,7 +206,17 @@ func startReceivers(qn int) {
 // destinations.
 func main() {
 	sngecomm.ShowRunParms(exampid)
-	sngecomm.StartProf()
+
+	if sngecomm.Pprof() {
+		cfg := profile.Config{
+			MemProfile:     true,
+			CPUProfile:     true,
+			BlockProfile:   true,
+			NoShutdownHook: false, // Hook SIGINT
+		}
+		defer profile.Start(&cfg).Stop()
+	}
+
 	start := time.Now()
 	fmt.Println(sngecomm.ExampIdNow(exampid), "main starts")
 	fmt.Println(sngecomm.ExampIdNow(exampid), "main profiling", sngecomm.Pprof())
