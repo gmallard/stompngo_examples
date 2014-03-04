@@ -49,6 +49,7 @@ var (
 	scc   = 1                          // Default subscribe channel capacity
 	mdml  = 1024 * 32                  // Message data max length of variable message, 32K
 	md    = make([]byte, 1)            // Additional message data, primed during init()
+	rc    = 1                          // Receiver connection count, srmgor_1smrconn
 	//
 	sendFact float64 = 1.0 // Send sleep time factor
 	recvFact float64 = 1.0 // Receive sleep time factor
@@ -104,6 +105,18 @@ func init() {
 			mdml = int(i)
 		}
 	}
+	//
+	if s := os.Getenv("STOMP_RECVCONNS"); s != "" {
+		i, e := strconv.ParseInt(s, 10, 32)
+		if e == nil {
+			rc = int(i)
+		}
+	}
+}
+
+// Receiver connection count
+func Recvconns() int {
+	return int(rc)
 }
 
 // Max Data Message Length
@@ -457,4 +470,5 @@ func ShowRunParms(exampid string) {
 	fmt.Println(ExampIdNow(exampid), "SENDFACT", SendFactor())
 	fmt.Println(ExampIdNow(exampid), "CON2BUFFER", Conn2Buffer())
 	fmt.Println(ExampIdNow(exampid), "ACKMODE", AckMode())
+	fmt.Println(ExampIdNow(exampid), "RECVCONNS", Recvconns())
 }
