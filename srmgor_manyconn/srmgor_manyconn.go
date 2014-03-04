@@ -39,6 +39,7 @@ import (
 	"sync"
 	"time"
 	//
+	"github.com/davecheney/profile"
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
