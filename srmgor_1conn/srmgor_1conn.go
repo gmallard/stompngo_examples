@@ -151,6 +151,7 @@ func receiver(qn, c int) {
 			default: // 1.2 (NB: 1.0 not supported here)
 				ah = append(ah, "id", d.Message.Headers.Value("ack"))
 			}
+			ah = append(ah, "qnum", qns, "msgnum", mns) // For tracking
 			e := conn.Ack(ah)
 			if e != nil {
 				log.Fatalln("ACK Error", e)

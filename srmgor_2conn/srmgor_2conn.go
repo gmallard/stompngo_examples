@@ -103,7 +103,8 @@ func sender(conn *stompngo.Connection, qn, c int) {
 }
 
 // Asynchronously process all messages for a given subscription.
-func receiveWorker(mc <-chan stompngo.MessageData, qns string, c int, d chan<- bool) {
+func receiveWorker(mc <-chan stompngo.MessageData, qns string, c int,
+	d chan<- bool, conn *stompngo.Connection, id string) {
 	//
 	tmr := time.NewTimer(100 * time.Hour)
 	// Receive loop
@@ -123,6 +124,21 @@ func receiveWorker(mc <-chan stompngo.MessageData, qns string, c int, d chan<- b
 		sl := 16
 		if len(d.Message.Body) < sl {
 			sl = len(d.Message.Body)
+		}
+		// Handle ACKs if needed
+		if sngecomm.AckMode() != "auto" {
+			ah := []string{}
+			switch conn.Protocol() {
+			case stompngo.SPL_11:
+				ah = append(ah, "subscription", id, "message-id", d.Message.Headers.Value("message-id"))
+			default: // 1.2 (NB: 1.0 not supported here)
+				ah = append(ah, "id", d.Message.Headers.Value("ack"))
+			}
+			ah = append(ah, "qnum", qns, "msgnum", mns) // For tracking
+			e := conn.Ack(ah)
+			if e != nil {
+				log.Fatalln("ACK Error", e)
+			}
 		}
 		fmt.Println(sngecomm.ExampIdNow(exampid), "recv message", string(d.Message.Body[0:sl]), qns, d.Message.Headers.Value("msgnum"))
 		if i == c {
@@ -149,7 +165,7 @@ func receiver(conn *stompngo.Connection, qn, c int) {
 	q := qp + "." + qns
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv queue name", q, qn)
 	id := stompngo.Uuid() // A unique subscription ID
-	r := sngecomm.Subscribe(conn, q, id, "auto")
+	r := sngecomm.Subscribe(conn, q, id, sngecomm.AckMode())
 	// Many receivers running under the same connection can cause
 	// (wire read) performance issues.  This is *very* dependent on the broker
 	// being used, specifically the broker's algorithm for putting messages on
@@ -165,9 +181,9 @@ func receiver(conn *stompngo.Connection, qn, c int) {
 		nb = sngecomm.Conn2Buffer() // User spec'd bufsize
 	}
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv", "mdbuffersize", nb, qns)
-	mc = make(chan stompngo.MessageData, nb) // MessageData Buffer size
-	dc := make(chan bool)                    // Receive processing done channel
-	go receiveWorker(mc, qns, c, dc)         // Start async processor
+	mc = make(chan stompngo.MessageData, nb)   // MessageData Buffer size
+	dc := make(chan bool)                      // Receive processing done channel
+	go receiveWorker(mc, qns, c, dc, conn, id) // Start async processor
 	for i := 1; i <= c; i++ {
 		mc <- <-r // Receive message data as soon as possible, and internally queue it
 	}

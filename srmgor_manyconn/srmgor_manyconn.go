@@ -109,7 +109,7 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv queue name:", q, qnum)
 	// Subscribe
 	id := stompngo.Uuid() // A unique subscription ID
-	r := sngecomm.Subscribe(conn, q, id, "auto")
+	r := sngecomm.Subscribe(conn, q, id, sngecomm.AckMode())
 	// Receive messages
 	fmt.Println(sngecomm.ExampIdNow(exampid), "recv starts", nmsgs, qnum)
 	//
@@ -134,6 +134,21 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		fmt.Println(sngecomm.ExampIdNow(exampid), "recv message", string(d.Message.Body[0:sl]), qnum, d.Message.Headers.Value("msgnum"))
 		if n == nmsgs {
 			break
+		}
+		// Handle ACKs if needed
+		if sngecomm.AckMode() != "auto" {
+			ah := []string{}
+			switch conn.Protocol() {
+			case stompngo.SPL_11:
+				ah = append(ah, "subscription", id, "message-id", d.Message.Headers.Value("message-id"))
+			default: // 1.2 (NB: 1.0 not supported here)
+				ah = append(ah, "id", d.Message.Headers.Value("ack"))
+			}
+			ah = append(ah, "qnum", qns, "msgnum", mns) // For tracking
+			e := conn.Ack(ah)
+			if e != nil {
+				log.Fatalln("ACK Error", e)
+			}
 		}
 		//
 		if recv_wait {
