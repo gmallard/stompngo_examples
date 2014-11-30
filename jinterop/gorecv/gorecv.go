@@ -24,7 +24,8 @@ import (
 	"log"
 	"net"
 	//
-	"github.com/gmallard/stompngo")
+	"github.com/gmallard/stompngo"
+)
 
 var exampid = "gorecv: "
 
