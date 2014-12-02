@@ -369,7 +369,7 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 	cs := n.ConnectionState()
 	fmt.Println(ExampIdNow(exampid), "HandshakeComplete:", cs.HandshakeComplete)
 	fmt.Println(ExampIdNow(exampid), "DidResume:", cs.DidResume)
-	fmt.Println(ExampIdNow(exampid), "CipherSuite:", cs.CipherSuite)
+	fmt.Printf("%s %s %d(0x%X)\n", ExampIdNow(exampid), "CipherSuite:", cs.CipherSuite, cs.CipherSuite)
 	fmt.Println(ExampIdNow(exampid), "NegotiatedProtocol:", cs.NegotiatedProtocol)
 	fmt.Println(ExampIdNow(exampid), "NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
 	fmt.Println(ExampIdNow(exampid), "ServerName:", cs.ServerName)
