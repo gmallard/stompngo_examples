@@ -142,6 +142,14 @@ func receiver(qn, c int) {
 			log.Fatalln("Bad Headers", d.Message.Headers, qns, mns)
 		}
 
+		if recvWait {
+			d := time.Duration(sngecomm.ValueBetween(min, max, recvFact))
+			fmt.Println(sngecomm.ExampIdNow(exampid), id, "recv", "stagger", int64(d)/1000000, "ms", qns)
+			tmr.Reset(d)
+			_ = <-tmr.C
+			runtime.Gosched()
+		}
+
 		// Handle ACKs if needed
 		if sngecomm.AckMode() != "auto" {
 			ah := []string{}
@@ -156,13 +164,6 @@ func receiver(qn, c int) {
 			if e != nil {
 				log.Fatalln("ACK Error", e)
 			}
-		}
-		if recvWait {
-			d := time.Duration(sngecomm.ValueBetween(min, max, recvFact))
-			fmt.Println(sngecomm.ExampIdNow(exampid), id, "recv", "stagger", int64(d)/1000000, "ms", qns)
-			tmr.Reset(d)
-			_ = <-tmr.C
-			runtime.Gosched()
 		}
 	}
 	// Unsubscribe
