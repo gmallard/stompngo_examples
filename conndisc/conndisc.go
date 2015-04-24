@@ -60,8 +60,8 @@ func main() {
 
 	// Open a net connection
 	h, p := sngecomm.HostAndPort()
-  jhp := net.JoinHostPort(h, p)
-	fmt.Println(exampid + "will dial ...", jhp)
+	jhp := net.JoinHostPort(h, p)
+	fmt.Println(exampid+"will dial ...", jhp)
 	n, e := net.Dial("tcp", jhp)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
@@ -80,6 +80,14 @@ func main() {
 		log.Fatalln(e) // Handle this ......
 	}
 	fmt.Println(exampid+"stomp connect complete, protocol level is:", conn.Protocol())
+
+	// Show connect response
+	fmt.Println(exampid+"connect response:", conn.ConnectResponse)
+
+	if sngecomm.HbParms() != "" {
+		fmt.Println(exampid+"heart-beat send:", conn.SendTickerInterval())
+		fmt.Println(exampid+"heart-beat receive:", conn.ReceiveTickerInterval())
+	}
 
 	// *NOTE* your application functionaltiy goes here!
 
