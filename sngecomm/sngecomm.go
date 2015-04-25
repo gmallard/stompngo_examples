@@ -58,7 +58,8 @@ var (
 	//
 	ackMode = "auto" // The default ack mode
 	//
-	pprof = false // Do not do profiling
+	pprof   = false // Do not do profiling
+	hbparms = ""    // No heartbeats
 )
 
 // Initialization
@@ -111,6 +112,10 @@ func init() {
 		if e == nil {
 			rc = int(i)
 		}
+	}
+	//
+	if hbp := os.Getenv("STOMP_HBPARMS"); hbp != "" {
+		hbparms = hbp
 	}
 }
 
@@ -222,6 +227,12 @@ func ConnectHeaders() stompngo.Headers {
 	if p != stompngo.SPL_10 { // 1.1 and 1.2
 		h = h.Add("accept-version", p).Add("host", Vhost())
 	}
+	//
+	hb := HbParms()
+	if hb != "" {
+		h = h.Add("heart-beat", hb)
+	}
+
 	return h
 }
 
@@ -319,6 +330,11 @@ func Vhost() string {
 		vhost = d
 	}
 	return vhost
+}
+
+// Heartbeat parms
+func HbParms() string {
+	return hbparms
 }
 
 // Show connection metrics.
