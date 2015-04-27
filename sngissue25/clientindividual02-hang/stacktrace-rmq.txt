@@ -1,0 +1,26 @@
+// Immediate panic here. no Ctrl=\ required for stack trace.
+
+Ending ACK 10
+panic: send on closed channel
+
+goroutine 6 [running]:
+github.com/gmallard/stompngo.(*Connection).reader(0xc20808a000)
+
+//**INFO** Sending to subscription unique MessageData
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/reader.go:55 +0x59d
+created by github.com/gmallard/stompngo.Connect
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/connect.go:111 +0xaee
+
+goroutine 1 [chan receive]:
+github.com/gmallard/stompngo.(*Connection).Disconnect(0xc20808a000, 0x6eeee0, 0x0, 0x0, 0x0, 0x0)
+
+//**INFO** Trying to get the disconnect receipt from c.input.
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/disconnect.go:69 +0x7aa
+main.main()
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo_examples/ackmode/clientindividual02-hang/clientindividual02-hang.go:113 +0x143a
+
+goroutine 17 [syscall, locked to thread]:
+runtime.goexit()
+	/ad3/gma/gorepo/github/go/src/runtime/asm_amd64.s:1671 +0x1
+exit status 2
+

@@ -1,0 +1,68 @@
+Ending ACK 10
+subscribe: unsubscribe complete
+^\SIGQUIT: quit
+PC=0x455211 m=0
+
+goroutine 0 [idle]:
+runtime.futex(0x6cce70, 0x0, 0x0, 0x0, 0x0, 0x6cc9c0, 0x0, 0x0, 0x40e80d, 0x6cce70, ...)
+	/ad3/gma/gorepo/github/go/src/runtime/sys_linux_amd64.s:299 +0x21
+runtime.futexsleep(0x6cce70, 0x0, 0xffffffffffffffff)
+	/ad3/gma/gorepo/github/go/src/runtime/os1_linux.go:40 +0x5b
+runtime.notesleep(0x6cce70)
+	/ad3/gma/gorepo/github/go/src/runtime/lock_futex.go:142 +0xad
+runtime.stopm()
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1054 +0x128
+runtime.findrunnable(0xc208020000)
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1395 +0x549
+runtime.schedule()
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1494 +0x1f0
+runtime.park_m(0xc208000120)
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1553 +0x1a4
+runtime.mcall(0x7ffd31e44280)
+	/ad3/gma/gorepo/github/go/src/runtime/asm_amd64.s:204 +0x5e
+
+goroutine 1 [chan receive]:
+github.com/gmallard/stompngo.(*Connection).Disconnect(0xc20808a000, 0x6efee0, 0x0, 0x0, 0x0, 0x0)
+
+//**INFO** Attempting to get the disconnect receipt from c.input.
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/disconnect.go:69 +0x7aa
+main.main()
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo_examples/ackmode/clientindividual01-hang.txt/clientindividual01-hang.go:118 +0x15a5
+
+goroutine 17 [syscall, locked to thread]:
+runtime.goexit()
+	/ad3/gma/gorepo/github/go/src/runtime/asm_amd64.s:1671 +0x1
+
+goroutine 6 [chan send (nil chan)]:
+github.com/gmallard/stompngo.(*Connection).reader(0xc20808a000)
+
+//**INFO** Attempting to put data onto the subscribe unique MessageData
+// channel.  Holds the lock.
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/reader.go:55 +0x59d
+created by github.com/gmallard/stompngo.Connect
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/connect.go:111 +0xaee
+
+rax    0xca
+rbx    0x0
+rcx    0xffffffffffffffff
+rdx    0x0
+rdi    0x6cce70
+rsi    0x0
+rbp    0x1
+rsp    0x7ffd31e440f8
+r8     0x0
+r9     0x0
+r10    0x0
+r11    0x286
+r12    0xffffffffffffffff
+r13    0xc208010780
+r14    0x3
+r15    0x0
+rip    0x455211
+rflags 0x286
+cs     0x33
+fs     0x0
+gs     0x0
+exit status 2
++ set +x
+

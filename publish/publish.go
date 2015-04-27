@@ -47,7 +47,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
+	// "time"
 	//
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo_examples/sngecomm"
@@ -93,7 +93,7 @@ func main() {
 		//		time.Sleep(125 * time.Millisecond) // DB OK
 		//		time.Sleep(250 * time.Millisecond) // DB OK
 		//		time.Sleep(500 * time.Millisecond) // DB OK
-		time.Sleep(2 * time.Minute)
+		// time.Sleep(2 * time.Minute)
 	}
 
 	// Disconnect from the Stomp server

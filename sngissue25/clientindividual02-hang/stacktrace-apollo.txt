@@ -1,0 +1,76 @@
+// This is a hang.  Ctrl-\ required for stack trace.
+
+Payload: publish:  message: 10
+Ending ACK 10
+^\SIGQUIT: quit
+PC=0x4550a1 m=0
+
+goroutine 0 [idle]:
+runtime.futex(0x6cbe70, 0x0, 0x0, 0x0, 0x0, 0x6cb9c0, 0x0, 0x0, 0x40e69d, 0x6cbe70, ...)
+	/ad3/gma/gorepo/github/go/src/runtime/sys_linux_amd64.s:299 +0x21
+runtime.futexsleep(0x6cbe70, 0x0, 0xffffffffffffffff)
+	/ad3/gma/gorepo/github/go/src/runtime/os1_linux.go:40 +0x5b
+runtime.notesleep(0x6cbe70)
+	/ad3/gma/gorepo/github/go/src/runtime/lock_futex.go:142 +0xad
+runtime.stopm()
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1054 +0x128
+runtime.findrunnable(0xc208020000)
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1395 +0x549
+runtime.schedule()
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1494 +0x1f0
+runtime.park_m(0xc208000120)
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1553 +0x1a4
+runtime.mcall(0x7fff8db09820)
+	/ad3/gma/gorepo/github/go/src/runtime/asm_amd64.s:204 +0x5e
+
+goroutine 1 [semacquire]:
+sync.runtime_Semacquire(0xc20808a0b4)
+	/ad3/gma/gorepo/github/go/src/runtime/sema.go:43 +0x2d
+sync.(*Mutex).Lock(0xc20808a0b0)
+	/ad3/gma/gorepo/github/go/src/sync/mutex.go:82 +0x1c9
+github.com/gmallard/stompngo.(*Connection).shutdown(0xc20808a000)
+
+//**INFO** Trying to obtain subsLock during shutdown
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/connection.go:206 +0x268
+github.com/gmallard/stompngo.(*Connection).Disconnect(0xc20808a000, 0x6eeee0, 0x0, 0x0, 0x0, 0x0)
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/disconnect.go:65 +0x75b
+main.main()
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo_examples/ackmode/clientindividual02-hang/clientindividual02-hang.go:113 +0x143a
+
+goroutine 17 [syscall, locked to thread]:
+runtime.goexit()
+	/ad3/gma/gorepo/github/go/src/runtime/asm_amd64.s:1671 +0x1
+
+goroutine 6 [chan send]:
+github.com/gmallard/stompngo.(*Connection).reader(0xc20808a000)
+
+//**INFO** Trying to send to the subscription unique MessageData channel.
+// Holds the lock.
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/reader.go:55 +0x59d
+created by github.com/gmallard/stompngo.Connect
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/connect.go:111 +0xaee
+
+rax    0xca
+rbx    0x0
+rcx    0xffffffffffffffff
+rdx    0x0
+rdi    0x6cbe70
+rsi    0x0
+rbp    0x1
+rsp    0x7fff8db09698
+r8     0x0
+r9     0x0
+r10    0x0
+r11    0x286
+r12    0xffffffffffffffff
+r13    0xc208010780
+r14    0x3
+r15    0x0
+rip    0x4550a1
+rflags 0x286
+cs     0x33
+fs     0x0
+gs     0x0
+exit status 2
++ set +x
+

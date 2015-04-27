@@ -1,0 +1,81 @@
+Starting final ACK
+Ending final ACK
+^\SIGQUIT: quit
+PC=0x4552e1 m=0
+
+goroutine 0 [idle]:
+runtime.futex(0x6cce70, 0x0, 0x0, 0x0, 0x0, 0x6cc9c0, 0x0, 0x0, 0x40e8dd, 0x6cce70, ...)
+	/ad3/gma/gorepo/github/go/src/runtime/sys_linux_amd64.s:299 +0x21
+runtime.futexsleep(0x6cce70, 0x0, 0xffffffffffffffff)
+	/ad3/gma/gorepo/github/go/src/runtime/os1_linux.go:40 +0x5b
+runtime.notesleep(0x6cce70)
+	/ad3/gma/gorepo/github/go/src/runtime/lock_futex.go:142 +0xad
+runtime.stopm()
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1054 +0x128
+runtime.findrunnable(0xc208020000)
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1395 +0x549
+runtime.schedule()
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1494 +0x1f0
+runtime.park_m(0xc208000120)
+	/ad3/gma/gorepo/github/go/src/runtime/proc1.go:1553 +0x1a4
+runtime.mcall(0x7ffc45cd3230)
+	/ad3/gma/gorepo/github/go/src/runtime/asm_amd64.s:204 +0x5e
+
+goroutine 1 [semacquire]:
+sync.runtime_Semacquire(0xc20808a0b4)
+	/ad3/gma/gorepo/github/go/src/runtime/sema.go:43 +0x2d
+sync.(*Mutex).Lock(0xc20808a0b0)
+	/ad3/gma/gorepo/github/go/src/sync/mutex.go:82 +0x1c9
+github.com/gmallard/stompngo.(*Connection).Unsubscribe(0xc20808a000, 0xc208011e80, 0x2, 0x2, 0x0, 0x0)
+
+//*INFO* Trying to obtain stompngo.Connection.subsLock.
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/unsubscribe.go:52 +0x4a1
+github.com/gmallard/stompngo_examples/sngecomm.Unsubscribe(0xc20808a000, 0xc20800e00b, 0x16, 0xc20800e900, 0x24)
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo_examples/sngecomm/sngecomm.go:449 +0x2e0
+main.main()
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo_examples/ackmode/client01-hang/client01-hang.go:119 +0x14ec
+
+goroutine 17 [syscall, locked to thread]:
+runtime.goexit()
+	/ad3/gma/gorepo/github/go/src/runtime/asm_amd64.s:1671 +0x1
+
+goroutine 5 [select]:
+github.com/gmallard/stompngo.(*Connection).writer(0xc20808a000)
+
+//*INFO* Just waiting for more work or shutdown.
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/writer.go:33 +0x2d1
+created by github.com/gmallard/stompngo.Connect
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/connect.go:93 +0x80b
+
+goroutine 6 [chan send]:
+github.com/gmallard/stompngo.(*Connection).reader(0xc20808a000)
+
+//*INFO* Trying to send to a subscription unique MessageData channel
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/reader.go:55 +0x59d
+created by github.com/gmallard/stompngo.Connect
+	/ad3/gma/gosrc/src/github.com/gmallard/stompngo/connect.go:111 +0xaee
+
+rax    0xca
+rbx    0x0
+rcx    0xffffffffffffffff
+rdx    0x0
+rdi    0x6cce70
+rsi    0x0
+rbp    0x1
+rsp    0x7ffc45cd30a8
+r8     0x0
+r9     0x0
+r10    0x0
+r11    0x286
+r12    0xffffffffffffffff
+r13    0xc208010780
+r14    0x3
+r15    0x0
+rip    0x4552e1
+rflags 0x286
+cs     0x33
+fs     0x0
+gs     0x0
+exit status 2
++ set +x
+
