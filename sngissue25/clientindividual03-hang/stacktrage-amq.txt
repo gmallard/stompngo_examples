@@ -1,0 +1,19 @@
+// No stack trace.  This works.
+
+Ending ACK 9
+subscribe: channel read complete ...
+Frame Type: MESSAGE
+Header: message-id:ID:tjjackson-48283-1430443370792-2:1:-1:1:10
+Header: destination:/queue/client03-hang.1
+Header: timestamp:1430443478575
+Header: expires:0
+Header: subscription:c42649f8-cba8-4d8b-b72d-6db49ab6869a
+Header: persistent:true
+Header: content-length:21
+Header: priority:4
+Payload: publish:  message: 10
+Ending ACK 10
+subscribe: network close complete ...
+subscribe: ends ...
++ set +x
+

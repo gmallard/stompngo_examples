@@ -1,0 +1,22 @@
+// No stacktrace here.  This works.
+
+Header: subscription:3b7b7da5-aeaf-4a65-ab16-507b0f48ff3a
+Header: destination:/queue/client03-hang.1
+Header: message-id:T_3b7b7da5-aeaf-4a65-ab16-507b0f48ff3a@@session-5AFFbmPffUyFuTirBpVPWA@@9
+Header: persistent:true
+Header: content-length:20
+Payload: publish:  message: 9
+subscribe: channel read complete ...
+Frame Type: MESSAGE
+Header: subscription:3b7b7da5-aeaf-4a65-ab16-507b0f48ff3a
+Header: destination:/queue/client03-hang.1
+Header: message-id:T_3b7b7da5-aeaf-4a65-ab16-507b0f48ff3a@@session-5AFFbmPffUyFuTirBpVPWA@@10
+Header: persistent:true
+Header: content-length:21
+Payload: publish:  message: 10
+Starting final ACK
+Ending final ACK
+subscribe: network close complete ...
+subscribe: ends ...
++ set +x
+

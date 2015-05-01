@@ -1,0 +1,17 @@
+// No stacktrace here.  This works.
+
+Header: message-id:ID:tjjackson-60409-1430442554070-2:1:-1:1:10
+Header: destination:/queue/client03-hang.1
+Header: timestamp:1430442646892
+Header: expires:0
+Header: subscription:8959676d-ed3e-426a-9421-fcf02dc5a10c
+Header: persistent:true
+Header: content-length:21
+Header: priority:4
+Payload: publish:  message: 10
+Starting final ACK
+Ending final ACK
+subscribe: network close complete ...
+subscribe: ends ...
++ set +x
+

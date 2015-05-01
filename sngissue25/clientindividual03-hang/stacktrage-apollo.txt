@@ -1,0 +1,23 @@
+// No stack trace.  This works.
+
+Frame Type: MESSAGE
+Header: subscription:1b364add-1ae4-492b-b29d-5e406539ee9c
+Header: message-id:broker-19
+Header: destination:/queue/client03-hang.1
+Header: persistent:true
+Header: content-length:20
+Payload: publish:  message: 9
+Ending ACK 9
+subscribe: channel read complete ...
+Frame Type: MESSAGE
+Header: subscription:1b364add-1ae4-492b-b29d-5e406539ee9c
+Header: message-id:broker-110
+Header: destination:/queue/client03-hang.1
+Header: persistent:true
+Header: content-length:21
+Payload: publish:  message: 10
+Ending ACK 10
+subscribe: network close complete ...
+subscribe: ends ...
++ set +x
+

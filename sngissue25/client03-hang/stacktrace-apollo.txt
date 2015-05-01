@@ -1,0 +1,14 @@
+// No stacktrace here.  This works.
+
+Header: subscription:7d9c994c-35b3-4e3c-9dd2-5e9dffe52b44
+Header: message-id:broker-110
+Header: destination:/queue/client03-hang.1
+Header: persistent:true
+Header: content-length:21
+Payload: publish:  message: 10
+Starting final ACK
+Ending final ACK
+subscribe: network close complete ...
+subscribe: ends ...
++ set +x
+
