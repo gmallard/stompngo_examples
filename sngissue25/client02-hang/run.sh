@@ -16,7 +16,7 @@ port=61613 # ActiveMQ Here
 vh=localhost # OK for AMQ or Apollo
 #vh=/ # OK for RMQ
 #
-STOMP_NMSGS=$npms STOMP_VHOST=$vh STOMP_PORT=$port STOMP_PROTOCOL=$proto STOMP_DEST=/queue/client01-hang.1 go run $basic/publish/publish.go
-STOMP_NMSGS=$ncms STOMP_VHOST=$vh STOMP_PORT=$port STOMP_PROTOCOL=$proto STOMP_DEST=/queue/client01-hang.1 go run client02-hang.go
+STOMP_NMSGS=$npms STOMP_VHOST=$vh STOMP_PORT=$port STOMP_PROTOCOL=$proto STOMP_DEST=/queue/client02-hang.1 go run $basic/publish/publish.go
+STOMP_NMSGS=$ncms STOMP_VHOST=$vh STOMP_PORT=$port STOMP_PROTOCOL=$proto STOMP_DEST=/queue/client02-hang.1 go run client02-hang.go
 set +x
 
