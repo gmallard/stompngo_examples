@@ -411,6 +411,10 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 // Handle a subscribe for the different protocol levels.
 func Subscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.MessageData {
 	h := stompngo.Headers{"destination", d, "ack", a}
+	f := os.Getenv("STOMP_DRAIN")
+	if f != "" {
+		h = h.Add("subdrain", "true")
+	}
 	//
 	switch c.Protocol() {
 	case stompngo.SPL_12:

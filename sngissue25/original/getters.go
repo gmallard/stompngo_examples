@@ -22,6 +22,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"net"
 	//
 	"github.com/gmallard/stompngo"
@@ -81,12 +82,16 @@ func runApp(c *stompngo.Connection) {
 		cqs := fmt.Sprintf("%d", cq)
 		nqn := qbase + cqs // Next queue name
 		fmt.Println(exampid+"next queue name ...", nqn)
-		id := stompngo.Uuid()
+//		id := stompngo.Uuid()
+		id := "Q" + cqs
 		fmt.Println(exampid+"next queue id ...", id)
 		// Subscribe
 		sh := stompngo.Headers{"destination", nqn,
 			"id", id,
 			"ack", "client"}
+		if os.Getenv("STOMP_DRAIN") != "" {
+			sh = sh.Add("subdrain", "yep")
+		}
 		mdc, e := c.Subscribe(sh)
 		if e != nil {
 			log.Fatalln(exampid+"fatal subscribe", e)
