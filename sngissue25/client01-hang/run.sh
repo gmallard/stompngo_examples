@@ -2,6 +2,8 @@
 #
 set -x
 . ../shbasic
+#
+opts="--race"
 # Number of messages to send
 npms=100
 # Number of messages to consume
@@ -17,7 +19,6 @@ port=61613 # ActiveMQ Here
 vh=localhost # OK for AMQ or Apollo
 #vh=/ # OK for RMQ
 #
-STOMP_NMSGS=$npms STOMP_VHOST=$vh STOMP_PORT=$port STOMP_PROTOCOL=$proto STOMP_DEST=/queue/client01-hang.1 go run $basic/publish/publish.go
-STOMP_DRAIN=yes STOMP_NMSGS=$ncms STOMP_VHOST=$vh STOMP_PORT=$port STOMP_PROTOCOL=$proto STOMP_DEST=/queue/client01-hang.1 go run client01-hang.go
+STOMP_NMSGS=$npms STOMP_VHOST=$vh STOMP_PORT=$port STOMP_PROTOCOL=$proto STOMP_DEST=/queue/client01-hang.1 go run $opts $basic/publish/publish.go
+STOMP_DRAIN=yes STOMP_NMSGS=$ncms STOMP_VHOST=$vh STOMP_PORT=$port STOMP_PROTOCOL=$proto STOMP_DEST=/queue/client01-hang.1 go run $opts client01-hang.go
 set +x
-
