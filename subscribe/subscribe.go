@@ -72,6 +72,8 @@ func main() {
 	}
 	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
+	pbc := sngecomm.Pbc() // Print byte count
+
 	fmt.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.
@@ -86,6 +88,7 @@ func main() {
 	for i := 1; i <= sngecomm.Nmsgs(); i++ {
 		m := <-r
 		fmt.Println(exampid + "channel read complete ...")
+		fmt.Println("Message Number:", i)
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
@@ -101,7 +104,14 @@ func main() {
 		for j := 0; j < len(h)-1; j += 2 {
 			fmt.Printf("Header: %s:%s\n", h[j], h[j+1])
 		}
-		fmt.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
+		if pbc > 0 {
+			maxlen := pbc
+			if len(m.Message.Body) < maxlen {
+				maxlen = len(m.Message.Body)
+			}
+			ss := string(m.Message.Body[0:maxlen])
+			fmt.Printf("Payload: %s\n", ss) // Data payload
+		}
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
 	// Again we use a utility routine to handle the different protocol level

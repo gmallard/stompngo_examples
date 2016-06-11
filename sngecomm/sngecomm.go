@@ -50,6 +50,8 @@ var (
 	mdml  = 1024 * 32                  // Message data max length of variable message, 32K
 	md    = make([]byte, 1)            // Additional message data, primed during init()
 	rc    = 1                          // Receiver connection count, srmgor_1smrconn
+	pbc   = 64                         // Number of bytes to print (used in some
+	// 																 // examples that receive).
 	//
 	sendFact float64 = 1.0 // Send sleep time factor
 	recvFact float64 = 1.0 // Receive sleep time factor
@@ -117,6 +119,13 @@ func init() {
 	if hbp := os.Getenv("STOMP_HBPARMS"); hbp != "" {
 		hbparms = hbp
 	}
+	//
+	if s := os.Getenv("STOMP_PBC"); s != "" {
+		i, e := strconv.ParseInt(s, 10, 32)
+		if e == nil {
+			pbc = int(i)
+		}
+	}
 }
 
 // Receiver connection count
@@ -172,6 +181,11 @@ func Protocol() string {
 		protocol = p
 	}
 	return protocol
+}
+
+// Print Byte Count
+func Pbc() int {
+	return pbc
 }
 
 // Override Host and port for Dial if requested.
