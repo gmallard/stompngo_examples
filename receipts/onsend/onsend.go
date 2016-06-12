@@ -1,5 +1,5 @@
 //
-// Copyright © 2015 Guy M. Allard
+// Copyright © 2015-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ Show receiving a RECIPT, requested from a SEND.
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	//
@@ -51,29 +50,29 @@ import (
 var exampid = "onsend: "
 
 func main() {
-	fmt.Println(exampid + "starts ...")
+	log.Println(exampid + "starts ...")
 
 	// ****************************************
 	// Set up the connection.
 	h, p := sngecomm.HostAndPort()
-	fmt.Println(exampid+"host", h, "port", p)
+	log.Println(exampid+"host", h, "port", p)
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "dial complete ...")
+	log.Println(exampid + "dial complete ...")
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
+	log.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
 	// ****************************************
 	// App logic here .....
 
 	// Prep
-	fmt.Println(sngecomm.ExampIdNow(exampid), "dest:", sngecomm.Dest())
+	log.Println(sngecomm.ExampIdNow(exampid), "dest:", sngecomm.Dest())
 
 	// ****************************************
 	// Send exactly one message.  Ask for a receipt.
@@ -82,40 +81,40 @@ func main() {
 	rid := "1" // The receipt ID
 	m := exampid + " message: "
 	t := m + rid
-	fmt.Println(sngecomm.ExampIdNow(exampid), "sending now:", t)
+	log.Println(sngecomm.ExampIdNow(exampid), "sending now:", t)
 	e = conn.Send(s, t)
 	if e != nil {
 		log.Fatalln("bad send", e) // Handle this ...
 	}
-	fmt.Println(sngecomm.ExampIdNow(exampid), "send complete:", t)
+	log.Println(sngecomm.ExampIdNow(exampid), "send complete:", t)
 
 	// ****************************************
 	// OK, here we are looking for a RECEIPT.
 	// The MessageData struct of the receipt will be on the connection
 	// level MessageData channel.
-	fmt.Println(sngecomm.ExampIdNow(exampid), "start receipt read")
+	log.Println(sngecomm.ExampIdNow(exampid), "start receipt read")
 
 	// ****************************************
 	// ***IMPORTANT***
 	// ***NOTE*** which channel this RECEIPT MessageData comes in on.
 	r := <-conn.MessageData
-	fmt.Println(sngecomm.ExampIdNow(exampid), "end receipt read")
+	log.Println(sngecomm.ExampIdNow(exampid), "end receipt read")
 
 	// ****************************************
 	// Show stuff about the RECEIPT MessageData struct
-	fmt.Println(sngecomm.ExampIdNow(exampid), "COMMAND", r.Message.Command)
-	fmt.Println(sngecomm.ExampIdNow(exampid), "HEADERS", r.Message.Headers)
-	fmt.Println(sngecomm.ExampIdNow(exampid), "BODY", string(r.Message.Body))
+	log.Println(sngecomm.ExampIdNow(exampid), "COMMAND", r.Message.Command)
+	log.Println(sngecomm.ExampIdNow(exampid), "HEADERS", r.Message.Headers)
+	log.Println(sngecomm.ExampIdNow(exampid), "BODY", string(r.Message.Body))
 
 	// ****************************************
 	// Get the returned ID.
 	irid := r.Message.Headers.Value("receipt-id")
-	fmt.Println(sngecomm.ExampIdNow(exampid), "irid", irid)
+	log.Println(sngecomm.ExampIdNow(exampid), "irid", irid)
 	// Check that it matches what we asked for
 	if rid != irid {
 		log.Fatalln("notsame", rid, irid) // Handle this ......
 	}
-	fmt.Println(sngecomm.ExampIdNow(exampid), "validation complete")
+	log.Println(sngecomm.ExampIdNow(exampid), "validation complete")
 
 	// ****************************************
 	// Disconnect from the Stomp server
@@ -123,14 +122,14 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp disconnect complete ...")
+	log.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "network close complete ...")
+	log.Println(exampid + "network close complete ...")
 
-	fmt.Println(exampid + "ends ...")
+	log.Println(exampid + "ends ...")
 
 }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2011-2015 Guy M. Allard
+// Copyright © 2011-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@
 // All senders and receivers use the same Stomp connection.
 
 /*
-Output can demonstrate different broker's algorithms for balancing messages across
-multiple subscriptions to the same queue.  In this example all subscriptions
-share the same connection/session.
+Outputs to demonstrate different broker's algorithms for balancing messages across
+multiple subscriptions to the same queue.  (One go routine per subscription). In
+this example all subscriptions share the same connection/session.  The actual
+results can / will likely be slightly surprising.  YMMV.
 
 Prime the queue for this demonstration using publish.go.
 
@@ -44,11 +45,9 @@ Prime the queue for this demonstration using publish.go.
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"runtime"
-	"sync"
 	"time"
 	//
 	"github.com/gmallard/stompngo"
@@ -57,47 +56,56 @@ import (
 
 var (
 	exampid = "recv_mds: "
-	ns      = 4 // Number of subscriptions
-	wgrecv  sync.WaitGroup
-	n       net.Conn                     // Network Connection
-	conn    *stompngo.Connection         // Stomp Connection
-	ack     bool                 = false // ack mode control
+	ns      = 4                           // Number of subscriptions
+	n       net.Conn                      // Network Connection
+	conn    *stompngo.Connection          // Stomp Connection
+	ackMode string               = "auto" // ackMode control
 	port    string
 )
 
 func recv(s int) {
+	log.Println(exampid, "receiver", s, "starts")
 	// Setup Headers ...
 	id := stompngo.Uuid() // Use package convenience function for unique ID
 	d := sngecomm.Dest()
+	ackMode = sngecomm.AckMode() // get ack mode
+
+	pbc := sngecomm.Pbc() // Print byte count
+
 	var r <-chan stompngo.MessageData
-	if ack {
-		r = sngecomm.Subscribe(conn, d, id, "client-individual")
-	} else {
-		r = sngecomm.Subscribe(conn, d, id, "auto")
-	}
+	r = sngecomm.Subscribe(conn, d, id, ackMode)
 	// Receive loop
+	mc := 0
 	for {
 		d := <-r // Read a messagedata struct
+		mc++
 		if d.Error != nil {
 			panic(d.Error)
 		}
-		m := d.Message.BodyString()
-		fmt.Println(exampid, "subnumber", s, m, id)
+		log.Println(exampid, "subnumber", s, id, mc)
+		if pbc > 0 {
+			maxlen := pbc
+			if len(d.Message.Body) < maxlen {
+				maxlen = len(d.Message.Body)
+			}
+			ss := string(d.Message.Body[0:maxlen])
+			log.Printf("Payload: %s\n", ss) // Data payload
+		}
+
+		time.Sleep(3 * time.Second)
 		runtime.Gosched()
-		time.Sleep(1 * time.Second)
-		if ack {
+		if ackMode != "auto" {
 			sngecomm.Ack(conn, d.Message.Headers, id)
-			fmt.Println(exampid + "ACK complete ...")
+			log.Println(exampid + "ACK complete ...")
 		}
 		runtime.Gosched()
 	}
-	wgrecv.Done() // Never get here, cancel via ^C
 }
 
-// Connect to a STOMP broker, receive and ack some messages.
+// Connect to a STOMP broker, receive and ackMode some messages.
 // Disconnect never occurs, kill via ^C.
 func main() {
-	fmt.Println(exampid, "starts ...")
+	log.Println(exampid, "starts ...")
 
 	// Set up the connection.
 	h, port := sngecomm.HostAndPort() //
@@ -105,20 +113,19 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid, "dial complete ...")
+	log.Println(exampid, "dial complete ...")
 	ch := sngecomm.ConnectHeaders()
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid, "stomp connect complete ...", conn.Protocol())
+	log.Println(exampid, "stomp connect complete ...", conn.Protocol())
 
-	wgrecv.Add(ns) // Number of subscriptions, hard coded in this demonstartion
 	for i := 1; i <= ns; i++ {
 		go recv(i)
 	}
-	fmt.Println(exampid, "receivers started ...")
+	log.Println(exampid, ns, "receivers started ...")
 
-	wgrecv.Wait() // This will never complete, use ^C to cancel
+	select {} // This will never complete, use ^C to cancel
 
 }
