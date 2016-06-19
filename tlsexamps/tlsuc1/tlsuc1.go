@@ -67,14 +67,15 @@ func main() {
 	// Connect logic: use net.Dial and tls.Client
 	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("nedDiat", e) // Handle this ......
 	}
 	log.Println(exampid, "dial complete ...")
 	n := tls.Client(t, testConfig)
 	e = n.Handshake()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("netHandshake", e) // Handle this ......
 	}
+	log.Println(exampid, "handshake complete ...")
 
 	sngecomm.DumpTLSConfig(exampid, testConfig, n)
 
@@ -86,7 +87,7 @@ func main() {
 	// b) the connect Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("sngConnect", e) // Handle this ......
 	}
 	log.Println(exampid, "stomp connect complete ...")
 
@@ -96,14 +97,14 @@ func main() {
 	// Empty headers here.
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("sngDisconnect", e) // Handle this ......
 	}
 	log.Println(exampid, "stomp disconnect complete ...")
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("netClose", e) // Handle this ......
 	}
 	log.Println(exampid, "network close complete ...")
 

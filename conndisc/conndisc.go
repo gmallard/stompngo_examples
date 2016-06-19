@@ -63,7 +63,7 @@ func main() {
 	log.Println(exampid+"will dial ...", jhp)
 	n, e := net.Dial("tcp", jhp)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("netdial", e) // Handle this ......
 	}
 	log.Println(exampid + "dial complete ...")
 
@@ -76,7 +76,7 @@ func main() {
 	// b) the Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("sngConnect", e) // Handle this ......
 	}
 	log.Println(exampid+"stomp connect complete, protocol level is:", conn.Protocol())
 
@@ -94,7 +94,7 @@ func main() {
 	// Empty headers here for the DISCONNECT
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("sngDisconnect", e) // Handle this ......
 	}
 	log.Println(exampid + "stomp disconnect complete ...")
 
