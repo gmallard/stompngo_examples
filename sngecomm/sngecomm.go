@@ -412,10 +412,26 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 	}
 	fmt.Println(ExampIdNow(exampid), "Server Certs:")
 	for i, cert := range certs {
-		fmt.Printf("Certificate chain:%d\n", i)
-		fmt.Printf("Common Name:%s\n", cert.Subject.CommonName)
-		fmt.Printf("Alternate Name:%v\n", cert.DNSNames)
-		fmt.Printf("Valid Not Before:%s\n", cert.NotBefore.Local().String())
+		fmt.Printf("Certificate chain: %d\n", i)
+		fmt.Printf("Common Name:%s \n", cert.Subject.CommonName)
+		//
+		fmt.Printf("Subject Alternative Names (DNSNames):\n")
+		for idx, dnsn := range cert.DNSNames {
+			fmt.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, dnsn)
+		}
+		//
+		fmt.Printf("Subject Alternative Names (Emailaddresses):\n")
+		for idx, enn := range cert.EmailAddresses {
+			fmt.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, enn)
+		}
+		//
+		fmt.Printf("Subject Alternative Names (IPAddresses):\n")
+		for idx, ipadn := range cert.IPAddresses {
+			fmt.Printf("\tNumber: %d, DNS Name: %v\n", idx+1, ipadn)
+		}
+		//
+		fmt.Printf("Valid Not Before: %s\n", cert.NotBefore.Local().String())
+		fmt.Printf("Valid Not After: %s\n", cert.NotAfter.Local().String())
 		fmt.Println("" + strings.Repeat("=", 80) + "\n")
 	}
 
