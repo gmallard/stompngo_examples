@@ -140,6 +140,16 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 			log.Fatalln("Bad Headers", d.Message.Headers, qns, mns)
 		}
 
+		sl := len(d.Message.Body)
+		if pbc > 0 {
+			sl = pbc
+			if len(d.Message.Body) < sl {
+				sl = len(d.Message.Body)
+			}
+		}
+
+		log.Println(sngecomm.ExampIdNow(exampid), "recv message", string(d.Message.Body[0:sl]), qns, d.Message.Headers.Value("msgnum"))
+
 		// Handle ACKs if needed
 		if sngecomm.AckMode() != "auto" {
 			ah := []string{}
