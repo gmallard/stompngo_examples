@@ -1,5 +1,5 @@
 //
-// Copyright © 2011-2015 Guy M. Allard
+// Copyright © 2011-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ A message receiver, to demonstrate JMS interoperability.
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	//
@@ -29,24 +28,24 @@ import (
 
 var exampid = "gorecv: "
 
-var nmsgs = 5
+var nmsgs = 1
 
 // Connect to a STOMP 1.1 broker, receive some messages and disconnect.
 func main() {
-	fmt.Println(exampid + "starts ...")
+	log.Println(exampid + "starts ...")
 
 	// Set up the connection.
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "dial complete ...")
+	log.Println(exampid + "dial complete ...")
 	eh := stompngo.Headers{"login", "userr", "passcode", "passw0rd"}
 	conn, e := stompngo.Connect(n, eh)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...")
+	log.Println(exampid + "stomp connect complete ...")
 
 	// Setup Headers ...
 	u := stompngo.Uuid() // Use package convenience function for unique ID
@@ -58,11 +57,11 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ...
 	}
-	fmt.Println(exampid + "stomp subscribe complete ...")
+	log.Println(exampid + "stomp subscribe complete ...")
 	// Read data from the returned channel
 	for i := 1; i <= nmsgs; i++ {
 		m := <-r
-		fmt.Println(exampid + "channel read complete ...")
+		log.Println(exampid + "channel read complete ...")
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
@@ -70,12 +69,12 @@ func main() {
 			log.Fatalln(m.Error) // Handle this
 		}
 		//
-		fmt.Printf("Frame Type: %s\n", m.Message.Command) // Will be MESSAGE or ERROR!
+		log.Printf("Frame Type: %s\n", m.Message.Command) // Will be MESSAGE or ERROR!
 		h := m.Message.Headers
 		for j := 0; j < len(h)-1; j += 2 {
-			fmt.Printf("Header: %s:%s\n", h[j], h[j+1])
+			log.Printf("Header: %s:%s\n", h[j], h[j+1])
 		}
-		fmt.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
+		log.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
 	// With Stomp 1.1, the same unique ID is required on UNSUBSCRIBE.  Failure
@@ -84,7 +83,7 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ...
 	}
-	fmt.Println(exampid + "stomp unsubscribe complete ...")
+	log.Println(exampid + "stomp unsubscribe complete ...")
 
 	// Disconnect from the Stomp server
 	eh = stompngo.Headers{}
@@ -92,13 +91,13 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp disconnect complete ...")
+	log.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "network close complete ...")
+	log.Println(exampid + "network close complete ...")
 
-	fmt.Println(exampid + "ends ...")
+	log.Println(exampid + "ends ...")
 }

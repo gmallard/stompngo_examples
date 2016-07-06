@@ -1,5 +1,5 @@
 //
-// Copyright © 2013-2015 Guy M. Allard
+// Copyright © 2013-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ package main
 
 import (
 	"crypto/tls"
-	"fmt"
 	"log"
 	"net"
 	//
@@ -45,7 +44,7 @@ var (
 
 // Connect to a STOMP 1.0 broker using TLS and disconnect.
 func main() {
-	fmt.Println(exampid + "starts ...")
+	log.Println(exampid + "starts ...")
 
 	// TLS Configuration.  This configuration assumes that:
 	// a) The server used does *not* require client certificates
@@ -63,7 +62,7 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "dial complete ...")
+	log.Println(exampid + "dial complete ...")
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
@@ -76,7 +75,7 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp connect complete ...")
+	log.Println(exampid + "stomp connect complete ...")
 
 	// *NOTE* your application functionaltiy goes here!
 
@@ -86,14 +85,14 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp disconnect complete ...")
+	log.Println(exampid + "stomp disconnect complete ...")
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "network close complete ...")
+	log.Println(exampid + "network close complete ...")
 
-	fmt.Println(exampid + "ends ...")
+	log.Println(exampid + "ends ...")
 }

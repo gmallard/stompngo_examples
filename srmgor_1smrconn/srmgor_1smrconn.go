@@ -1,5 +1,5 @@
 //
-// Copyright © 2014-2015 Guy M. Allard
+// Copyright © 2014-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -108,31 +108,28 @@ runReceive receives all messages from a specified queue.
 func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 	qns := fmt.Sprintf("%d", q) // queue number
 	id := stompngo.Uuid()       // A unique subscription ID
-	fmt.Println(sngecomm.ExampIdNow(exampid), id, "runReceive starts", qns)
+	log.Println(sngecomm.ExampIdNow(exampid), id, "runReceive starts", qns)
 	//
 	qp := sngecomm.Dest() // queue name prefix
 	qname := qp + "." + qns
-	fmt.Println(sngecomm.ExampIdNow(exampid), id, "runReceive queue name:", qname, qns)
+	log.Println(sngecomm.ExampIdNow(exampid), id, "runReceive queue name:", qname, qns)
 	// Subscribe (use common helper)
 	r := sngecomm.Subscribe(conn, qname, id, sngecomm.AckMode())
 	//
 	tmr := time.NewTimer(100 * time.Hour)
 
+	pbc := sngecomm.Pbc() // Print byte count
+
 	// Receive loop
 	for m := 1; m <= sngecomm.Nmsgs(); m++ {
-		fmt.Println(sngecomm.ExampIdNow(exampid), id, "runReceive chanchek", "q", qns, "len", len(r), "cap", cap(r))
+		log.Println(sngecomm.ExampIdNow(exampid), id, "runReceive chanchek", "q", qns, "len", len(r), "cap", cap(r))
 		d := <-r
 		if d.Error != nil {
 			log.Fatalln(sngecomm.ExampIdNow(exampid), id, "runReceive error", d.Error, qns)
 		}
 
 		// Process the inbound message .................
-		osl := lhl
-		if len(d.Message.Body) < osl {
-			osl = len(d.Message.Body)
-		}
-		os := string(d.Message.Body[0:osl])
-		fmt.Println(sngecomm.ExampIdNow(exampid), id, "runReceive message", os, qns, m)
+		log.Println(sngecomm.ExampIdNow(exampid), id, "recv message", qns, m)
 
 		// Sanity check the message Command, and the queue and message numbers
 		mns := fmt.Sprintf("%d", m) // message number
@@ -142,6 +139,16 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 		if !d.Message.Headers.ContainsKV("qnum", qns) || !d.Message.Headers.ContainsKV("msgnum", mns) {
 			log.Fatalln("Bad Headers", d.Message.Headers, qns, mns)
 		}
+
+		sl := len(d.Message.Body)
+		if pbc > 0 {
+			sl = pbc
+			if len(d.Message.Body) < sl {
+				sl = len(d.Message.Body)
+			}
+		}
+
+		log.Println(sngecomm.ExampIdNow(exampid), "recv message", string(d.Message.Body[0:sl]), qns, d.Message.Headers.Value("msgnum"))
 
 		// Handle ACKs if needed
 		if sngecomm.AckMode() != "auto" {
@@ -163,7 +170,7 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 		}
 		if recvWait {
 			d := time.Duration(sngecomm.ValueBetween(min, max, recvFact))
-			fmt.Println(sngecomm.ExampIdNow(exampid), id, "runReceive", "stagger", int64(d)/1000000, "ms", qns)
+			log.Println(sngecomm.ExampIdNow(exampid), id, "runReceive", "stagger", int64(d)/1000000, "ms", qns)
 			tmr.Reset(d)
 			_ = <-tmr.C
 			runtime.Gosched()
@@ -172,7 +179,7 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 	// Unsubscribe
 	sngecomm.Unsubscribe(conn, qname, id)
 
-	fmt.Println(sngecomm.ExampIdNow(exampid), "runReceive", "ends", q)
+	log.Println(sngecomm.ExampIdNow(exampid), "runReceive", "ends", q)
 	w.Done()
 }
 
@@ -180,7 +187,7 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 receiverConnection starts individual receivers for this connection.
 */
 func receiverConnection(conn *stompngo.Connection, cn, qpc int) {
-	fmt.Println(sngecomm.ExampIdNow(exampid), "receiverConnection", "starts", cn)
+	log.Println(sngecomm.ExampIdNow(exampid), "receiverConnection", "starts", cn)
 
 	cb := cn - 1
 	q1 := qpc*cb + 1
@@ -188,7 +195,7 @@ func receiverConnection(conn *stompngo.Connection, cn, qpc int) {
 	if ql > sngecomm.Nqs() {
 		ql = sngecomm.Nqs()
 	}
-	fmt.Println(sngecomm.ExampIdNow(exampid), "receiverConnection", "startq", q1, "endq", ql)
+	log.Println(sngecomm.ExampIdNow(exampid), "receiverConnection", "startq", q1, "endq", ql)
 	var wgrconn sync.WaitGroup
 	for q := q1; q <= ql; q++ {
 		wgrconn.Add(1)
@@ -196,7 +203,7 @@ func receiverConnection(conn *stompngo.Connection, cn, qpc int) {
 	}
 	wgrconn.Wait()
 	//
-	fmt.Println(sngecomm.ExampIdNow(exampid), "receiverConnection", "ends", cn)
+	log.Println(sngecomm.ExampIdNow(exampid), "receiverConnection", "ends", cn)
 	wgrecv.Done()
 }
 
@@ -216,7 +223,7 @@ func startReceivers() {
 	if qpc == 0 {
 		mr = 1
 	}
-	fmt.Println(sngecomm.ExampIdNow(exampid), "startReceivers", "mr", mr, "qpc", qpc)
+	log.Println(sngecomm.ExampIdNow(exampid), "startReceivers", "mr", mr, "qpc", qpc)
 	ncs := make([]net.Conn, 0)
 	cs := make([]*stompngo.Connection, 0)
 	for c := 1; c <= mr; c++ { // :-)
@@ -227,12 +234,12 @@ func startReceivers() {
 		go receiverConnection(conn, c, qpc)
 	}
 	wgrecv.Wait()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "startReceivers", "receives done")
+	log.Println(sngecomm.ExampIdNow(exampid), "startReceivers", "receives done")
 	//
 	for i := 0; i < len(ncs); i++ {
 		closeSconn(ncs[i], cs[i])
 	}
-	fmt.Println(sngecomm.ExampIdNow(exampid), "startReceivers", "finishes")
+	log.Println(sngecomm.ExampIdNow(exampid), "startReceivers", "finishes")
 	//
 	wgall.Done()
 }
@@ -243,7 +250,7 @@ runSender sends all messages to a specified queue.
 func runSender(conn *stompngo.Connection, qns string) {
 	qname := sngecomm.Dest() + "." + qns
 	id := stompngo.Uuid() // A unique sender id
-	fmt.Println(sngecomm.ExampIdNow(exampid), id, "send queue name:", qname)
+	log.Println(sngecomm.ExampIdNow(exampid), id, "send queue name:", qname)
 	h := stompngo.Headers{"destination", qname, "senderId", id,
 		"qnum", qns} // basic send Headers
 	tmr := time.NewTimer(100 * time.Hour)
@@ -252,7 +259,7 @@ func runSender(conn *stompngo.Connection, qns string) {
 		ms := fmt.Sprintf("%d", m)
 		sh := append(h, "msgnum", ms)
 		// Generate a message to send ...............
-		fmt.Println(sngecomm.ExampIdNow(exampid), id, "send message", qns, ms)
+		log.Println(sngecomm.ExampIdNow(exampid), id, "send message", qns, ms)
 		e := conn.Send(sh, string(sngecomm.Partial()))
 		if e != nil {
 			log.Fatalln(sngecomm.ExampIdNow(exampid), id, "send error", e, qns, ms)
@@ -262,7 +269,7 @@ func runSender(conn *stompngo.Connection, qns string) {
 		}
 		if sendWait {
 			d := time.Duration(sngecomm.ValueBetween(min, max, sendFact))
-			fmt.Println(sngecomm.ExampIdNow(exampid), id, "send", "stagger", int64(d)/1000000, "ms", qns, ms)
+			log.Println(sngecomm.ExampIdNow(exampid), id, "send", "stagger", int64(d)/1000000, "ms", qns, ms)
 			tmr.Reset(d)
 			_ = <-tmr.C
 			runtime.Gosched()
@@ -304,22 +311,22 @@ func main() {
 	}
 
 	start := time.Now()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "main starts")
-	fmt.Println(sngecomm.ExampIdNow(exampid), "main profiling", sngecomm.Pprof())
-	fmt.Println(sngecomm.ExampIdNow(exampid), "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+	log.Println(sngecomm.ExampIdNow(exampid), "main starts")
+	log.Println(sngecomm.ExampIdNow(exampid), "main profiling", sngecomm.Pprof())
+	log.Println(sngecomm.ExampIdNow(exampid), "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
-		fmt.Println(sngecomm.ExampIdNow(exampid), "main number of CPUs is:", nc)
+		log.Println(sngecomm.ExampIdNow(exampid), "main number of CPUs is:", nc)
 		c := runtime.GOMAXPROCS(nc)
-		fmt.Println(sngecomm.ExampIdNow(exampid), "main previous number of GOMAXPROCS is:", c)
-		fmt.Println(sngecomm.ExampIdNow(exampid), "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+		log.Println(sngecomm.ExampIdNow(exampid), "main previous number of GOMAXPROCS is:", c)
+		log.Println(sngecomm.ExampIdNow(exampid), "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	}
 	// Wait flags
 	sendWait = sngecomm.SendWait()
 	recvWait = sngecomm.RecvWait()
 	sendFact = sngecomm.SendFactor()
 	recvFact = sngecomm.RecvFactor()
-	fmt.Println(sngecomm.ExampIdNow(exampid), "main Sleep Factors", "send", sendFact, "recv", recvFact)
+	log.Println(sngecomm.ExampIdNow(exampid), "main Sleep Factors", "send", sendFact, "recv", recvFact)
 
 	wgall.Add(1)
 	go startReceivers()
@@ -329,5 +336,5 @@ func main() {
 
 	// The end
 	dur := time.Since(start)
-	fmt.Println(sngecomm.ExampIdNow(exampid), "main ends", dur)
+	log.Println(sngecomm.ExampIdNow(exampid), "main ends", dur)
 }

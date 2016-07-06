@@ -1,5 +1,5 @@
 //
-// Copyright © 2013-2015 Guy M. Allard
+// Copyright © 2013-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ Subscribe and receive messages from a STOMP broker.
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	//
@@ -56,7 +55,7 @@ var exampid = "subscribe: "
 
 // Connect to a STOMP broker, subscribe and receive some messages and disconnect.
 func main() {
-	fmt.Println(exampid + "starts ...")
+	log.Println(exampid + "starts ...")
 
 	// Set up the connection.
 	h, p := sngecomm.HostAndPort()
@@ -64,15 +63,17 @@ func main() {
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "dial complete ...")
+	log.Println(exampid + "dial complete ...")
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid+"stomp connect complete ...", conn.Protocol())
+	log.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
-	fmt.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
+	pbc := sngecomm.Pbc() // Print byte count
+
+	log.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.
 	// Subscribe returns a channel of MessageData struct.
@@ -81,11 +82,12 @@ func main() {
 	d := sngecomm.Dest()
 	i := stompngo.Uuid()
 	r := sngecomm.Subscribe(conn, d, i, "auto")
-	fmt.Println(exampid + "stomp subscribe complete ...")
+	log.Println(exampid + "stomp subscribe complete ...")
 	// Read data from the returned channel
 	for i := 1; i <= sngecomm.Nmsgs(); i++ {
 		m := <-r
-		fmt.Println(exampid + "channel read complete ...")
+		log.Println(exampid + "channel read complete ...")
+		log.Println("Message Number:", i)
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
@@ -93,34 +95,41 @@ func main() {
 			log.Fatalln(m.Error) // Handle this
 		}
 		//
-		fmt.Printf("Frame Type: %s\n", m.Message.Command) // Will be MESSAGE or ERROR!
+		log.Printf("Frame Type: %s\n", m.Message.Command) // Will be MESSAGE or ERROR!
 		if m.Message.Command != stompngo.MESSAGE {
 			log.Fatalln(m) // Handle this ...
 		}
 		h := m.Message.Headers
 		for j := 0; j < len(h)-1; j += 2 {
-			fmt.Printf("Header: %s:%s\n", h[j], h[j+1])
+			log.Printf("Header: %s:%s\n", h[j], h[j+1])
 		}
-		fmt.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
+		if pbc > 0 {
+			maxlen := pbc
+			if len(m.Message.Body) < maxlen {
+				maxlen = len(m.Message.Body)
+			}
+			ss := string(m.Message.Body[0:maxlen])
+			log.Printf("Payload: %s\n", ss) // Data payload
+		}
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
 	// Again we use a utility routine to handle the different protocol level
 	// requirements.
 	sngecomm.Unsubscribe(conn, d, i)
-	fmt.Println(exampid + "unsubscribe complete")
+	log.Println(exampid + "unsubscribe complete")
 
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp disconnect complete ...")
+	log.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "network close complete ...")
+	log.Println(exampid + "network close complete ...")
 
-	fmt.Println(exampid + "ends ...")
+	log.Println(exampid + "ends ...")
 }

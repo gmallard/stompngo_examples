@@ -1,5 +1,5 @@
 //
-// Copyright © 2013-2015 Guy M. Allard
+// Copyright © 2013-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ Connect and Disconnect from a STOMP broker using TCP.
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	//
@@ -56,17 +55,17 @@ var exampid = "conndisc: "
 
 // Connect to a STOMP broker and disconnect.
 func main() {
-	fmt.Println(exampid + "starts ...")
+	log.Println(exampid + "starts ...")
 
 	// Open a net connection
 	h, p := sngecomm.HostAndPort()
 	jhp := net.JoinHostPort(h, p)
-	fmt.Println(exampid+"will dial ...", jhp)
+	log.Println(exampid+"will dial ...", jhp)
 	n, e := net.Dial("tcp", jhp)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("netdial", e) // Handle this ......
 	}
-	fmt.Println(exampid + "dial complete ...")
+	log.Println(exampid + "dial complete ...")
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
@@ -77,16 +76,16 @@ func main() {
 	// b) the Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("sngConnect", e) // Handle this ......
 	}
-	fmt.Println(exampid+"stomp connect complete, protocol level is:", conn.Protocol())
+	log.Println(exampid+"stomp connect complete, protocol level is:", conn.Protocol())
 
 	// Show connect response
-	fmt.Println(exampid+"connect response:", conn.ConnectResponse)
+	log.Println(exampid+"connect response:", conn.ConnectResponse)
 
 	if sngecomm.HbParms() != "" {
-		fmt.Println(exampid+"heart-beat send:", conn.SendTickerInterval())
-		fmt.Println(exampid+"heart-beat receive:", conn.ReceiveTickerInterval())
+		log.Println(exampid+"heart-beat send:", conn.SendTickerInterval())
+		log.Println(exampid+"heart-beat receive:", conn.ReceiveTickerInterval())
 	}
 
 	// *NOTE* your application functionaltiy goes here!
@@ -95,16 +94,16 @@ func main() {
 	// Empty headers here for the DISCONNECT
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("sngDisconnect", e) // Handle this ......
 	}
-	fmt.Println(exampid + "stomp disconnect complete ...")
+	log.Println(exampid + "stomp disconnect complete ...")
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	fmt.Println(exampid + "network close complete ...")
+	log.Println(exampid + "network close complete ...")
 
-	fmt.Println(exampid + "ends ...")
+	log.Println(exampid + "ends ...")
 }

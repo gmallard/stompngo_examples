@@ -1,5 +1,5 @@
 //
-// Copyright © 2013-2015 Guy M. Allard
+// Copyright © 2013-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ package main
 
 import (
 	"crypto/tls"
-	"fmt"
 	"log"
 	"net"
 	//
@@ -52,7 +51,7 @@ var (
 
 // Connect to a STOMP broker using TLS and disconnect.
 func main() {
-	fmt.Println(exampid, "starts ...")
+	log.Println(exampid, "starts ...")
 
 	// TLS Configuration.
 	testConfig = new(tls.Config)
@@ -60,7 +59,7 @@ func main() {
 
 	// Get host and port
 	h, p := sngecomm.HostAndPort()
-	fmt.Println(exampid, "host", h, "port", p)
+	log.Println(exampid, "host", h, "port", p)
 
 	// Be polite, allow SNI (Server Virtual Hosting)
 	testConfig.ServerName = h
@@ -68,14 +67,15 @@ func main() {
 	// Connect logic: use net.Dial and tls.Client
 	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("nedDiat", e) // Handle this ......
 	}
-	fmt.Println(exampid, "dial complete ...")
+	log.Println(exampid, "dial complete ...")
 	n := tls.Client(t, testConfig)
 	e = n.Handshake()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("netHandshake", e) // Handle this ......
 	}
+	log.Println(exampid, "handshake complete ...")
 
 	sngecomm.DumpTLSConfig(exampid, testConfig, n)
 
@@ -87,9 +87,9 @@ func main() {
 	// b) the connect Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("sngConnect", e) // Handle this ......
 	}
-	fmt.Println(exampid, "stomp connect complete ...")
+	log.Println(exampid, "stomp connect complete ...")
 
 	// *NOTE* your application functionaltiy goes here!
 
@@ -97,16 +97,16 @@ func main() {
 	// Empty headers here.
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("sngDisconnect", e) // Handle this ......
 	}
-	fmt.Println(exampid, "stomp disconnect complete ...")
+	log.Println(exampid, "stomp disconnect complete ...")
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		log.Fatalln("netClose", e) // Handle this ......
 	}
-	fmt.Println(exampid, "network close complete ...")
+	log.Println(exampid, "network close complete ...")
 
-	fmt.Println(exampid, "ends ...")
+	log.Println(exampid, "ends ...")
 }

@@ -11,21 +11,25 @@
 * Modify cp.sh to provide your AMQ lib location
 * Run ./compile.sh
 
-## Send With go ##
+## Send and Receive With go ##
 
 * Run ./gosend.sh
-
-## Receive With go ##
-
 * Run ./gorecv.sh
 
-## Send With Java ##
+## Send and Receive With Java ##
 
 * Run ./jsend.sh
-
-## Receive With Java ##
-
 * Run ./jrecv.sh
+
+## Send With go and Receive With Java ##
+
+* Run ./gosend.sh
+* Run ./jrecv.sh
+
+## Send With Java and Receive With go ##
+
+* Run ./jsend.sh
+* Run ./gorecv.sh
 
 ## Cleanup After Testing ##
 

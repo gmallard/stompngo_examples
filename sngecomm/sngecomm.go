@@ -1,5 +1,5 @@
 //
-// Copyright © 2011-2015 Guy M. Allard
+// Copyright © 2011-2016 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ var (
 	mdml  = 1024 * 32                  // Message data max length of variable message, 32K
 	md    = make([]byte, 1)            // Additional message data, primed during init()
 	rc    = 1                          // Receiver connection count, srmgor_1smrconn
+	pbc   = 64                         // Number of bytes to print (used in some
+	// 																 // examples that receive).
 	//
 	sendFact float64 = 1.0 // Send sleep time factor
 	recvFact float64 = 1.0 // Receive sleep time factor
@@ -117,6 +119,13 @@ func init() {
 	if hbp := os.Getenv("STOMP_HBPARMS"); hbp != "" {
 		hbparms = hbp
 	}
+	//
+	if s := os.Getenv("STOMP_PBC"); s != "" {
+		i, e := strconv.ParseInt(s, 10, 32)
+		if e == nil {
+			pbc = int(i)
+		}
+	}
 }
 
 // Receiver connection count
@@ -172,6 +181,11 @@ func Protocol() string {
 		protocol = p
 	}
 	return protocol
+}
+
+// Print Byte Count
+func Pbc() int {
+	return pbc
 }
 
 // Override Host and port for Dial if requested.
@@ -398,10 +412,26 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 	}
 	fmt.Println(ExampIdNow(exampid), "Server Certs:")
 	for i, cert := range certs {
-		fmt.Printf("Certificate chain:%d\n", i)
-		fmt.Printf("Common Name:%s\n", cert.Subject.CommonName)
-		fmt.Printf("Alternate Name:%v\n", cert.DNSNames)
-		fmt.Printf("Valid Not Before:%s\n", cert.NotBefore.Local().String())
+		fmt.Printf("Certificate chain: %d\n", i)
+		fmt.Printf("Common Name:%s \n", cert.Subject.CommonName)
+		//
+		fmt.Printf("Subject Alternative Names (DNSNames):\n")
+		for idx, dnsn := range cert.DNSNames {
+			fmt.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, dnsn)
+		}
+		//
+		fmt.Printf("Subject Alternative Names (Emailaddresses):\n")
+		for idx, enn := range cert.EmailAddresses {
+			fmt.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, enn)
+		}
+		//
+		fmt.Printf("Subject Alternative Names (IPAddresses):\n")
+		for idx, ipadn := range cert.IPAddresses {
+			fmt.Printf("\tNumber: %d, DNS Name: %v\n", idx+1, ipadn)
+		}
+		//
+		fmt.Printf("Valid Not Before: %s\n", cert.NotBefore.Local().String())
+		fmt.Printf("Valid Not After: %s\n", cert.NotAfter.Local().String())
 		fmt.Println("" + strings.Repeat("=", 80) + "\n")
 	}
 

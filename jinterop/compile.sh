@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright © 2012-2013 Guy M. Allard
+# Copyright © 2012-2016 Guy M. Allard
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-set -x
+## set -x
 #
 . ./cp.sh
 #
@@ -26,5 +26,5 @@ javac -cp $CP Receiver.java
 #
 cd gosend && go build gosend.go && cd ..
 cd gorecv && go build gorecv.go && cd ..
-set +x
+## set +x
 
