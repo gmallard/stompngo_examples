@@ -6,13 +6,12 @@ This repository is a set of STOMP client examples using go.
 
 These examples use the stomp client package here:
 
-[stompngo](https://github.com/gmallard/stompngo)
+[stompngo STOMP client library](https://github.com/gmallard/stompngo)
 
-## List of Examples  ##
+## List of Individual Examples  ##
 
-A brief explanation of these examples follows.
-
-This is a list of example go, Java, and properties files:
+A brief explanation of the individual examples follows. The list of consistes
+of example go, Java, and properties files:
 
 <table border="1" style="width:80%;border: 1px solid black;">
 <tr>
@@ -55,19 +54,44 @@ ssl (tls).  You must connect to a broker port that is 'ssl/tls' enabled.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/Constants.java
+jinterop
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+A subdirectory which contains go and Java examples of a producer and consumer.<br />
+This demonstrates interoperability between go and Java, and between STOMP and JMS.<br />
+See individual files for details.<br />
+This example is ActiveMQ specific, but can be easily adapted for other brokers.<br />
+It is assumed that the reader is familiar with Java, JMS, and JNDI.<br />
+A number of helper shell scripts are provided.  See the script descriptions below.<br />
+These interoperability examples have some hard coded port numbers and path names.<br />
 </td>
 </tr>
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jndi.properties
+jinterop/Constants.java
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Static constants used in the other Java programs in this directory.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+jinterop/jndi.properties
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+The JNDI properties file definition.
+</td>
+</tr>
+
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+jinterop/log4j.properties
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+The log4j properties file used by the Java code.
 </td>
 </tr>
 
@@ -76,7 +100,7 @@ TODO
 jinterop/gorecv/gorecv.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+A message consumer written in go.
 </td>
 </tr>
 
@@ -85,7 +109,7 @@ TODO
 jinterop/gosend/gosend.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+A message producer written in go.
 </td>
 </tr>
 
@@ -94,7 +118,7 @@ TODO
 jinterop/Receiver.java
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+A message consumer written in Java using JMS.
 </td>
 </tr>
 
@@ -103,7 +127,7 @@ TODO
 jinterop/Sender.java
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+A message producer written in Java using JMS.
 </td>
 </tr>
 
@@ -452,6 +476,15 @@ A stomp destination.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+dh
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+Disconnect headers.  A stompngo.Headers instance.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 e
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
@@ -523,6 +556,16 @@ An instance of net.Conn.
 </td>
 </tr>
 
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+nmsgs
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+The number of messages to process (produce/consume).
+</td>
+</tr>
+
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
 p
@@ -571,7 +614,6 @@ sh
 Send headers.  A stompngo.Headers instance.
 </td>
 </tr>
-
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >

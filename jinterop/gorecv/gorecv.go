@@ -22,82 +22,86 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
 )
 
-var exampid = "gorecv: "
+var (
+	exampid = "gorecv: "
+	ll      = log.New(os.Stdout, "GOJRCV ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	nmsgs   = 1
+)
 
-var nmsgs = 1
-
-// Connect to a STOMP 1.1 broker, receive some messages and disconnect.
+// Connect to a STOMP 1.2 broker, receive some messages and disconnect.
 func main() {
-	log.Println(exampid + "starts ...")
+	ll.Println(exampid + "starts ...")
 
 	// Set up the connection.
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "dial complete ...")
-	eh := stompngo.Headers{"login", "userr", "passcode", "passw0rd"}
-	conn, e := stompngo.Connect(n, eh)
+	ll.Println(exampid + "dial complete ...")
+	ch := stompngo.Headers{"login", "userr", "passcode", "passw0rd",
+		"host", "localhost", "accept-version", "1.2"}
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "stomp connect complete ...")
+	ll.Println(exampid + "stomp connect complete ...")
 
 	// Setup Headers ...
-	u := stompngo.Uuid() // Use package convenience function for unique ID
-	s := stompngo.Headers{"destination", "/queue/allards.queue",
-		"id", u} // subscribe/unsubscribe headers
+	id := stompngo.Uuid() // Use package convenience function for unique ID
+	sbh := stompngo.Headers{"destination", "/queue/allards.queue",
+		"id", id} // subscribe/unsubscribe headers
 
 	// Subscribe
-	r, e := conn.Subscribe(s)
+	r, e := conn.Subscribe(sbh)
 	if e != nil {
-		log.Fatalln(e) // Handle this ...
+		ll.Fatalln(e) // Handle this ...
 	}
-	log.Println(exampid + "stomp subscribe complete ...")
+	ll.Println(exampid + "stomp subscribe complete ...")
 	// Read data from the returned channel
 	for i := 1; i <= nmsgs; i++ {
-		m := <-r
-		log.Println(exampid + "channel read complete ...")
+		md := <-r
+		ll.Println(exampid + "channel read complete ...")
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
-		if m.Error != nil {
-			log.Fatalln(m.Error) // Handle this
+		if md.Error != nil {
+			ll.Fatalln(md.Error) // Handle this
 		}
 		//
-		log.Printf("Frame Type: %s\n", m.Message.Command) // Will be MESSAGE or ERROR!
-		h := m.Message.Headers
-		for j := 0; j < len(h)-1; j += 2 {
-			log.Printf("Header: %s:%s\n", h[j], h[j+1])
+		ll.Printf("Frame Type: %s\n", md.Message.Command) // Will be MESSAGE or ERROR!
+		wh := md.Message.Headers
+		for j := 0; j < len(wh)-1; j += 2 {
+			ll.Printf("Header: %s:%s\n", wh[j], wh[j+1])
 		}
-		log.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
+		ll.Printf("Payload: %s\n", string(md.Message.Body)) // Data payload
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
-	// With Stomp 1.1, the same unique ID is required on UNSUBSCRIBE.  Failure
+	// With Stomp 1.1+, the same unique ID is required on UNSUBSCRIBE.  Failure
 	// to provide it will result in an error return.
-	e = conn.Unsubscribe(s)
+	e = conn.Unsubscribe(sbh) // Same headers as Subscribe
 	if e != nil {
-		log.Fatalln(e) // Handle this ...
+		ll.Fatalln(e) // Handle this ...
 	}
-	log.Println(exampid + "stomp unsubscribe complete ...")
+	ll.Println(exampid + "stomp unsubscribe complete ...")
 
 	// Disconnect from the Stomp server
-	eh = stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	dh := stompngo.Headers{}
+	e = conn.Disconnect(dh)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect complete ...")
+	ll.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "network close complete ...")
+	ll.Println(exampid + "network close complete ...")
 
-	log.Println(exampid + "ends ...")
+	ll.Println(exampid + "ends ...")
 }
