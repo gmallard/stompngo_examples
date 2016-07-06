@@ -28,6 +28,7 @@ import (
 	"math/big"
 	"os"
 	"strings"
+	"time"
 	//
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo/senv"
@@ -224,4 +225,9 @@ func ShowRunParms(exampid string) {
 	fmt.Println(ExampIdNow(exampid), "CON2BUFFER", Conn2Buffer())
 	fmt.Println(ExampIdNow(exampid), "ACKMODE", AckMode())
 	fmt.Println(ExampIdNow(exampid), "RECVCONNS", Recvconns())
+}
+
+// Timestamp example ids
+func ExampIdNow(s string) string {
+	return time.Now().String() + " " + s
 }

@@ -25,7 +25,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 	//
 	// "github.com/gmallard/stompngo"
 )
@@ -59,7 +58,7 @@ func init() {
 }
 
 // Number of queues
-func Nqs() (rc int) {
+func Nqs() int {
 	//
 	if s := os.Getenv("STOMP_NQS"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
@@ -73,7 +72,7 @@ func Nqs() (rc int) {
 }
 
 // Receiver connection count
-func Recvconns() (rc int) {
+func Recvconns() int {
 	//
 	if s := os.Getenv("STOMP_RECVCONNS"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
@@ -134,11 +133,6 @@ func Conn2Buffer() int {
 		}
 	}
 	return conn2Buffer
-}
-
-// Timestamp example ids
-func ExampIdNow(s string) string {
-	return time.Now().String() + " " + s
 }
 
 // Get Send Sleep Factor
