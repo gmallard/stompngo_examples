@@ -1,5 +1,5 @@
 //
-// Copyright © 2016 Guy M. Allard
+// Copyright © 2016 Guy M. Alluard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,17 @@ package sngecomm
 import (
 	"crypto/rand"
 	"crypto/tls"
-	"fmt"
 	"log"
 	"math/big"
 	"os"
 	"strings"
-	"time"
 	//
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo/senv"
+)
+
+var (
+	llu = log.New(os.Stdout, "UTIL ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 )
 
 // Provide connect headers
@@ -67,16 +69,16 @@ func ShowStats(exampid, tag string, conn *stompngo.Connection) {
 	bw := conn.BytesWritten()
 	s := conn.Running().Seconds()
 	n := conn.Running().Nanoseconds()
-	fmt.Println(ExampIdNow(exampid), tag, "frame read count", r)
-	fmt.Println(ExampIdNow(exampid), tag, "bytes read", br)
-	fmt.Println(ExampIdNow(exampid), tag, "frame write count", w)
-	fmt.Println(ExampIdNow(exampid), tag, "bytes written", bw)
-	fmt.Println(ExampIdNow(exampid), tag, "current duration(ns)", n)
-	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "current duration(sec)", s)
-	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "frame reads/sec", float64(r)/s)
-	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "bytes read/sec", float64(br)/s)
-	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "frame writes/sec", float64(w)/s)
-	fmt.Printf("%s %s %s %20.6f\n", ExampIdNow(exampid), tag, "bytes written/sec", float64(bw)/s)
+	llu.Println(exampid, tag, "frame read count", r)
+	llu.Println(exampid, tag, "bytes read", br)
+	llu.Println(exampid, tag, "frame write count", w)
+	llu.Println(exampid, tag, "bytes written", bw)
+	llu.Println(exampid, tag, "current duration(ns)", n)
+	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "current duration(sec)", s)
+	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "frame reads/sec", float64(r)/s)
+	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes read/sec", float64(br)/s)
+	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "frame writes/sec", float64(w)/s)
+	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes written/sec", float64(bw)/s)
 }
 
 // Get a value between min amd max
@@ -87,63 +89,63 @@ func ValueBetween(min, max int64, fact float64) int64 {
 
 // Dump a TLS Configuration Struct
 func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
-	fmt.Println()
-	fmt.Printf("%s Rand: %v\n", ExampIdNow(exampid), c.Rand)
-	fmt.Printf("%s Time: %v\n", ExampIdNow(exampid), c.Time)
-	fmt.Printf("%s Certificates: %v\n", ExampIdNow(exampid), c.Certificates)
-	fmt.Printf("%s NameToCertificate: %v\n", ExampIdNow(exampid), c.NameToCertificate)
-	fmt.Printf("%s RootCAs: %v\n", ExampIdNow(exampid), c.RootCAs)
-	fmt.Printf("%s NextProtos: %v\n", ExampIdNow(exampid), c.NextProtos)
-	fmt.Printf("%s ServerName: %v\n", ExampIdNow(exampid), c.ServerName)
-	fmt.Printf("%s ClientAuth: %v\n", ExampIdNow(exampid), c.ClientAuth)
-	fmt.Printf("%s ClientCAs: %v\n", ExampIdNow(exampid), c.ClientCAs)
-	fmt.Printf("%s CipherSuites: %v\n", ExampIdNow(exampid), c.CipherSuites)
-	fmt.Printf("%s PreferServerCipherSuites: %v\n", ExampIdNow(exampid), c.PreferServerCipherSuites)
-	fmt.Printf("%s SessionTicketsDisabled: %v\n", ExampIdNow(exampid), c.SessionTicketsDisabled)
-	fmt.Printf("%s SessionTicketKey: %v\n", ExampIdNow(exampid), c.SessionTicketKey)
+	llu.Println()
+	llu.Printf("%s Rand: %v\n", exampid, c.Rand)
+	llu.Printf("%s Time: %v\n", exampid, c.Time)
+	llu.Printf("%s Certificates: %v\n", exampid, c.Certificates)
+	llu.Printf("%s NameToCertificate: %v\n", exampid, c.NameToCertificate)
+	llu.Printf("%s RootCAs: %v\n", exampid, c.RootCAs)
+	llu.Printf("%s NextProtos: %v\n", exampid, c.NextProtos)
+	llu.Printf("%s ServerName: %v\n", exampid, c.ServerName)
+	llu.Printf("%s ClientAuth: %v\n", exampid, c.ClientAuth)
+	llu.Printf("%s ClientCAs: %v\n", exampid, c.ClientCAs)
+	llu.Printf("%s CipherSuites: %v\n", exampid, c.CipherSuites)
+	llu.Printf("%s PreferServerCipherSuites: %v\n", exampid, c.PreferServerCipherSuites)
+	llu.Printf("%s SessionTicketsDisabled: %v\n", exampid, c.SessionTicketsDisabled)
+	llu.Printf("%s SessionTicketKey: %v\n", exampid, c.SessionTicketKey)
 
-	// Idea Embellished From:
+	// Idea Embelluished From:
 	// https://groups.google.com/forum/#!topic/golang-nuts/TMNdOxugbTY
 	cs := n.ConnectionState()
-	fmt.Println(ExampIdNow(exampid), "HandshakeComplete:", cs.HandshakeComplete)
-	fmt.Println(ExampIdNow(exampid), "DidResume:", cs.DidResume)
-	fmt.Printf("%s %s %d(0x%X)\n", ExampIdNow(exampid), "CipherSuite:", cs.CipherSuite, cs.CipherSuite)
-	fmt.Println(ExampIdNow(exampid), "NegotiatedProtocol:", cs.NegotiatedProtocol)
-	fmt.Println(ExampIdNow(exampid), "NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
-	fmt.Println(ExampIdNow(exampid), "ServerName:", cs.ServerName)
+	llu.Println(exampid, "HandshakeComplete:", cs.HandshakeComplete)
+	llu.Println(exampid, "DidResume:", cs.DidResume)
+	llu.Printf("%s %s %d(0x%X)\n", exampid, "CipherSuite:", cs.CipherSuite, cs.CipherSuite)
+	llu.Println(exampid, "NegotiatedProtocol:", cs.NegotiatedProtocol)
+	llu.Println(exampid, "NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
+	llu.Println(exampid, "ServerName:", cs.ServerName)
 	// Portions of any Peer Certificates present
 	certs := cs.PeerCertificates
 	if certs == nil || len(certs) < 1 {
-		fmt.Println("Could not get server's certificate from the TLS connection.")
-		fmt.Println()
+		llu.Println("Could not get server's certificate from the TLS connection.")
+		llu.Println()
 		return
 	}
-	fmt.Println(ExampIdNow(exampid), "Server Certs:")
+	llu.Println(exampid, "Server Certs:")
 	for i, cert := range certs {
-		fmt.Printf("Certificate chain: %d\n", i)
-		fmt.Printf("Common Name:%s \n", cert.Subject.CommonName)
+		llu.Printf("Certificate chain: %d\n", i)
+		llu.Printf("Common Name:%s \n", cert.Subject.CommonName)
 		//
-		fmt.Printf("Subject Alternative Names (DNSNames):\n")
+		llu.Printf("Subject Alternative Names (DNSNames):\n")
 		for idx, dnsn := range cert.DNSNames {
-			fmt.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, dnsn)
+			llu.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, dnsn)
 		}
 		//
-		fmt.Printf("Subject Alternative Names (Emailaddresses):\n")
+		llu.Printf("Subject Alternative Names (Emailaddresses):\n")
 		for idx, enn := range cert.EmailAddresses {
-			fmt.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, enn)
+			llu.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, enn)
 		}
 		//
-		fmt.Printf("Subject Alternative Names (IPAddresses):\n")
+		llu.Printf("Subject Alternative Names (IPAddresses):\n")
 		for idx, ipadn := range cert.IPAddresses {
-			fmt.Printf("\tNumber: %d, DNS Name: %v\n", idx+1, ipadn)
+			llu.Printf("\tNumber: %d, DNS Name: %v\n", idx+1, ipadn)
 		}
 		//
-		fmt.Printf("Valid Not Before: %s\n", cert.NotBefore.Local().String())
-		fmt.Printf("Valid Not After: %s\n", cert.NotAfter.Local().String())
-		fmt.Println("" + strings.Repeat("=", 80) + "\n")
+		llu.Printf("Valid Not Before: %s\n", cert.NotBefore.Local().String())
+		llu.Printf("Valid Not After: %s\n", cert.NotAfter.Local().String())
+		llu.Println("" + strings.Repeat("=", 80) + "\n")
 	}
 
-	fmt.Println()
+	llu.Println()
 }
 
 // Handle a subscribe for the different protocol levels.
@@ -160,12 +162,12 @@ func HandleSubscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.Mes
 	case stompngo.SPL_10:
 		// Nothing else to do here
 	default:
-		log.Fatalln("subscribe invalid protocol level, should not happen")
+		llu.Fatalln("subscribe invalid protocol level, should not happen")
 	}
 	//
 	r, e := c.Subscribe(h)
 	if e != nil {
-		log.Fatalln("subscribe failed", e)
+		llu.Fatalln("subscribe failed", e)
 	}
 	return r
 }
@@ -182,11 +184,11 @@ func HandleUnsubscribe(c *stompngo.Connection, d, i string) {
 	case stompngo.SPL_10:
 		sbh = sbh.Add("destination", d)
 	default:
-		log.Fatalln("unsubscribe invalid protocol level, should not happen")
+		llu.Fatalln("unsubscribe invalid protocol level, should not happen")
 	}
 	e := c.Unsubscribe(sbh)
 	if e != nil {
-		log.Fatalln("unsubscribe failed", e)
+		llu.Fatalln("unsubscribe failed", e)
 	}
 	return
 }
@@ -203,31 +205,26 @@ func HandleAck(c *stompngo.Connection, h stompngo.Headers, id string) {
 	case stompngo.SPL_10:
 		ah = ah.Add("message-id", h.Value("message-id"))
 	default:
-		log.Fatalln("unsubscribe invalid protocol level, should not happen")
+		llu.Fatalln("unsubscribe invalid protocol level, should not happen")
 	}
 	e := c.Ack(ah)
 	if e != nil {
-		log.Fatalln("ack failed", e, c.Protocol())
+		llu.Fatalln("ack failed", e, c.Protocol())
 	}
 	return
 }
 
 func ShowRunParms(exampid string) {
-	fmt.Println(ExampIdNow(exampid), "HOST", os.Getenv("STOMP_HOST"))
-	fmt.Println(ExampIdNow(exampid), "PORT", os.Getenv("STOMP_PORT"))
-	fmt.Println(ExampIdNow(exampid), "PROTOCOL", senv.Protocol())
-	fmt.Println(ExampIdNow(exampid), "VHOST", senv.Vhost())
-	fmt.Println(ExampIdNow(exampid), "NQS", Nqs())
-	fmt.Println(ExampIdNow(exampid), "NMSGS", senv.Nmsgs())
-	fmt.Println(ExampIdNow(exampid), "SUBCHANCAP", senv.SubChanCap())
-	fmt.Println(ExampIdNow(exampid), "RECVFACT", RecvFactor())
-	fmt.Println(ExampIdNow(exampid), "SENDFACT", SendFactor())
-	fmt.Println(ExampIdNow(exampid), "CON2BUFFER", Conn2Buffer())
-	fmt.Println(ExampIdNow(exampid), "ACKMODE", AckMode())
-	fmt.Println(ExampIdNow(exampid), "RECVCONNS", Recvconns())
-}
-
-// Timestamp example ids
-func ExampIdNow(s string) string {
-	return time.Now().String() + " " + s
+	llu.Println(exampid, "HOST", os.Getenv("STOMP_HOST"))
+	llu.Println(exampid, "PORT", os.Getenv("STOMP_PORT"))
+	llu.Println(exampid, "PROTOCOL", senv.Protocol())
+	llu.Println(exampid, "VHOST", senv.Vhost())
+	llu.Println(exampid, "NQS", Nqs())
+	llu.Println(exampid, "NMSGS", senv.Nmsgs())
+	llu.Println(exampid, "SUBCHANCAP", senv.SubChanCap())
+	llu.Println(exampid, "RECVFACT", RecvFactor())
+	llu.Println(exampid, "SENDFACT", SendFactor())
+	llu.Println(exampid, "CON2BUFFER", Conn2Buffer())
+	llu.Println(exampid, "ACKMODE", AckMode())
+	llu.Println(exampid, "RECVCONNS", Recvconns())
 }
