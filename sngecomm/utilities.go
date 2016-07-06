@@ -172,19 +172,19 @@ func HandleSubscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.Mes
 
 // Handle a unsubscribe for the different protocol levels.
 func HandleUnsubscribe(c *stompngo.Connection, d, i string) {
-	h := stompngo.Headers{}
+	sbh := stompngo.Headers{}
 	//
 	switch c.Protocol() {
 	case stompngo.SPL_12:
-		h = h.Add("id", i)
+		sbh = sbh.Add("id", i)
 	case stompngo.SPL_11:
-		h = h.Add("id", i)
+		sbh = sbh.Add("id", i)
 	case stompngo.SPL_10:
-		h = h.Add("destination", d)
+		sbh = sbh.Add("destination", d)
 	default:
 		log.Fatalln("unsubscribe invalid protocol level, should not happen")
 	}
-	e := c.Unsubscribe(h)
+	e := c.Unsubscribe(sbh)
 	if e != nil {
 		log.Fatalln("unsubscribe failed", e)
 	}

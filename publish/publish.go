@@ -50,6 +50,9 @@ import (
 	"time"
 	//
 	"github.com/gmallard/stompngo"
+	// senv methods could be used in general by stompngo clients.
+	"github.com/gmallard/stompngo/senv"
+	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
@@ -60,12 +63,13 @@ func main() {
 	log.Println(sngecomm.ExampIdNow(exampid) + "starts ...")
 
 	// Open a net connection
-	h, p := sngecomm.HostAndPort()
+	h, p := senv.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
 		log.Fatalln(e) // Handle this ......
 	}
-	log.Println(sngecomm.ExampIdNow(exampid) + "dial complete ...")
+	log.Println(sngecomm.ExampIdNow(exampid)+"dial complete ...",
+		net.JoinHostPort(h, p))
 
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
@@ -76,13 +80,13 @@ func main() {
 
 	log.Println(sngecomm.ExampIdNow(exampid)+"connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
-	s := stompngo.Headers{"destination", sngecomm.Dest(),
+	sh := stompngo.Headers{"destination", senv.Dest(),
 		"persistent", "true"} // send headers
-	m := exampid + " message: "
-	for i := 1; i <= sngecomm.Nmsgs(); i++ {
-		t := m + fmt.Sprintf("%d", i)
+	ms := exampid + " message: "
+	for i := 1; i <= senv.Nmsgs(); i++ {
+		t := ms + fmt.Sprintf("%d", i)
 		log.Println(sngecomm.ExampIdNow(exampid), "sending now:", t)
-		e := conn.Send(s, t)
+		e := conn.Send(sh, t)
 		if e != nil {
 			log.Fatalln("bad send", e) // Handle this ...
 		}
