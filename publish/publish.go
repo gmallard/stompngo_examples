@@ -47,6 +47,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"time"
 	//
 	"github.com/gmallard/stompngo"
@@ -56,41 +57,44 @@ import (
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
-var exampid = "publish: "
+var (
+	exampid = "publish: "
+	ll      = log.New(os.Stdout, "EPUB ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+)
 
 // Connect to a STOMP broker, publish some messages and disconnect.
 func main() {
-	log.Println(sngecomm.ExampIdNow(exampid) + "starts ...")
+	ll.Println(exampid + "starts ...")
 
 	// Open a net connection
 	h, p := senv.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(sngecomm.ExampIdNow(exampid)+"dial complete ...",
+	ll.Println(exampid+"dial complete ...",
 		net.JoinHostPort(h, p))
 
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(sngecomm.ExampIdNow(exampid)+"stomp connect complete ...", conn.Protocol())
+	ll.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
-	log.Println(sngecomm.ExampIdNow(exampid)+"connected headers", conn.ConnectResponse.Headers)
+	ll.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
 	sh := stompngo.Headers{"destination", senv.Dest(),
 		"persistent", "true"} // send headers
 	ms := exampid + " message: "
 	for i := 1; i <= senv.Nmsgs(); i++ {
 		t := ms + fmt.Sprintf("%d", i)
-		log.Println(sngecomm.ExampIdNow(exampid), "sending now:", t)
+		ll.Println(exampid, "sending now:", t)
 		e := conn.Send(sh, t)
 		if e != nil {
-			log.Fatalln("bad send", e) // Handle this ...
+			ll.Fatalln("bad send", e) // Handle this ...
 		}
-		log.Println(sngecomm.ExampIdNow(exampid), "send complete:", t)
+		ll.Println(exampid, "send complete:", t)
 		//		time.Sleep(16 * time.Millisecond)
 		//		time.Sleep(1 * time.Millisecond) // DB Behind ~ 4 messages
 		//		time.Sleep(64 * time.Millisecond) // DB OK
@@ -104,15 +108,15 @@ func main() {
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(sngecomm.ExampIdNow(exampid) + "stomp disconnect complete ...")
+	ll.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(sngecomm.ExampIdNow(exampid) + "network close complete ...")
+	ll.Println(exampid + "network close complete ...")
 
-	log.Println(sngecomm.ExampIdNow(exampid) + "ends ...")
+	ll.Println(exampid + "ends ...")
 }

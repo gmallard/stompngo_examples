@@ -47,31 +47,35 @@ import (
 	"github.com/gmallard/stompngo"
 	"log"
 	"net"
+	"os"
 	// senv methods could be used in general by stompngo clients.
 	"github.com/gmallard/stompngo/senv"
 	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
-var exampid = "ack: "
+var (
+	exampid = "ack: "
+	ll      = log.New(os.Stdout, "EACK ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+)
 
 // Connect to a STOMP broker, receive some messages, ACK them, and disconnect.
 func main() {
-	log.Println(exampid + "starts ...")
+	ll.Println(exampid + "starts ...")
 
 	// Set up the connection.
 	h, p := senv.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid+"dial complete ...", net.JoinHostPort(h, p))
+	ll.Println(exampid+"dial complete ...", net.JoinHostPort(h, p))
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid+"stomp connect complete ...", conn.Protocol())
+	ll.Println(exampid+"stomp connect complete ...", conn.Protocol())
 
 	pbc := sngecomm.Pbc() // Print byte count
 
@@ -83,25 +87,25 @@ func main() {
 	d := senv.Dest()
 	id := stompngo.Uuid()
 	r := sngecomm.HandleSubscribe(conn, d, id, "client")
-	log.Println(exampid + "stomp subscribe complete ...")
+	ll.Println(exampid + "stomp subscribe complete ...")
 	// Read data from the returned channel
 	for i := 1; i <= senv.Nmsgs(); i++ {
 		md := <-r
-		log.Println(exampid + "channel read complete ...")
+		ll.Println(exampid + "channel read complete ...")
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
 		if md.Error != nil {
-			log.Fatalln(m.Error) // Handle this
+			ll.Fatalln(md.Error) // Handle this
 		}
 		//
-		log.Printf("Frame Type: %s\n", md.Message.Command) // Will be MESSAGE or ERROR!
+		ll.Printf("Frame Type: %s\n", md.Message.Command) // Will be MESSAGE or ERROR!
 		if md.Message.Command != stompngo.MESSAGE {
-			log.Fatalln(md) // Handle this ...
+			ll.Fatalln(md) // Handle this ...
 		}
 		wh := md.Message.Headers
 		for j := 0; j < len(wh)-1; j += 2 {
-			log.Printf("Header: %s:%s\n", wh[j], wh[j+1])
+			ll.Printf("Header: %s:%s\n", wh[j], wh[j+1])
 		}
 		if pbc > 0 {
 			maxlen := pbc
@@ -109,32 +113,32 @@ func main() {
 				maxlen = len(md.Message.Body)
 			}
 			ss := string(md.Message.Body[0:maxlen])
-			log.Printf("Payload: %s\n", ss) // Data payload
+			ll.Printf("Payload: %s\n", ss) // Data payload
 		}
 		// ACK the message just received.
 		// Agiain we use a utility routine to handle the different requirements
 		// of the protocol versions.
-		sngecomm.HandleAck(conn, m.Message.Headers, id)
-		log.Println(exampid + "ACK complete ...")
+		sngecomm.HandleAck(conn, md.Message.Headers, id)
+		ll.Println(exampid + "ACK complete ...")
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
 	// Again we use a utility routine to handle the different protocol level
 	// requirements.
 	sngecomm.HandleUnsubscribe(conn, d, id)
-	log.Println(exampid + "stomp unsubscribe complete ...")
+	ll.Println(exampid + "stomp unsubscribe complete ...")
 
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect complete ...")
+	ll.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "network close complete ...")
+	ll.Println(exampid + "network close complete ...")
 
-	log.Println(exampid + "ends ...")
+	ll.Println(exampid + "ends ...")
 }

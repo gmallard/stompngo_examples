@@ -39,7 +39,7 @@ destination should have been previously loaded with message(s).
 conndisc/conndisc.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+A very basic demonstration of a 'CONNECT' / 'DISCONNECT' sequence.
 </td>
 </tr>
 
@@ -451,10 +451,10 @@ A stomp destination.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-n
+e
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-An instance of net.Conn.
+A go 'error' instance.
 </td>
 </tr>
 
@@ -487,6 +487,15 @@ A (type 4) UUID.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+jhp
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A joined host and port pair, returned from net.JoinHostPort(h, p).
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 md
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
@@ -501,6 +510,15 @@ ms
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 A message body, with type string.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+n
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+An instance of net.Conn.
 </td>
 </tr>
 
