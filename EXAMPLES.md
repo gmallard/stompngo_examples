@@ -48,7 +48,8 @@ A very basic demonstration of a 'CONNECT' / 'DISCONNECT' sequence.
 conndisc_tls/conndisc_tls.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+A very basic demonstration of a 'CONNECT' / 'DISCONNECT' sequence with
+ssl (tls).  You must connect to a broker port that is 'ssl/tls' enabled.
 </td>
 </tr>
 
@@ -568,6 +569,16 @@ sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 Send headers.  A stompngo.Headers instance.
+</td>
+</tr>
+
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+tc
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+An instance of *tls.Config.
 </td>
 </tr>
 
