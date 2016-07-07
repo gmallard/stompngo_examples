@@ -8,6 +8,12 @@ These examples use the stomp client package here:
 
 [stompngo STOMP client library](https://github.com/gmallard/stompngo)
 
+The reader is urged to become familiar with the go documentaion
+for the *stompngo* package:
+
+[stompngo documentation](http://godoc.org/github.com/gmallard/stompngo)<br />
+[stompngo wiki](https://github.com/gmallard/stompngo/wiki)
+
 ## List of Individual Examples  ##
 
 A brief explanation of the individual examples follows. The list of consistes
@@ -201,7 +207,7 @@ Utility routines used by these examples.
 srmgor_1conn/srmgor_1conn.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Send and receive, many go routines, one *stompngo.Connection.
 </td>
 </tr>
 
@@ -237,7 +243,7 @@ TODO
 subscribe/subscribe.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+A basic demonstration of subscribing and receiving messages.
 </td>
 </tr>
 
@@ -300,7 +306,8 @@ Description
 jinterop/clean.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+This is the clean up script for the Java / JMS interoperability examples.<br />
+It removes all three .class files and the two go executables.
 </td>
 </tr>
 
@@ -309,7 +316,8 @@ TODO
 jinterop/compile.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+This is the compile script for the Java / JMS interoperability examples.<br />
+It compiles the Java and the go interoperability code.
 </td>
 </tr>
 
@@ -318,7 +326,9 @@ TODO
 jinterop/cp.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+An internal script, sourced by most of the other scripts.<br />
+It builds a list of jar files that will be included in the Java CLASSPATH.<br />
+This script should be modified to support your environment.
 </td>
 </tr>
 
@@ -327,7 +337,7 @@ TODO
 jinterop/gorecv.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+This script runs the go receiver/consumer/getter.
 </td>
 </tr>
 
@@ -336,7 +346,7 @@ TODO
 jinterop/gosend.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+This script runs the go sender/producer/putter.
 </td>
 </tr>
 
@@ -345,7 +355,7 @@ TODO
 jinterop/jrecv.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+This script runs the Java receiver/consumer/getter.
 </td>
 </tr>
 
@@ -354,7 +364,7 @@ TODO
 jinterop/jsend.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+This script runs the Java sender/producer/putter.
 </td>
 </tr>
 
@@ -363,7 +373,7 @@ TODO
 srmgor_1conn/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Send and receive, many go routines, one *stompngo.Connection.
 </td>
 </tr>
 
@@ -495,6 +505,15 @@ Disconnect headers.  A stompngo.Headers instance.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+dt
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A time.Duration instance.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 e
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
@@ -540,6 +559,24 @@ A joined host and port pair, returned from net.JoinHostPort(h, p).
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+ll
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A go logger instance.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+mc
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A message count.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 md
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
@@ -566,13 +603,21 @@ An instance of net.Conn.
 </td>
 </tr>
 
-
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
 nmsgs
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 The number of messages to process (produce/consume).
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+nqs
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+The number of destinations to use.
 </td>
 </tr>
 
@@ -599,6 +644,25 @@ set to 0, message bodies are (usually) not printed at all.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+qn
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A queue number identifier.  Used in a looping control structure for a
+variable number of queues.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+qns
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A queue number identifier, type string (from qn).
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 r
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
@@ -618,10 +682,30 @@ A receipt message from the broker. An instance of type stompngo.MessageData.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+rf
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A receive wait time multiplier.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 rid
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 A receipt id.
+</td>
+</tr>
+
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+rw
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A wait flag used by receivers. When set to true, receivers wait for a
+random amount of time after each message red.
 </td>
 </tr>
 
@@ -643,13 +727,33 @@ A channel of type stompngo.MessageData.  Used in example code to
 receive messages and metadata from the broker.
 </td>
 </tr>
+
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+sf
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A send wait time multiplier.
+</td>
+</tr>
+
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
 sh
 </td>
-
 <td style="border: 1px solid black;padding-left: 10px;" >
 Send headers.  A stompngo.Headers instance.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+sw
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A wait flag used by senders. When set to true, senders wait for a
+random amount of time after each send.
 </td>
 </tr>
 
@@ -659,6 +763,52 @@ tc
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 An instance of *tls.Config.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+td
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A time.Duration.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+tmr
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A time.Timer.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+wga
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+Wait group for all sender and receiver go routines.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+wgr
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+Wait group for all receiver go routines.
+</td>
+</tr>
+
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+wgs
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+Wait group for all sender go routines.
 </td>
 </tr>
 

@@ -205,7 +205,7 @@ func HandleAck(c *stompngo.Connection, h stompngo.Headers, id string) {
 	case stompngo.SPL_10:
 		ah = ah.Add("message-id", h.Value("message-id"))
 	default:
-		llu.Fatalln("unsubscribe invalid protocol level, should not happen")
+		llu.Fatalln("ack invalid protocol level, should not happen")
 	}
 	e := c.Ack(ah)
 	if e != nil {
