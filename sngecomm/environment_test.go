@@ -29,11 +29,6 @@ func TestEnvironmentDefaults(t *testing.T) {
 		t.Errorf("sngecomm Nqs, expected [%d], got [%d]\n", 1, n)
 	}
 	//
-	n = Recvconns()
-	if n != 1 {
-		t.Errorf("sngecomm Recvconns, expected [%d], got [%d]\n", 1, n)
-	}
-	//
 	n = Mdml()
 	if n != 1024*32 {
 		t.Errorf("sngecomm Mdml, expected [%d], got [%d]\n", 1024*32, n)

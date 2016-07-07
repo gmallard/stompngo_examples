@@ -34,7 +34,6 @@ var (
 	nqs  = 1               // Default number of queues for multi-queue demo(s)
 	mdml = 1024 * 32       // Message data max length of variable message, 32K
 	md   = make([]byte, 1) // Additional message data, primed during init()
-	rc   = 1               // Receiver connection count, srmgor_1smrconn
 	pbc  = 64              // Number of bytes to print (used in some
 	// 																 // examples that receive).
 	//
@@ -69,20 +68,6 @@ func Nqs() int {
 		}
 	}
 	return nqs
-}
-
-// Receiver connection count
-func Recvconns() int {
-	//
-	if s := os.Getenv("STOMP_RECVCONNS"); s != "" {
-		i, e := strconv.ParseInt(s, 10, 32)
-		if nil != e {
-			log.Println("RECVCONNS conversion error", e)
-		} else {
-			rc = int(i)
-		}
-	}
-	return rc
 }
 
 // Max Data Message Length
