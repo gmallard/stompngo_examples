@@ -146,7 +146,7 @@ a given destination.
 receipts/onack/onack.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Demonstrate obtaining a RECEIPT for an ACK request.
 </td>
 </tr>
 
@@ -155,7 +155,7 @@ TODO
 receipts/onsend/onsend.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Demonstrate obtaining a RECEIPT for a SEND request.
 </td>
 </tr>
 
@@ -599,6 +599,24 @@ receive messages and metadata from the broker.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+rd
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A receipt message from the broker. An instance of type stompngo.MessageData.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+rid
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A receipt id.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 sbh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
@@ -608,8 +626,18 @@ Subscribe headers.  A stompngo.Headers instance.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+sc
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A channel of type stompngo.MessageData.  Used in example code to
+receive messages and metadata from the broker.
+</td>
+</tr>
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 sh
 </td>
+
 <td style="border: 1px solid black;padding-left: 10px;" >
 Send headers.  A stompngo.Headers instance.
 </td>
