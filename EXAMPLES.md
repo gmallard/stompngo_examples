@@ -164,7 +164,17 @@ Demonstrate obtaining a RECEIPT for a SEND request.
 recv_mds/recv_mds.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+An example intended to demonstrate how different brokers distribute output
+messages when a client subscribes multiple times to the same destination.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+sngecomm
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A subdirectory which defines helper code for these examples.
 </td>
 </tr>
 
@@ -173,7 +183,7 @@ TODO
 sngecomm/environment.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Handle overrides from the environment for these examples.
 </td>
 </tr>
 
@@ -182,7 +192,7 @@ TODO
 sngecomm/utilities.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Utility routines used by these examples.
 </td>
 </tr>
 
