@@ -220,7 +220,8 @@ srmgor_1smrconn/srmgor_1smrconn.go
 <td style="border: 1px solid black;padding-left: 10px;" >
 Send and receive, many go routines.<br />
 One sender connection, with one go routine per destination.<br />
-Many receiver connections: one per destination.<br />
+Many receiver connections:<br />
+one receiver connection per destination (one go routine per connection.<br />
 </td>
 </tr>
 
@@ -229,7 +230,11 @@ Many receiver connections: one per destination.<br />
 srmgor_2conn/srmgor_2conn.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Send and receive, two connections.<br />
+Many go routines in the sender connection.<br />
+Many go routines in the receiver connection.<br />
+The receiver go routines illustrate a channel buffering technique that
+can be used with in bound message data.
 </td>
 </tr>
 
@@ -377,7 +382,8 @@ This script runs the Java sender/producer/putter.
 srmgor_1conn/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-Send and receive, many go routines, one *stompngo.Connection.
+Send and receive, many go routines, one *stompngo.Connection.<br />
+A logging helper script.
 </td>
 </tr>
 
@@ -386,7 +392,9 @@ Send and receive, many go routines, one *stompngo.Connection.
 srmgor_1smrconn/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Send and receive, one sender connection with many go routines,
+many receiver connections.<br />
+A logging helper script.
 </td>
 </tr>
 
@@ -395,7 +403,9 @@ TODO
 srmgor_2conn/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Send and receive, one receiver connection with many go routines, one
+sender connection with many go routines.<br />
+A logging helper script.
 </td>
 </tr>
 
@@ -404,7 +414,8 @@ TODO
 srmgor_manyconn/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Send and receive, many receiver connections, many receiver connections.<br />
+A logging helper script.
 </td>
 </tr>
 
@@ -676,11 +687,20 @@ set to 0, message bodies are (usually) not printed at all.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+qc
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A channel of type bool, used for signaling event completion.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 qn
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 A queue number identifier.  Used in a looping control structure for a
-variable number of queues.
+variable number of queues, or as a method parameter.
 </td>
 </tr>
 
@@ -786,6 +806,15 @@ sw
 <td style="border: 1px solid black;padding-left: 10px;" >
 A wait flag used by senders. When set to true, senders wait for a
 random amount of time after each send.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+si
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A loop counter formatted as a string.
 </td>
 </tr>
 
