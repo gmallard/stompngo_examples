@@ -40,8 +40,6 @@ var (
 	sendFact float64 = 1.0 // Send sleep time factor
 	recvFact float64 = 1.0 // Receive sleep time factor
 	//
-	conn2Buffer int = -1 // 2 connection buffer. < 0 means use queue size.
-	//
 	ackMode = "auto" // The default ack mode
 	//
 	pprof = false // Do not do profiling
@@ -105,19 +103,6 @@ func AckMode() string {
 		}
 	}
 	return ackMode
-}
-
-// 2 Connection Buffer Size
-func Conn2Buffer() int {
-	if s := os.Getenv("STOMP_CONN2BUFFER"); s != "" {
-		i, e := strconv.ParseInt(s, 10, 32)
-		if nil != e {
-			log.Println("CONN2BUFFER conversion error", e)
-		} else {
-			conn2Buffer = int(i)
-		}
-	}
-	return conn2Buffer
 }
 
 // Get Send Sleep Factor

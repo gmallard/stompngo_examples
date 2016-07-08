@@ -224,6 +224,5 @@ func ShowRunParms(exampid string) {
 	llu.Println(exampid, "SUBCHANCAP", senv.SubChanCap())
 	llu.Println(exampid, "RECVFACT", RecvFactor())
 	llu.Println(exampid, "SENDFACT", SendFactor())
-	llu.Println(exampid, "CON2BUFFER", Conn2Buffer())
 	llu.Println(exampid, "ACKMODE", AckMode())
 }

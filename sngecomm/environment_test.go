@@ -44,11 +44,6 @@ func TestEnvironmentDefaults(t *testing.T) {
 		t.Errorf("sngecomm AckMode, expected [%s], got [%s]\n", "auto", s)
 	}
 	//
-	n = Conn2Buffer()
-	if n != -1 {
-		t.Errorf("sngecomm Conn2Buffer, expected [%d], got [%d]\n", -1, n)
-	}
-	//
 	f := SendFactor()
 	if f != 1.0 {
 		t.Errorf("sngecomm SendFactor, expected [%v], got [%v]\n", 1.0, n)
