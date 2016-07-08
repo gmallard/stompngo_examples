@@ -207,7 +207,9 @@ Utility routines used by these examples.
 srmgor_1conn/srmgor_1conn.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-Send and receive, many go routines, one *stompngo.Connection.
+Send and receive, many go routines, one *stompngo.Connection.<br />
+One sender go routine per destination.<br />
+One receiver go routine per destination.
 </td>
 </tr>
 
@@ -216,7 +218,9 @@ Send and receive, many go routines, one *stompngo.Connection.
 srmgor_1smrconn/srmgor_1smrconn.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Send and receive, many go routines.<br />
+One sender connection, with one go routine per destination.<br />
+Many receiver connections: one per destination.<br />
 </td>
 </tr>
 
@@ -468,6 +472,16 @@ Ack headers.  A stompngo.Headers instance.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+c
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A loop couner.  Because in some situations it makes sense. And I enjoy
+writing 'c++' for the end of loop condition.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 ch
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
@@ -577,6 +591,15 @@ A message count.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+mcs
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A message count, with type string.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 md
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
@@ -618,6 +641,15 @@ nqs
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 The number of destinations to use.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+nr
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+The number of receiver go routines.
 </td>
 </tr>
 
