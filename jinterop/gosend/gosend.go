@@ -23,59 +23,63 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
 )
 
-var exampid = "gosend: "
+var (
+	exampid = "gosend: "
+	ll      = log.New(os.Stdout, "GOJSND ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	nmsgs   = 1
+)
 
-var nmsgs = 1
-
-// Connect to a STOMP 1.1 broker, send some messages and disconnect.
+// Connect to a STOMP 1.2 broker, send some messages and disconnect.
 func main() {
-	log.Println(exampid + "starts ...")
+	ll.Println(exampid + "starts ...")
 
 	// Open a net connection
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "dial complete ...")
+	ll.Println(exampid + "dial complete ...")
 
 	// Connect to broker
-	eh := stompngo.Headers{"login", "users", "passcode", "passw0rd"}
-	conn, e := stompngo.Connect(n, eh)
+	ch := stompngo.Headers{"login", "userr", "passcode", "passw0rd",
+		"host", "localhost", "accept-version", "1.2"}
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "stomp connect complete ...")
+	ll.Println(exampid + "stomp connect complete ...")
 
 	// Suppress content length here, so JMS will treat this as a 'text' message.
-	s := stompngo.Headers{"destination", "/queue/allards.queue",
+	sh := stompngo.Headers{"destination", "/queue/allards.queue",
 		"suppress-content-length", "true"} // send headers, suppress content-length
-	m := exampid + " message: "
+	ms := exampid + " message: "
 	for i := 1; i <= nmsgs; i++ {
-		t := m + fmt.Sprintf("%d", i)
-		e := conn.Send(s, t)
+		t := ms + fmt.Sprintf("%d", i)
+		e := conn.Send(sh, t)
 		if e != nil {
-			log.Fatalln(e) // Handle this ...
+			ll.Fatalln(e) // Handle this ...
 		}
-		log.Println(exampid, "send complete:", t)
+		ll.Println(exampid, "send complete:", t)
 	}
 
 	// Disconnect from the Stomp server
-	eh = stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	dh := stompngo.Headers{}
+	e = conn.Disconnect(dh)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect complete ...")
+	ll.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "network close complete ...")
+	ll.Println(exampid + "network close complete ...")
 
-	log.Println(exampid + "ends ...")
+	ll.Println(exampid + "ends ...")
 }

@@ -46,26 +46,33 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
+	// senv methods could be used in general by stompngo clients.
+	"github.com/gmallard/stompngo/senv"
+	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
-var exampid = "conndisc: "
+var (
+	exampid = "conndisc: "
+	ll      = log.New(os.Stdout, "ECNDS ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+)
 
 // Connect to a STOMP broker and disconnect.
 func main() {
-	log.Println(exampid + "starts ...")
+	ll.Println(exampid + "starts ...")
 
 	// Open a net connection
-	h, p := sngecomm.HostAndPort()
+	h, p := senv.HostAndPort()
 	jhp := net.JoinHostPort(h, p)
-	log.Println(exampid+"will dial ...", jhp)
+	ll.Println(exampid+"will dial ...", jhp)
 	n, e := net.Dial("tcp", jhp)
 	if e != nil {
-		log.Fatalln("netdial", e) // Handle this ......
+		ll.Fatalln("netdial", e) // Handle this ......
 	}
-	log.Println(exampid + "dial complete ...")
+	ll.Println(exampid+"dial complete ...", jhp)
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
@@ -73,37 +80,48 @@ func main() {
 
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
-	// b) the Headers
+	// b) the Connect Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln("sngConnect", e) // Handle this ......
+		ll.Fatalln("sngConnect", e) // Handle this ......
 	}
-	log.Println(exampid+"stomp connect complete, protocol level is:", conn.Protocol())
+	ll.Println(exampid+"stomp connect complete, protocol level is:",
+		conn.Protocol())
 
 	// Show connect response
-	log.Println(exampid+"connect response:", conn.ConnectResponse)
+	ll.Println(exampid+"connect response:", conn.ConnectResponse)
 
-	if sngecomm.HbParms() != "" {
-		log.Println(exampid+"heart-beat send:", conn.SendTickerInterval())
-		log.Println(exampid+"heart-beat receive:", conn.ReceiveTickerInterval())
+	if senv.Heartbeats() != "" {
+		ll.Println(exampid+"heart-beat send:", conn.SendTickerInterval())
+		ll.Println(exampid+"heart-beat receive:", conn.ReceiveTickerInterval())
 	}
 
 	// *NOTE* your application functionaltiy goes here!
 
-	// Polite Stomp disconnects are not required, but highly recommended.
-	// Empty headers here for the DISCONNECT
+	// Stomp disconnects are not required, but highly recommended.
+	// We use empty headers here for the DISCONNECT.  This will trigger the
+	// disconnect receipt described below.
+	//
+	// If you do *not* want a disconnect receipt use:
+	// stompngo.Headers{"noreceipt", "true"}
+	//
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln("sngDisconnect", e) // Handle this ......
+		ll.Fatalln("sngDisconnect", e) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect complete ...")
+	ll.Println(exampid + "stomp disconnect complete ...")
+
+	// After a DISCONNECT there is (by default) a 'Disconnect
+	// Receipt' available.  The disconnect receipt is an instance of
+	// stompngo.MessageData.
+	ll.Println(exampid+"disconnect receipt", conn.DisconnectReceipt)
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
-	log.Println(exampid + "network close complete ...")
+	ll.Println(exampid + "network close complete ...")
 
-	log.Println(exampid + "ends ...")
+	ll.Println(exampid + "ends ...")
 }

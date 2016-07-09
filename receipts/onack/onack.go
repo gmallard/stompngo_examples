@@ -42,12 +42,19 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
+	// senv methods could be used in general by stompngo clients.
+	"github.com/gmallard/stompngo/senv"
+	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
-var exampid = "onack: "
+var (
+	exampid = "onack: "
+	ll      = log.New(os.Stdout, "OACK ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+)
 
 func main() {
 
@@ -73,94 +80,94 @@ func main() {
 	// - Show data from the RECEIPT and verify it
 	// - Disconnect from the broker
 
-	log.Println(exampid + "starts ...")
+	ll.Println(exampid + "starts ...")
 
 	// **************************************** Phase 1
 	// Set up the connection.
-	h, p := sngecomm.HostAndPort()
-	log.Println(exampid+"host", h, "port", p)
+	h, p := senv.HostAndPort()
+	ll.Println(exampid+"host", h, "port", p)
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(exampid, e) // Handle this ......
 	}
-	log.Println(exampid + "dial 1 complete ...")
+	ll.Println(exampid+"dial 1 complete ...", net.JoinHostPort(h, p))
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(exampid, e) // Handle this ......
 	}
 
 	if conn.Protocol() == stompngo.SPL_10 {
 		panic("STOMP 1.0 not supported for this example")
 	}
-	log.Println(exampid+"stomp connect 1 complete ...", conn.Protocol())
+	ll.Println(exampid+"stomp connect 1 complete ...", conn.Protocol())
 
 	// ****************************************
 	// App logic here .....
 
 	// Prep
-	log.Println(sngecomm.ExampIdNow(exampid), "dest:", sngecomm.Dest())
+	ll.Println(exampid, "dest:", senv.Dest())
 
 	// ****************************************
 	// Send exactly one message.
-	s := stompngo.Headers{"destination", sngecomm.Dest()}
+	s := stompngo.Headers{"destination", senv.Dest()}
 	m := exampid + " message: "
 	t := m + "1"
-	log.Println(sngecomm.ExampIdNow(exampid), "sending now:", t)
+	ll.Println(exampid, "sending now:", t)
 	e = conn.Send(s, t)
 	if e != nil {
-		log.Fatalln("bad send", e) // Handle this ...
+		ll.Fatalln(exampid, "bad send", e) // Handle this ...
 	}
-	log.Println(sngecomm.ExampIdNow(exampid), "send complete:", t)
+	ll.Println(exampid, "send complete:", t)
 
 	// ****************************************
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(exampid, e) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect 1 complete ...")
+	ll.Println(exampid + "stomp disconnect 1 complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(exampid, e) // Handle this ......
 	}
-	log.Println(exampid + "network close 1 complete ...")
+	ll.Println(exampid + "network close 1 complete ...")
 
 	// **************************************** Phase 2
 
 	n, e = net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(exampid, e) // Handle this ......
 	}
-	log.Println(exampid + "dial 2 complete ...")
+	ll.Println(exampid + "dial 2 complete ...")
 
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(10, e) // Handle this ......
+		ll.Fatalln(10, e) // Handle this ......
 	}
-	log.Println(exampid+"stomp connect 2 complete ...", conn.Protocol())
+	ll.Println(exampid+"stomp connect 2 complete ...", conn.Protocol())
 
 	// ****************************************
 	// Subscribe here
-	d := sngecomm.Dest()
-	i := stompngo.Uuid()
+	d := senv.Dest()
+	id := stompngo.Uuid()
 
 	// Get the "subscribe channel"
-	sc := sngecomm.Subscribe(conn, d, i, "client-individual")
-	log.Println(exampid + "stomp subscribe complete ...")
+	sc := sngecomm.HandleSubscribe(conn, d, id, "client-individual")
+	ll.Println(exampid + "stomp subscribe complete ...")
 	// Get what is on the subscribe channel
 	md := <-sc
-	log.Println(exampid + "channel read complete ...")
+	ll.Println(exampid + "channel read complete ...")
 	// MessageData has two components:
 	// a) a Message struct
 	// b) an Error value.  Check the error value as usual
 	if md.Error != nil {
-		log.Fatalln(md.Error) // Handle this
+		ll.Fatalln(exampid, md.Error) // Handle this
 	}
-	log.Println(exampid+"read message COMMAND", md.Message.Command)
-	log.Println(exampid+"read message HEADERS", md.Message.Headers)
-	log.Println(exampid+"read message BODY", string(md.Message.Body))
+	ll.Println(exampid+"read message COMMAND", md.Message.Command)
+	ll.Println(exampid+"read message HEADERS", md.Message.Headers)
+	ll.Println(exampid+"read message BODY", string(md.Message.Body))
 
 	// Here we need to send an ACK.  Required Headers are different between
 	// a 1.1 and a 1.2 connection level.
@@ -178,7 +185,7 @@ func main() {
 	//
 	e = conn.Ack(ah)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(e) // Handle this ......
 	}
 
 	// Finally get the RECEIPT.  Where is it?  It is *not* on the "subscribe
@@ -187,28 +194,28 @@ func main() {
 	// ****************************************
 	// ***IMPORTANT***
 	// ***NOTE*** which channel this RECEIPT MessageData comes in on.
-	log.Println(sngecomm.ExampIdNow(exampid), "start receipt read")
-	r := <-conn.MessageData
-	log.Println(sngecomm.ExampIdNow(exampid), "end receipt read")
+	ll.Println(exampid, "start receipt read")
+	rd := <-conn.MessageData
+	ll.Println(exampid, "end receipt read")
 
 	// ****************************************
 	// Show stuff about the RECEIPT MessageData struct
-	log.Println(sngecomm.ExampIdNow(exampid), "receipt COMMAND", r.Message.Command)
-	log.Println(sngecomm.ExampIdNow(exampid), "receipt HEADERS", r.Message.Headers)
-	log.Println(sngecomm.ExampIdNow(exampid), "receipt BODY", string(r.Message.Body))
+	ll.Println(exampid, "receipt COMMAND", rd.Message.Command)
+	ll.Println(exampid, "receipt HEADERS", rd.Message.Headers)
+	ll.Println(exampid, "receipt BODY", string(rd.Message.Body))
 
 	// ****************************************
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(exampid, e) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect 2 complete ...")
+	ll.Println(exampid + "stomp disconnect 2 complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalln(exampid, e) // Handle this ......
 	}
-	log.Println(exampid + "network close 2 complete ...")
+	ll.Println(exampid + "network close 2 complete ...")
 
 }
