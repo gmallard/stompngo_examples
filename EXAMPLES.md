@@ -221,7 +221,7 @@ srmgor_1smrconn/srmgor_1smrconn.go
 Send and receive, many go routines.<br />
 One sender connection, with one go routine per destination.<br />
 Many receiver connections:<br />
-one receiver connection per destination (one go routine per connection.<br />
+one receiver connection per destination (one go routine per connection).<br />
 </td>
 </tr>
 
@@ -243,7 +243,9 @@ can be used with in bound message data.
 srmgor_manyconn/srmgor_manyconn.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+Send and receive.<br />
+Many sender connections.<br />
+Many receiver connections.
 </td>
 </tr>
 
@@ -335,7 +337,7 @@ It compiles the Java and the go interoperability code.
 jinterop/cp.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-An internal script, sourced by most of the other scripts.<br />
+An internal script, sourced by some of the other scripts.<br />
 It builds a list of jar files that will be included in the Java CLASSPATH.<br />
 This script should be modified to support your environment.
 </td>
@@ -414,7 +416,7 @@ A logging helper script.
 srmgor_manyconn/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-Send and receive, many receiver connections, many receiver connections.<br />
+Send and receive, many receiver connections, many sender connections.<br />
 A logging helper script.
 </td>
 </tr>
