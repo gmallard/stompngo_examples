@@ -168,15 +168,6 @@ func SendWait() bool {
 	return false
 }
 
-// True if persistent messages are desired.
-func Persistent() bool {
-	f := os.Getenv("STOMP_PERSISTENT")
-	if f == "" {
-		return false
-	}
-	return true
-}
-
 // True if max procs are to be set
 func SetMAXPROCS() bool {
 	f := os.Getenv("STOMP_SETMAXPROCS")
