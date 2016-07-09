@@ -260,10 +260,29 @@ A basic demonstration of subscribing and receiving messages.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+tlsexamps
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A subdirectory demonstrating the use of TLS connections.<br />
+All four primary TLS use cases are demonstrated.<br />
+UseCase1) Client does not authenticate the broker and broker does not
+authenticate the client.<br />
+UseCase2) Client does authenticate the broker but broker does not
+authenticate the client.<br />
+UseCase3) Client does not authenticate the broker but broker does
+authenticate the client.<br />
+UseCase4) Client does authenticate the broker and broker does
+authenticate the client.<br />
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 tlsexamps/tlsuc1/tlsuc1.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+UseCase1) Client does not authenticate the broker and broker does not
+authenticate the client.
 </td>
 </tr>
 
@@ -272,7 +291,8 @@ TODO
 tlsexamps/tlsuc2/tlsuc2.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+UseCase2) Client does authenticate the broker but broker does not
+authenticate the client.
 </td>
 </tr>
 
@@ -281,7 +301,8 @@ TODO
 tlsexamps/tlsuc3/tlsuc3.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+UseCase3) Client does not authenticate the broker but broker does
+authenticate the client.
 </td>
 </tr>
 
@@ -290,7 +311,8 @@ TODO
 tlsexamps/tlsuc4/tlsuc4.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+UseCase4) Client does authenticate the broker and broker does
+authenticate the client.
 </td>
 </tr>
 
@@ -426,7 +448,19 @@ A logging helper script.
 tlsexamps/tlsuc1/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+TLS Use Case 1.<br />
+Example run script.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+tlsexamps/tlsuc2/runall.sh
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+TLS Use Case 2.<br />
+Example run script.<br />
+Three separate runs, using different ports.
 </td>
 </tr>
 
@@ -435,7 +469,20 @@ TODO
 tlsexamps/tlsuc2/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+TLS Use Case 2.<br />
+Example run script.
+</td>
+</tr>
+
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+tlsexamps/tlsuc3/runall.sh
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+TLS Use Case 3.<br />
+Example run script.<br />
+Three separate runs, using different ports.
 </td>
 </tr>
 
@@ -444,7 +491,19 @@ TODO
 tlsexamps/tlsuc3/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+TLS Use Case 3.<br />
+Example run script.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+tlsexamps/tlsuc4/runall.sh
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+TLS Use Case 4.<br />
+Example run script.<br />
+Three separate runs, using different ports.
 </td>
 </tr>
 
@@ -453,7 +512,8 @@ TODO
 tlsexamps/tlsuc4/run.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-TODO
+TLS Use Case 4.<br />
+Example run script.
 </td>
 </tr>
 
@@ -461,8 +521,7 @@ TODO
 
 ## Variable Names in the Examples  ##
 
-Note the author is accustomed to idiomatic go variable names (short, 1
-character if possible).
+Note the author is accustomed to idiomatic go variable names (short if possible).
 
 <table border="1" style="width:80%;border: 1px solid black;">
 <tr>
@@ -881,6 +940,130 @@ wh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 Work headers.  A stompngo.Headers instance.
+</td>
+</tr>
+
+</table>
+
+## Variable Names Specific to the TLS Examples  ##
+
+<table border="1" style="width:80%;border: 1px solid black;">
+<tr>
+<th style="width:20%;border: 1px solid black;padding-left: 10px;" >
+Variable Name
+</th>
+<th style="width:60%border: 1px solid black;padding-left: 10px;" >
+Common Use
+</th>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+b
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A buffer, type []byte.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+c
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+An instance of *x509.Certificate.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+cc
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+An instance of tls.Certificate.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+cliCertFile
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+The full file name of the client's public cert in PEM format.
+</td>
+</tr>
+
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+cliKeyFile
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+The full file name of the client's private key in PEM format.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+e
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+An instance of error.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+k
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+An instance of *pem.Block.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+ll
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A logger instance.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+nc
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A pointer to a tls configuration, type *tls.Config, obtained from
+'tls.Client'.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+svrCAFile
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+The full file name of the server CA's public cert in PEM format.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+t
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+An instance of net.Conn obtained from net.Dial.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+tc
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A pointer to a tls configuration, type *tls.Config obtained from 'new'.
 </td>
 </tr>
 
