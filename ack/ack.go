@@ -86,11 +86,11 @@ func main() {
 	// requirements of each protocol level.
 	d := senv.Dest()
 	id := stompngo.Uuid()
-	r := sngecomm.HandleSubscribe(conn, d, id, "client")
+	sc := sngecomm.HandleSubscribe(conn, d, id, "client")
 	ll.Println(exampid + "stomp subscribe complete ...")
 	// Read data from the returned channel
 	for i := 1; i <= senv.Nmsgs(); i++ {
-		md := <-r
+		md := <-sc
 		ll.Println(exampid + "channel read complete ...")
 		// MessageData has two components:
 		// a) a Message struct
