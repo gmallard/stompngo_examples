@@ -105,8 +105,9 @@ func sender(conn *stompngo.Connection, qn, nmsgs int) {
 		if sw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
-			ll.Printf("%s connsess:%s sender_stagger qns:%s dt:%v\n",
-				exampid, conn.Session(), qns, dt)
+			ll.Printf("%s connsess:%s send_stagger dt:%v qns:%s\n",
+				exampid, conn.Session(),
+				dt, qns)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 		}
@@ -164,8 +165,9 @@ func receiveWorker(sc <-chan stompngo.MessageData, qns string, nmsgs int,
 		if rw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, rf))
-			ll.Printf("%s connsess:%s recv_stagger qns:%s dt:%v\n",
-				exampid, conn.Session(), qns, dt)
+			ll.Printf("%s connsess:%s recv_stagger dt:%v qns:%s\n",
+				exampid, conn.Session(),
+				dt, qns)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 		}

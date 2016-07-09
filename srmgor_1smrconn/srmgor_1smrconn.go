@@ -177,8 +177,9 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 		}
 		if rw {
 			dt := time.Duration(sngecomm.ValueBetween(min, max, rf))
-			ll.Printf("%s connsess:%s id:%s runReceive_stagger duration:%v qns:%s\n mc:%d",
-				exampid, conn.Session(), id, dt, qns, mc)
+			ll.Printf("%s connsess:%s runReceive_stagger dt:%v qns:%s mc:%d\n",
+				exampid, conn.Session(),
+				dt, qns, mc)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 			runtime.Gosched()

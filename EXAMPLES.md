@@ -890,15 +890,6 @@ An instance of *tls.Config.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-td
-</td>
-<td style="border: 1px solid black;padding-left: 10px;" >
-A time.Duration.
-</td>
-</tr>
-
-<tr>
-<td style="border: 1px solid black;padding-left: 10px;" >
 tmr
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >

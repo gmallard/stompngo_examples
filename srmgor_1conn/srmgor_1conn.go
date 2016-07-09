@@ -101,8 +101,9 @@ func sender(qn, mc int) {
 		}
 		if sw {
 			dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
-			ll.Printf("%s id:%s send_stagger:%dms qn:%d\n", exampid, id,
-				int64(dt)/1000000, qn)
+			ll.Printf("%s send_stagger dt:%v qn:%d id:%s\n",
+				exampid, dt,
+				qn, id)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 			runtime.Gosched()
@@ -155,10 +156,11 @@ func receiver(qn, mc int) {
 		}
 
 		if rw {
-			td := time.Duration(sngecomm.ValueBetween(min, max, rf))
-			ll.Printf("%s id:%s recv_stagger:%dms qn:%d\n", exampid, id,
-				int64(td)/1000000, qn)
-			tmr.Reset(td)
+			dt := time.Duration(sngecomm.ValueBetween(min, max, rf))
+			ll.Printf("%s recv_stagger dt:%v qn:%d id:%s\n",
+				exampid, dt,
+				qn, id)
+			tmr.Reset(dt)
 			_ = <-tmr.C
 			runtime.Gosched()
 		}
