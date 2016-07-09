@@ -691,6 +691,15 @@ A message body, with type string.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+mse
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A message body, with addional data, type string.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 n
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >

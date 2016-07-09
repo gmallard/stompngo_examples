@@ -110,11 +110,14 @@ func main() {
 
 	// ****************************************
 	// Send exactly one message.
-	s := stompngo.Headers{"destination", senv.Dest()}
+	sh := stompngo.Headers{"destination", senv.Dest()}
+	if senv.Persistent() {
+		sh = sh.Add("persistent", "true")
+	}
 	m := exampid + " message: "
 	t := m + "1"
 	ll.Println(exampid, "sending now:", t)
-	e = conn.Send(s, t)
+	e = conn.Send(sh, t)
 	if e != nil {
 		ll.Fatalln(exampid, "bad send", e) // Handle this ...
 	}

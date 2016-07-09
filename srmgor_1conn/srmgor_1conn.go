@@ -84,7 +84,7 @@ func sender(qn, mc int) {
 	ll.Printf("%s id:%s send_queue_name:%s qn:%d\n", exampid, id, d, qn)
 	wh := stompngo.Headers{"destination", d, "senderId", id,
 		"qnum", qns} // send Headers
-	if sngecomm.Persistent() {
+	if senv.Persistent() {
 		wh = wh.Add("persistent", "true")
 	}
 	//

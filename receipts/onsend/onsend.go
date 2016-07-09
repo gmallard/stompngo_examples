@@ -86,6 +86,9 @@ func main() {
 	rid := "1" // The receipt ID
 	sh := stompngo.Headers{"destination", senv.Dest(),
 		"receipt", rid} // send headers
+	if senv.Persistent() {
+		sh = sh.Add("persistent", "true")
+	}
 	ms := exampid + " message: "
 	t := ms + rid
 	ll.Println(exampid, "sending now:", t)

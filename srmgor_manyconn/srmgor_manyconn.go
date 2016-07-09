@@ -82,7 +82,7 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		exampid, conn.Session(), d, qnum)
 	wh := stompngo.Headers{"destination", d,
 		"qnum", qns} // send Headers
-	if sngecomm.Persistent() {
+	if senv.Persistent() {
 		wh = wh.Add("persistent", "true")
 	}
 	//
