@@ -105,8 +105,8 @@ func main() {
 	e = n.Handshake()
 	if e != nil {
 		if e.Error() == "EOF" {
-			ll.Println(exampid, "handshake EOF", "Is the broker port TLS enabled?",
-				"port:"+p)
+			ll.Printf("%s handshake EOF, Is the broker port TLS enabled? port:%s\n",
+				exampid, p)
 		}
 		ll.Fatalln(exampid, "netHandshake", e) // Handle this .....
 	}
