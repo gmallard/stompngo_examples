@@ -102,7 +102,8 @@ func main() {
 	tc.RootCAs.AddCert(c)           // Add the CA cert to the pool
 
 	// Connect logic: use net.Dial and tls.Client
-	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	t, e := net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}

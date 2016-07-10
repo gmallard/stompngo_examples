@@ -71,7 +71,8 @@ func main() {
 	tc.ServerName = h
 
 	// Connect logic: use net.Dial and tls.Client
-	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalln(exampid, "nedDial", e) // Handle this ......
 	}

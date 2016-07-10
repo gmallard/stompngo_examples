@@ -95,7 +95,8 @@ func main() {
 	tc.BuildNameToCertificate() // Build names map
 
 	// Connect logic: use net.Dial and tls.Client
-	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	t, e := net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}

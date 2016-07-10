@@ -79,7 +79,8 @@ func openSconn() (net.Conn, *stompngo.Connection) {
 	h, p := senv.HostAndPort() // network connection host and port
 	var e error
 	// Network open
-	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalln(exampid, "dial error", e) // Handle this ......
 	}

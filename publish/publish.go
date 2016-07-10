@@ -68,11 +68,12 @@ func main() {
 
 	// Open a net connection
 	h, p := senv.HostAndPort()
-	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalf("%s Dial %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Printf("%s dial_complete hap:%s\n", exampid, net.JoinHostPort(h, p))
+	ll.Printf("%s dial_complete hap:%s\n", exampid, hap)
 
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)

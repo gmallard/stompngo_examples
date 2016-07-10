@@ -248,7 +248,8 @@ func startSenders(qn int) {
 
 	// Open
 	h, p := senv.HostAndPort() // host and port
-	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalln(exampid, "startSenders netconnect error", e, qn) // Handle this ......
 	}

@@ -62,12 +62,13 @@ func main() {
 
 	// Open a net connection
 	h, p := senv.HostAndPort()
+	hap := net.JoinHostPort(h, p)
 	// Use tls.Dial, not net.Dial
-	n, e := tls.Dial("tcp", net.JoinHostPort(h, p), tc)
+	n, e := tls.Dial("tcp", hap, tc)
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid+"dial complete ...", net.JoinHostPort(h, p))
+	ll.Println(exampid+"dial complete ...", hap)
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.

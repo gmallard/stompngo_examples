@@ -258,9 +258,10 @@ func main() {
 	nqs := sngecomm.Nqs()
 	// Open net and stomp connections
 	h, p := senv.HostAndPort() // network connection host and port
+	hap := net.JoinHostPort(h, p)
 	var e error
 	// Network open
-	n, e = net.Dial("tcp", net.JoinHostPort(h, p))
+	n, e = net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalln(exampid, "main dial error", e) // Handle this ......
 	}

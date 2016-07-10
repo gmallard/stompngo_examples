@@ -66,13 +66,13 @@ func main() {
 
 	// Open a net connection
 	h, p := senv.HostAndPort()
-	jhp := net.JoinHostPort(h, p)
-	ll.Println(exampid+"will dial ...", jhp)
-	n, e := net.Dial("tcp", jhp)
+	hap := net.JoinHostPort(h, p)
+	ll.Println(exampid+"will dial ...", hap)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalln("netdial", e) // Handle this ......
 	}
-	ll.Println(exampid+"dial complete ...", jhp)
+	ll.Println(exampid+"dial complete ...", hap)
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
@@ -85,8 +85,7 @@ func main() {
 	if e != nil {
 		ll.Fatalln("sngConnect", e) // Handle this ......
 	}
-	ll.Println(exampid+"stomp connect complete, protocol level is:",
-		conn.Protocol())
+	ll.Println(exampid+"stomp connect complete, protocol level is:", conn.Protocol())
 
 	// Show connect response
 	ll.Println(exampid+"connect response:", conn.ConnectResponse)

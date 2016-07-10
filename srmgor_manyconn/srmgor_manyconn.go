@@ -187,7 +187,8 @@ func runReceiver(qnum int) {
 	ll.Printf("%s runReceiver_start qnum:%d\n", exampid, qnum)
 	// Network Open
 	h, p := senv.HostAndPort() // host and port
-	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
 		ll.Fatalln(exampid, "recv nectonnr:", qnum, e) // Handle this ......
 	}
