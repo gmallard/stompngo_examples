@@ -64,25 +64,24 @@ var (
 
 // Connect to a STOMP broker, publish some messages and disconnect.
 func main() {
-	ll.Println(exampid + "starts ...")
+	ll.Printf("%s starts\n", exampid)
 
 	// Open a net connection
 	h, p := senv.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s Dial %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid+"dial complete ...",
-		net.JoinHostPort(h, p))
+	ll.Printf("%s dial_complete hap:%s\n", exampid, net.JoinHostPort(h, p))
 
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s Connect %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid+"stomp connect complete ...", conn.Protocol())
+	ll.Printf("%s connsess:%s protocol:%s connectresponse:%v\n",
+		exampid, conn.Session(), conn.Protocol(), conn.ConnectResponse)
 
-	ll.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
 	sh := stompngo.Headers{"destination", senv.Dest()}
 	if senv.Persistent() {
@@ -90,35 +89,38 @@ func main() {
 	}
 	ms := exampid + " message: "
 	for i := 1; i <= senv.Nmsgs(); i++ {
-		t := ms + fmt.Sprintf("%d", i)
-		ll.Println(exampid, "sending now:", t)
-		e := conn.Send(sh, t)
+		mse := ms + fmt.Sprintf("%d", i)
+		ll.Printf("%s connsess:%s sending mse:%s\n",
+			exampid, conn.Session(),
+			mse)
+		e := conn.Send(sh, mse)
 		if e != nil {
-			ll.Fatalln("bad send", e) // Handle this ...
+			ll.Fatalf("%s Send %s\n",
+				exampid, conn.Session(),
+				e.Error())
 		}
-		ll.Println(exampid, "send complete:", t)
-		//		time.Sleep(16 * time.Millisecond)
-		//		time.Sleep(1 * time.Millisecond) // DB Behind ~ 4 messages
-		//		time.Sleep(64 * time.Millisecond) // DB OK
-		//		time.Sleep(125 * time.Millisecond) // DB OK
-		//		time.Sleep(250 * time.Millisecond) // DB OK
-		//		time.Sleep(500 * time.Millisecond) // DB OK
-		//		time.Sleep(2 * time.Minute)
+		ll.Printf("%s connsess:%s send_complete mse:%s\n",
+			exampid, conn.Session(),
+			mse)
 		time.Sleep(100 * time.Millisecond)
 	}
 
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s Disconnect %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s connsess:%s disconnect_complete\n",
+		exampid, conn.Session())
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s Close %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "network close complete ...")
 
-	ll.Println(exampid + "ends ...")
+	ll.Printf("%s connsess:%s net_close_complete\n",
+		exampid, conn.Session())
+
+	ll.Printf("%s connsess:%s ends\n",
+		exampid, conn.Session())
 }
