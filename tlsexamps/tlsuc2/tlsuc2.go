@@ -87,15 +87,15 @@ func main() {
 	// Finish TLS Config initialization, so client can authenticate broker.
 	b, e := ioutil.ReadFile(srvCAFile) // Read broker's CA cert (PEM)
 	if e != nil {
-		ll.Fatalln(exampid, e)
+		ll.Fatalf("%s %s\n", exampid, e.Error())
 	}
 	k, _ := pem.Decode(b) // Decode PEM format (*pem.Block)
 	if k == nil {
-		ll.Fatalln(exampid, e)
+		ll.Fatalf("%s %s\n", exampid, e.Error())
 	}
 	c, e := x509.ParseCertificate(k.Bytes) // Create *x509.Certificate
 	if e != nil {
-		ll.Fatalln(exampid, e)
+		ll.Fatalf("%s %s\n", exampid, e.Error())
 	}
 
 	tc.RootCAs = x509.NewCertPool() // Create a cert "pool"
@@ -104,7 +104,7 @@ func main() {
 	// Connect logic: use net.Dial and tls.Client
 	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s dial_complete\n", exampid)
 
@@ -128,7 +128,7 @@ func main() {
 	// b) the connect Headers
 	conn, e := stompngo.Connect(nc, ch)
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_connect_complete\n",
 		exampid, conn.Session())
@@ -139,7 +139,7 @@ func main() {
 	// Empty headers here.
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_disconnect_complete\n",
 		exampid, conn.Session())
@@ -147,7 +147,7 @@ func main() {
 	// Close the net connection.
 	e = nc.Close()
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s net_close_complete\n",
 		exampid, conn.Session())
