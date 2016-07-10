@@ -57,14 +57,21 @@ func main() {
 		"id", id} // subscribe/unsubscribe headers
 
 	// Subscribe
-	r, e := conn.Subscribe(sbh)
+	sc, e := conn.Subscribe(sbh)
 	if e != nil {
 		ll.Fatalln(e) // Handle this ...
 	}
 	ll.Println(exampid + "stomp subscribe complete ...")
+
+	var md stompngo.MessageData
 	// Read data from the returned channel
 	for i := 1; i <= nmsgs; i++ {
-		md := <-r
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// A RECEIPT or ERROR frame is unexpected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
 		ll.Println(exampid + "channel read complete ...")
 		// MessageData has two components:
 		// a) a Message struct
@@ -73,7 +80,7 @@ func main() {
 			ll.Fatalln(md.Error) // Handle this
 		}
 		//
-		ll.Printf("Frame Type: %s\n", md.Message.Command) // Will be MESSAGE or ERROR!
+		ll.Printf("Frame Type: %s\n", md.Message.Command) // Should be MESSAGE
 		wh := md.Message.Headers
 		for j := 0; j < len(wh)-1; j += 2 {
 			ll.Printf("Header: %s:%s\n", wh[j], wh[j+1])

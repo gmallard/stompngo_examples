@@ -84,8 +84,10 @@ func main() {
 
 	ll.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
-	sh := stompngo.Headers{"destination", senv.Dest(),
-		"persistent", "true"} // send headers
+	sh := stompngo.Headers{"destination", senv.Dest()}
+	if senv.Persistent() {
+		sh = sh.Add("persistent", "true")
+	}
 	ms := exampid + " message: "
 	for i := 1; i <= senv.Nmsgs(); i++ {
 		t := ms + fmt.Sprintf("%d", i)

@@ -69,11 +69,6 @@ func TestEnvironmentDefaults(t *testing.T) {
 		t.Errorf("sngecomm SendWait, expected [%t], got [%t]\n", true, b)
 	}
 	//
-	b = Persistent()
-	if b {
-		t.Errorf("sngecomm Persistent, expected [%t], got [%t]\n", false, b)
-	}
-	//
 	b = SetMAXPROCS()
 	if b {
 		t.Errorf("sngecomm SetMAXPROCS, expected [%t], got [%t]\n", false, b)

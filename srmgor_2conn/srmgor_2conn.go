@@ -84,7 +84,7 @@ func sender(conn *stompngo.Connection, qn, nmsgs int) {
 		exampid, conn.Session(), d)
 	wh := stompngo.Headers{"destination", d,
 		"qnum", qns} // send Headers
-	if sngecomm.Persistent() {
+	if senv.Persistent() {
 		wh = wh.Add("persistent", "true")
 	}
 	//
@@ -105,8 +105,9 @@ func sender(conn *stompngo.Connection, qn, nmsgs int) {
 		if sw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
-			ll.Printf("%s connsess:%s sender_stagger qns:%s dt:%v\n",
-				exampid, conn.Session(), qns, dt)
+			ll.Printf("%s connsess:%s send_stagger dt:%v qns:%s\n",
+				exampid, conn.Session(),
+				dt, qns)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 		}
@@ -126,8 +127,15 @@ func receiveWorker(sc <-chan stompngo.MessageData, qns string, nmsgs int,
 	pbc := sngecomm.Pbc() // Print byte count
 
 	// Receive loop
+	var md stompngo.MessageData
 	for i := 1; i <= nmsgs; i++ {
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// Frames RECEIPT or ERROR not expected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
 		if md.Error != nil {
 			ll.Fatalln(exampid, "recv read error", md.Error, qns)
 		}
@@ -164,8 +172,9 @@ func receiveWorker(sc <-chan stompngo.MessageData, qns string, nmsgs int,
 		if rw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, rf))
-			ll.Printf("%s connsess:%s recv_stagger qns:%s dt:%v\n",
-				exampid, conn.Session(), qns, dt)
+			ll.Printf("%s connsess:%s recv_stagger dt:%v qns:%s\n",
+				exampid, conn.Session(),
+				dt, qns)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 		}

@@ -133,10 +133,18 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 	nmsgs := senv.Nmsgs()
 
 	// Receive loop
+	var md stompngo.MessageData
 	for mc := 1; mc <= nmsgs; mc++ {
 		ll.Printf("%s connsess:%s runReceive_chanchek id:%s qns:%s lensc:%d capsc:%d\n",
 			exampid, conn.Session(), id, qns, len(sc), cap(sc))
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// Frames RECEIPT or ERROR not expected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
+
 		if md.Error != nil {
 			ll.Fatalln(exampid, id, "runReceive error", md.Error, qns)
 		}
@@ -177,8 +185,9 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 		}
 		if rw {
 			dt := time.Duration(sngecomm.ValueBetween(min, max, rf))
-			ll.Printf("%s connsess:%s id:%s runReceive_stagger duration:%v qns:%s\n mc:%d",
-				exampid, conn.Session(), id, dt, qns, mc)
+			ll.Printf("%s connsess:%s runReceive_stagger dt:%v qns:%s mc:%d\n",
+				exampid, conn.Session(),
+				dt, qns, mc)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 			runtime.Gosched()
@@ -327,12 +336,15 @@ func runSender(conn *stompngo.Connection, qns string) {
 	id := stompngo.Uuid() // A unique sender id
 	ll.Printf("%s runSender_start connsess:%s id:%s dest:%s\n",
 		exampid, conn.Session(), id, d)
-	h := stompngo.Headers{"destination", d, "senderId", id,
+	wh := stompngo.Headers{"destination", d, "senderId", id,
 		"qnum", qns} // basic send Headers
+	if senv.Persistent() {
+		wh = wh.Add("persistent", "true")
+	}
 	tmr := time.NewTimer(100 * time.Hour)
 	nmsgs := senv.Nmsgs()
 	for mc := 1; mc <= nmsgs; mc++ {
-		sh := append(h, "msgnum", fmt.Sprintf("%d", mc))
+		sh := append(wh, "msgnum", fmt.Sprintf("%d", mc))
 		// Generate a message to send ...............
 		ll.Printf("%s runSender_send connsess:%s id:%s qns:%s mc:%d\n",
 			exampid, conn.Session(),

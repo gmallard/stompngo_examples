@@ -31,8 +31,8 @@ package main
 import (
 	"crypto/tls"
 	"log"
-	"os"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.

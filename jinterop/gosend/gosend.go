@@ -26,6 +26,7 @@ import (
 	"os"
 	//
 	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo/senv"
 )
 
 var (
@@ -57,14 +58,17 @@ func main() {
 	// Suppress content length here, so JMS will treat this as a 'text' message.
 	sh := stompngo.Headers{"destination", "/queue/allards.queue",
 		"suppress-content-length", "true"} // send headers, suppress content-length
+	if senv.Persistent() {
+		sh = sh.Add("persistent", "true")
+	}
 	ms := exampid + " message: "
 	for i := 1; i <= nmsgs; i++ {
-		t := ms + fmt.Sprintf("%d", i)
-		e := conn.Send(sh, t)
+		mse := ms + fmt.Sprintf("%d", i)
+		e := conn.Send(sh, mse)
 		if e != nil {
 			ll.Fatalln(e) // Handle this ...
 		}
-		ll.Println(exampid, "send complete:", t)
+		ll.Println(exampid, "send complete:", mse)
 	}
 
 	// Disconnect from the Stomp server

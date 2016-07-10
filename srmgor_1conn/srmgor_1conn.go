@@ -84,7 +84,7 @@ func sender(qn, mc int) {
 	ll.Printf("%s id:%s send_queue_name:%s qn:%d\n", exampid, id, d, qn)
 	wh := stompngo.Headers{"destination", d, "senderId", id,
 		"qnum", qns} // send Headers
-	if sngecomm.Persistent() {
+	if senv.Persistent() {
 		wh = wh.Add("persistent", "true")
 	}
 	//
@@ -101,8 +101,9 @@ func sender(qn, mc int) {
 		}
 		if sw {
 			dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
-			ll.Printf("%s id:%s send_stagger:%dms qn:%d\n", exampid, id,
-				int64(dt)/1000000, qn)
+			ll.Printf("%s send_stagger dt:%v qn:%d id:%s\n",
+				exampid, dt,
+				qn, id)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 			runtime.Gosched()
@@ -125,11 +126,18 @@ func receiver(qn, mc int) {
 	sc := sngecomm.HandleSubscribe(conn, d, id, sngecomm.AckMode())
 	//
 	tmr := time.NewTimer(100 * time.Hour)
+	var md stompngo.MessageData
 	// Receive loop
 	for i := 1; i <= mc; i++ {
 		ll.Printf("%s id:%s recv_ranchek qn:%d chlen:%d chcap:%d\n", exampid, id,
 			qn, len(sc), cap(sc))
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// A RECEIPT or ERROR frame is unexpected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
 		if md.Error != nil {
 			ll.Fatalln(exampid, id, "recv error", md.Error, qn)
 		}
@@ -155,10 +163,11 @@ func receiver(qn, mc int) {
 		}
 
 		if rw {
-			td := time.Duration(sngecomm.ValueBetween(min, max, rf))
-			ll.Printf("%s id:%s recv_stagger:%dms qn:%d\n", exampid, id,
-				int64(td)/1000000, qn)
-			tmr.Reset(td)
+			dt := time.Duration(sngecomm.ValueBetween(min, max, rf))
+			ll.Printf("%s recv_stagger dt:%v qn:%d id:%s\n",
+				exampid, dt,
+				qn, id)
+			tmr.Reset(dt)
 			_ = <-tmr.C
 			runtime.Gosched()
 		}

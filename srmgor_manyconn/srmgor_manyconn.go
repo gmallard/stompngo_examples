@@ -82,7 +82,7 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		exampid, conn.Session(), d, qnum)
 	wh := stompngo.Headers{"destination", d,
 		"qnum", qns} // send Headers
-	if sngecomm.Persistent() {
+	if senv.Persistent() {
 		wh = wh.Add("persistent", "true")
 	}
 	//
@@ -105,7 +105,7 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if sw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
-			ll.Printf("%s connsess:%s sendMessages_stagger dt:%s qnum:%d\n",
+			ll.Printf("%s connsess:%s sendMessages_stagger dt:%v qnum:%d\n",
 				exampid, conn.Session(), dt, qnum)
 			tmr.Reset(dt)
 			_ = <-tmr.C
@@ -127,8 +127,15 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 
 	//
 	tmr := time.NewTimer(100 * time.Hour)
+	var md stompngo.MessageData
 	for mc := 1; mc <= nmsgs; mc++ {
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// Frames RECEIPT or ERROR not expected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
 		if md.Error != nil {
 			ll.Fatalln(exampid, "recv read:", md.Error, nc.LocalAddr().String(), qnum)
 		}
@@ -162,9 +169,8 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if rw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, rf))
-
-			ll.Printf("%s connsess:%s receiveMessages_stagger d:%s dt:%v qnum:%d\n",
-				exampid, conn.Session(), d, dt, qnum)
+			ll.Printf("%s connsess:%s recvMessages_stagger dt:%v qnum:%d\n",
+				exampid, conn.Session(), dt, qnum)
 			tmr.Reset(dt)
 			_ = <-tmr.C
 		}
