@@ -156,12 +156,22 @@ func main() {
 	d := senv.Dest()
 	id := stompngo.Uuid()
 
+	var md stompngo.MessageData // A message data instance
+
 	// Get the "subscribe channel"
 	sc := sngecomm.HandleSubscribe(conn, d, id, "client-individual")
 	ll.Println(exampid + "stomp subscribe complete ...")
-	// Get what is on the subscribe channel
-	md := <-sc
+
+	// Get data from the broker
+	select {
+	case md = <-sc:
+	case md = <-conn.MessageData:
+		// This would be contain an ERROR or RECEIPT frame.  Both are unexpected
+		// in this example.
+		ll.Fatalln(exampid, md) // Handle this
+	}
 	ll.Println(exampid + "channel read complete ...")
+
 	// MessageData has two components:
 	// a) a Message struct
 	// b) an Error value.  Check the error value as usual
@@ -191,14 +201,27 @@ func main() {
 		ll.Fatalln(e) // Handle this ......
 	}
 
+	// ****************************************
 	// Finally get the RECEIPT.  Where is it?  It is *not* on the "subscribe
 	// channel".  It is on the connection level MessageData channel.  Why?
-	// Because it does *not* have a "subscription" header.
+	// Because the broker does *not* include a "subscription" header in
+	// RECEIPT frames..
 	// ****************************************
+
 	// ***IMPORTANT***
 	// ***NOTE*** which channel this RECEIPT MessageData comes in on.
+	var rd stompngo.MessageData
 	ll.Println(exampid, "start receipt read")
-	rd := <-conn.MessageData
+	select {
+	case rd = <-sc:
+		// This would contain a MESSAGE frame.  It is unexpected here
+		// in this example.
+		ll.Fatalln(exampid, md) // Handle this
+	case rd = <-conn.MessageData: // RECEIPT frame s/b in the MessageData
+		if rd.Message.Command != stompngo.RECEIPT {
+			ll.Fatalln(exampid, md) // Handle this
+		}
+	}
 	ll.Println(exampid, "end receipt read")
 
 	// ****************************************

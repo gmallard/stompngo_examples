@@ -26,6 +26,7 @@ import (
 	"os"
 	//
 	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo/senv"
 )
 
 var (
@@ -67,7 +68,7 @@ func main() {
 		if e != nil {
 			ll.Fatalln(e) // Handle this ...
 		}
-		ll.Println(exampid, "send complete:", t)
+		ll.Println(exampid, "send complete:", mse)
 	}
 
 	// Disconnect from the Stomp server

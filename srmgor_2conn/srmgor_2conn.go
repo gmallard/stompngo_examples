@@ -127,8 +127,15 @@ func receiveWorker(sc <-chan stompngo.MessageData, qns string, nmsgs int,
 	pbc := sngecomm.Pbc() // Print byte count
 
 	// Receive loop
+	var md stompngo.MessageData
 	for i := 1; i <= nmsgs; i++ {
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// Frames RECEIPT or ERROR not expected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
 		if md.Error != nil {
 			ll.Fatalln(exampid, "recv read error", md.Error, qns)
 		}

@@ -126,11 +126,18 @@ func receiver(qn, mc int) {
 	sc := sngecomm.HandleSubscribe(conn, d, id, sngecomm.AckMode())
 	//
 	tmr := time.NewTimer(100 * time.Hour)
+	var md stompngo.MessageData
 	// Receive loop
 	for i := 1; i <= mc; i++ {
 		ll.Printf("%s id:%s recv_ranchek qn:%d chlen:%d chcap:%d\n", exampid, id,
 			qn, len(sc), cap(sc))
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// A RECEIPT or ERROR frame is unexpected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
 		if md.Error != nil {
 			ll.Fatalln(exampid, id, "recv error", md.Error, qn)
 		}

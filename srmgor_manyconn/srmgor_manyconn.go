@@ -127,8 +127,15 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 
 	//
 	tmr := time.NewTimer(100 * time.Hour)
+	var md stompngo.MessageData
 	for mc := 1; mc <= nmsgs; mc++ {
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// Frames RECEIPT or ERROR not expected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
 		if md.Error != nil {
 			ll.Fatalln(exampid, "recv read:", md.Error, nc.LocalAddr().String(), qnum)
 		}

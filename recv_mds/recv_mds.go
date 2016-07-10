@@ -70,7 +70,7 @@ var (
 	ll      = log.New(os.Stdout, "EMDS ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 )
 
-func recv(s int) {
+func recv(conn *stompngo.Connection, s int) {
 	ll.Println(exampid, "receiver", s, "starts")
 	// Setup Headers ...
 	id := stompngo.Uuid() // Use package convenience function for unique ID
@@ -79,12 +79,18 @@ func recv(s int) {
 
 	pbc := sngecomm.Pbc() // Print byte count
 
-	var sc <-chan stompngo.MessageData
-	sc = sngecomm.HandleSubscribe(conn, d, id, ackMode)
+	sc := sngecomm.HandleSubscribe(conn, d, id, ackMode)
 	// Receive loop.
 	mc := 0
+	var md stompngo.MessageData
 	for {
-		md := <-sc // Read a messagedata struct
+		select {
+		case md = <-sc: // Read a messagedata struct, with a MESSAGE frame
+		case md = <-conn.MessageData: // Read a messagedata struct, with a ERROR/RECEIPT frame
+			// Unexpected here in this example.
+			ll.Fatalln(exampid, md) // Handle this
+		}
+		//
 		mc++
 		if md.Error != nil {
 			panic(md.Error)
@@ -99,10 +105,10 @@ func recv(s int) {
 			ll.Printf("Payload: %s\n", ss) // Data payload
 		}
 
-		// time.Sleep(3 * time.Second) // A very arbitraty number
-		// time.Sleep(500 * time.Millisecond) // A very arbitraty number
+		// time.Sleep(3 * time.Second) // A very arbitrary number
+		// time.Sleep(500 * time.Millisecond) // A very arbitrary number
 		runtime.Gosched()
-		time.Sleep(1500 * time.Millisecond) // A very arbitraty number
+		time.Sleep(1500 * time.Millisecond) // A very arbitrary number
 		runtime.Gosched()
 		if ackMode != "auto" {
 			sngecomm.HandleAck(conn, md.Message.Headers, id)
@@ -132,7 +138,7 @@ func main() {
 	ll.Println(exampid, "stomp connect complete ...", conn.Protocol())
 
 	for i := 1; i <= ns; i++ {
-		go recv(i)
+		go recv(conn, i)
 	}
 	ll.Println(exampid, ns, "receivers started ...")
 

@@ -25,7 +25,7 @@ Receive messages from a STOMP broker, and ACK them.
 		# Login is "guest"
 		# Passcode is "guest
 		# Virtual Host is "localhost"
-		# Protocol is 1.1
+		# Protocol is 1.2
 		go run ack.go
 
 		# ACK messages from a broker using STOMP protocol level 1.0:
@@ -89,8 +89,16 @@ func main() {
 	sc := sngecomm.HandleSubscribe(conn, d, id, "client")
 	ll.Println(exampid + "stomp subscribe complete ...")
 	// Read data from the returned channel
+	var md stompngo.MessageData
 	for i := 1; i <= senv.Nmsgs(); i++ {
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// Frames RECEIPT or ERROR not expected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
+
 		ll.Println(exampid + "channel read complete ...")
 		// MessageData has two components:
 		// a) a Message struct

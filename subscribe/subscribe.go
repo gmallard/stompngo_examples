@@ -92,8 +92,16 @@ func main() {
 	sc := sngecomm.HandleSubscribe(conn, d, id, "auto")
 	ll.Println(exampid, "stomp subscribe complete ...")
 	// Read data from the returned channel
+	var md stompngo.MessageData
 	for i := 1; i <= senv.Nmsgs(); i++ {
-		md := <-sc
+
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// Frames RECEIPT or ERROR not expected here
+			ll.Fatalln(exampid, md) // Handle this
+		}
+
 		ll.Println(exampid, "channel read complete ...")
 		ll.Println("Message Number:", i)
 		// MessageData has two components:
