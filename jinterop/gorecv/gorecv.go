@@ -40,14 +40,14 @@ func main() {
 	// Set up the connection.
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "dial complete ...")
 	ch := stompngo.Headers{"login", "userr", "passcode", "passw0rd",
 		"host", "localhost", "accept-version", "1.2"}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "stomp connect complete ...")
 
@@ -59,7 +59,7 @@ func main() {
 	// Subscribe
 	sc, e := conn.Subscribe(sbh)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ...
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 	}
 	ll.Println(exampid + "stomp subscribe complete ...")
 
@@ -92,7 +92,7 @@ func main() {
 	// to provide it will result in an error return.
 	e = conn.Unsubscribe(sbh) // Same headers as Subscribe
 	if e != nil {
-		ll.Fatalln(e) // Handle this ...
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 	}
 	ll.Println(exampid + "stomp unsubscribe complete ...")
 
@@ -100,13 +100,13 @@ func main() {
 	dh := stompngo.Headers{}
 	e = conn.Disconnect(dh)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "network close complete ...")
 

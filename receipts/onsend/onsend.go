@@ -65,14 +65,14 @@ func main() {
 	h, p := senv.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s dial_complete hap:%s\n",
 		exampid, net.JoinHostPort(h, p))
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_connect_complete protocol:%s\n",
 		exampid, conn.Session(),
@@ -163,7 +163,7 @@ func main() {
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s stomp_disconnect_complete\n",
@@ -171,7 +171,7 @@ func main() {
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s net_close2_complete\n",

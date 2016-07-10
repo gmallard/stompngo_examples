@@ -65,7 +65,7 @@ func main() {
 	// Use tls.Dial, not net.Dial
 	n, e := tls.Dial("tcp", net.JoinHostPort(h, p), tc)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid+"dial complete ...", net.JoinHostPort(h, p))
 
@@ -78,7 +78,7 @@ func main() {
 	// b) the Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "stomp connect complete ...")
 
@@ -106,7 +106,7 @@ func main() {
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "network close complete ...")
 

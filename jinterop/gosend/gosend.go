@@ -42,7 +42,7 @@ func main() {
 	// Open a net connection
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "dial complete ...")
 
@@ -51,7 +51,7 @@ func main() {
 		"host", "localhost", "accept-version", "1.2"}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "stomp connect complete ...")
 
@@ -66,7 +66,7 @@ func main() {
 		mse := ms + fmt.Sprintf("%d", i)
 		e := conn.Send(sh, mse)
 		if e != nil {
-			ll.Fatalln(e) // Handle this ...
+			ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 		}
 		ll.Println(exampid, "send complete:", mse)
 	}
@@ -75,13 +75,13 @@ func main() {
 	dh := stompngo.Headers{}
 	e = conn.Disconnect(dh)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "network close complete ...")
 

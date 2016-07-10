@@ -119,7 +119,7 @@ func main() {
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Println(exampid + "network close complete ...")
 

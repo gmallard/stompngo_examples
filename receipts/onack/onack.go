@@ -87,14 +87,14 @@ func main() {
 	h, p := senv.HostAndPort()
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s dial1_complete hap:%s\n",
 		exampid, net.JoinHostPort(h, p))
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 
 	if conn.Protocol() == stompngo.SPL_10 {
@@ -138,7 +138,7 @@ func main() {
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_disconnect1_complete t:%s\n",
 		exampid, conn.Session(),
@@ -146,7 +146,7 @@ func main() {
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s net_close1_complete t:%s\n",
 		exampid, conn.Session(),
@@ -156,7 +156,7 @@ func main() {
 
 	n, e = net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 
 	ll.Printf("%s dial2_complete hap:%s\n",
@@ -225,7 +225,7 @@ func main() {
 	//
 	e = conn.Ack(ah)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 
 	// ****************************************
@@ -270,7 +270,7 @@ func main() {
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s stomp_disconnect2_complete\n",
@@ -278,7 +278,7 @@ func main() {
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s net_close2_complete\n",
