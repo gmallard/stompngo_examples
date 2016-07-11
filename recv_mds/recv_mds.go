@@ -71,7 +71,7 @@ var (
 )
 
 func recv(conn *stompngo.Connection, s int) {
-	ll.Println(exampid, "receiver", s, "starts")
+	ll.Printf("%s v1:%v v2:%v v3:%v\n", exampid, "receiver", s, "starts")
 	// Setup Headers ...
 	id := stompngo.Uuid() // Use package convenience function for unique ID
 	d := senv.Dest()
@@ -88,14 +88,14 @@ func recv(conn *stompngo.Connection, s int) {
 		case md = <-sc: // Read a messagedata struct, with a MESSAGE frame
 		case md = <-conn.MessageData: // Read a messagedata struct, with a ERROR/RECEIPT frame
 			// Unexpected here in this example.
-			ll.Fatalln(exampid, md) // Handle this
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 		}
 		//
 		mc++
 		if md.Error != nil {
 			panic(md.Error)
 		}
-		ll.Println(exampid, "subnumber", s, id, mc)
+		ll.Printf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "subnumber", s, id, mc)
 		if pbc > 0 {
 			maxlen := pbc
 			if len(md.Message.Body) < maxlen {
@@ -112,7 +112,7 @@ func recv(conn *stompngo.Connection, s int) {
 		runtime.Gosched()
 		if ackMode != "auto" {
 			sngecomm.HandleAck(conn, md.Message.Headers, id)
-			ll.Println(exampid + "ACK complete ...")
+			ll.Printf("%s v1:%v\n", exampid, "ACK_complete_...")
 		}
 		runtime.Gosched()
 	}
@@ -121,7 +121,7 @@ func recv(conn *stompngo.Connection, s int) {
 // Connect to a STOMP broker, receive and ackMode some messages.
 // Disconnect never occurs, kill via ^C.
 func main() {
-	ll.Println(exampid, "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts ...")
 
 	// Set up the connection.
 	h, p := senv.HostAndPort() //
@@ -130,18 +130,18 @@ func main() {
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid, "dial complete ...", hap)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "dial complete ...", hap)
 	ch := sngecomm.ConnectHeaders()
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid, "stomp connect complete ...", conn.Protocol())
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "stomp connect complete ...", conn.Protocol())
 
 	for i := 1; i <= ns; i++ {
 		go recv(conn, i)
 	}
-	ll.Println(exampid, ns, "receivers started ...")
+	ll.Printf("%s v1:%v v2:%v\n", exampid, ns, "receivers started ...")
 
 	select {} // This will never complete, use ^C to cancel
 

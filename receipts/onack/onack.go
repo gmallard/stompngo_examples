@@ -99,7 +99,7 @@ func main() {
 	}
 
 	if conn.Protocol() == stompngo.SPL_10 {
-		ll.Fatalln(exampid, "STOMP 1.0 not supported for this example")
+		ll.Fatalf("%s v1:%v\n", exampid, "STOMP 1.0 not supported for this example")
 	}
 	ll.Printf("%s connsess:%s stomp_connect1_complete protocol:%s\n",
 		exampid, conn.Session(),
@@ -128,7 +128,7 @@ func main() {
 		t)
 	e = conn.Send(sh, t)
 	if e != nil {
-		ll.Fatalln(exampid, "bad send", e) // Handle this ...
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "bad send", e) // Handle this ...
 	}
 
 	ll.Printf("%s connsess:%s send_complete t:%s\n",
@@ -165,7 +165,7 @@ func main() {
 
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(10, e) // Handle this ......
+		ll.Fatalf("%s  f4v:%v\n", exampid, 10, e) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_connect2_complete protocol:%s\n",
 		exampid, conn.Session(),
@@ -188,7 +188,7 @@ func main() {
 	case md = <-conn.MessageData:
 		// This would be contain an ERROR or RECEIPT frame.  Both are unexpected
 		// in this example.
-		ll.Fatalln(exampid, md) // Handle this
+		ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 	}
 	ll.Printf("%s connsess:%s channel_read_complete\n",
 		exampid, conn.Session())
@@ -197,7 +197,7 @@ func main() {
 	// a) a Message struct
 	// b) an Error value.  Check the error value as usual
 	if md.Error != nil {
-		ll.Fatalln(exampid, md.Error) // Handle this
+		ll.Fatalf("%s v1:%v\n", exampid, md.Error) // Handle this
 	}
 
 	ll.Printf("%s connsess:%s read_message_COMMAND command:%s\n",
@@ -246,10 +246,10 @@ func main() {
 	case rd = <-sc:
 		// This would contain a MESSAGE frame.  It is unexpected here
 		// in this example.
-		ll.Fatalln(exampid, md) // Handle this
+		ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 	case rd = <-conn.MessageData: // RECEIPT frame s/b in the MessageData
 		if rd.Message.Command != stompngo.RECEIPT {
-			ll.Fatalln(exampid, md) // Handle this
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 		}
 	}
 	ll.Printf("%s connsess:%s end_receipt_read\n",

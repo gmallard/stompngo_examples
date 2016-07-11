@@ -63,7 +63,7 @@ var (
 
 // Connect to a STOMP broker, subscribe and receive some messages and disconnect.
 func main() {
-	ll.Println(exampid, "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts ...")
 
 	// Set up the connection.
 	h, p := senv.HostAndPort()
@@ -72,17 +72,17 @@ func main() {
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid, "dial complete ...", hap)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "dial complete ...", hap)
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid+"stomp connect complete ...", conn.Protocol())
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "stomp connect complete ...", conn.Protocol())
 
 	pbc := sngecomm.Pbc() // Print byte count
 
-	ll.Println(exampid+"connected headers", conn.ConnectResponse.Headers)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.
 	// Subscribe returns a channel of MessageData struct.
@@ -91,7 +91,7 @@ func main() {
 	d := senv.Dest()
 	id := stompngo.Uuid()
 	sc := sngecomm.HandleSubscribe(conn, d, id, "auto")
-	ll.Println(exampid, "stomp subscribe complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp subscribe complete ...")
 	// Read data from the returned channel
 	var md stompngo.MessageData
 	for i := 1; i <= senv.Nmsgs(); i++ {
@@ -100,21 +100,21 @@ func main() {
 		case md = <-sc:
 		case md = <-conn.MessageData:
 			// Frames RECEIPT or ERROR not expected here
-			ll.Fatalln(exampid, md) // Handle this
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 		}
 
-		ll.Println(exampid, "channel read complete ...")
-		ll.Println("Message Number:", i)
+		ll.Printf("%s v1:%v\n", exampid, "channel read complete ...")
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "Message Number:", i)
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
 		if md.Error != nil {
-			ll.Fatalln(exampid, md.Error) // Handle this
+			ll.Fatalf("%s v1:%v\n", exampid, md.Error) // Handle this
 		}
 		//
 		ll.Printf("Frame Type: %s\n", md.Message.Command) // Will be MESSAGE or ERROR!
 		if md.Message.Command != stompngo.MESSAGE {
-			ll.Fatalln(exampid, md) // Handle this ...
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this ...
 		}
 		wh := md.Message.Headers
 		for j := 0; j < len(wh)-1; j += 2 {
@@ -133,20 +133,20 @@ func main() {
 	// Again we use a utility routine to handle the different protocol level
 	// requirements.
 	sngecomm.HandleUnsubscribe(conn, d, id)
-	ll.Println(exampid, "unsubscribe complete")
+	ll.Printf("%s v1:%v\n", exampid, "unsubscribe complete")
 
 	// Disconnect from the Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid, "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp disconnect complete ...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid, "network close complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "network close complete ...")
 
-	ll.Println(exampid, "ends ...")
+	ll.Printf("%s v1:%v\n", exampid, "ends ...")
 }

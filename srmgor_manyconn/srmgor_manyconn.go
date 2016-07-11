@@ -97,7 +97,7 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 			exampid, conn.Session(), mc, qnum)
 		e := conn.Send(sh, string(sngecomm.Partial()))
 		if e != nil {
-			ll.Fatalln(exampid, "send:", e, nc.LocalAddr().String(), qnum)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "send:", e, nc.LocalAddr().String(), qnum)
 		}
 		if mc == nmsgs {
 			break
@@ -134,16 +134,16 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		case md = <-sc:
 		case md = <-conn.MessageData:
 			// Frames RECEIPT or ERROR not expected here
-			ll.Fatalln(exampid, md) // Handle this
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 		}
 		if md.Error != nil {
-			ll.Fatalln(exampid, "recv read:", md.Error, nc.LocalAddr().String(), qnum)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "recv read:", md.Error, nc.LocalAddr().String(), qnum)
 		}
 
 		// Sanity check the queue and message numbers
 		mcs := fmt.Sprintf("%d", mc) // message number
 		if !md.Message.Headers.ContainsKV("qnum", qns) || !md.Message.Headers.ContainsKV("msgnum", mcs) {
-			ll.Fatalln("Bad Headers", md.Message.Headers, qns, mcs)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "Bad Headers", md.Message.Headers, qns, mcs)
 		}
 
 		// Process the inbound message .................
@@ -190,7 +190,7 @@ func runReceiver(qnum int) {
 	hap := net.JoinHostPort(h, p)
 	n, e := net.Dial("tcp", hap)
 	if e != nil {
-		ll.Fatalln(exampid, "recv nectonnr:", qnum, e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "recv nectonnr:", qnum, e) // Handle this ......
 	}
 
 	ll.Printf("%s runReceiver_start open_complete qnum:%d\n", exampid, qnum)
@@ -206,7 +206,7 @@ func runReceiver(qnum int) {
 		exampid, ch, senv.Vhost(), senv.Protocol(), qnum)
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(exampid, "recv stompconnect:", qnum, e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "recv stompconnect:", qnum, e) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s runReceiver_stompconnect qnum:%d\n",
@@ -224,7 +224,7 @@ func runReceiver(qnum int) {
 	eh := stompngo.Headers{"recv_discqueue", fmt.Sprintf("%d", qnum)}
 	e = conn.Disconnect(eh)
 	if e != nil {
-		ll.Fatalln(exampid, "recv disconnects:", qnum, e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "recv disconnects:", qnum, e) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s runReceiver_disconnect_complete qnum:%d\n",
@@ -233,9 +233,8 @@ func runReceiver(qnum int) {
 	// Network close
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(exampid, "recv netcloser", qnum, e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "recv netcloser", qnum, e) // Handle this ......
 	}
-	// ll.Println(exampid, "recv network close complete", qnum)
 	ll.Printf("%s connsess:%s runReceiver_net_close_complete qnum:%d\n",
 		exampid, conn.Session(), qnum)
 
@@ -250,7 +249,7 @@ func runSender(qnum int) {
 	h, p := senv.HostAndPort() // host and port
 	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
 	if e != nil {
-		ll.Fatalln(exampid, "send nectonnr:", qnum, e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "send nectonnr:", qnum, e) // Handle this ......
 	}
 
 	ll.Printf("%s runSender_start open_complete qnum:%d\n", exampid, qnum)
@@ -266,7 +265,7 @@ func runSender(qnum int) {
 		exampid, ch, senv.Vhost(), senv.Protocol(), qnum)
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(exampid, "send stompconnect:", qnum, e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "send stompconnect:", qnum, e) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s runSender_stompconnect qnum:%d\n",
@@ -280,7 +279,7 @@ func runSender(qnum int) {
 	eh := stompngo.Headers{"send_discqueue", fmt.Sprintf("%d", qnum)}
 	e = conn.Disconnect(eh)
 	if e != nil {
-		ll.Fatalln(exampid, "send disconnects:", qnum, e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "send disconnects:", qnum, e) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s runSender_disconnect_complete qnum:%d\n",
@@ -288,7 +287,7 @@ func runSender(qnum int) {
 	// Network close
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(exampid, "send netcloser", qnum, e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "send netcloser", qnum, e) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s runSender_net_close_complete qnum:%d\n",
@@ -311,42 +310,42 @@ func main() {
 	}
 
 	tn := time.Now()
-	ll.Println(exampid, "main starts")
+	ll.Printf("%s v1:%v\n", exampid, "main starts")
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
-		ll.Println(exampid, "main number of CPUs is:", nc)
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main number of CPUs is:", nc)
 		c := runtime.GOMAXPROCS(nc)
-		ll.Println(exampid, "main previous number of GOMAXPROCS is:", c)
-		ll.Println(exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main previous number of GOMAXPROCS is:", c)
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	}
 	//
 	sw = sngecomm.SendWait()
 	rw = sngecomm.RecvWait()
 	sf = sngecomm.SendFactor()
 	rf = sngecomm.RecvFactor()
-	ll.Println(exampid, "main Sleep Factors", "send", sf, "recv", rf)
+	ll.Printf("%s v1:%v v2:%v v3:%v v4:%v v5:%v\n", exampid, "main Sleep Factors", "send", sf, "recv", rf)
 	//
 	numq := sngecomm.Nqs()
 	nmsgs = senv.Nmsgs() // message count
 	//
-	ll.Println(exampid, "main starting receivers")
+	ll.Printf("%s v1:%v\n", exampid, "main starting receivers")
 	for q := 1; q <= numq; q++ {
 		wgr.Add(1)
 		go runReceiver(q)
 	}
-	ll.Println(exampid, "main started receivers")
+	ll.Printf("%s v1:%v\n", exampid, "main started receivers")
 	//
-	ll.Println(exampid, "main starting senders")
+	ll.Printf("%s v1:%v\n", exampid, "main starting senders")
 	for q := 1; q <= numq; q++ {
 		wgs.Add(1)
 		go runSender(q)
 	}
-	ll.Println(exampid, "main started senders")
+	ll.Printf("%s v1:%v\n", exampid, "main started senders")
 	//
 	wgs.Wait()
-	ll.Println(exampid, "main senders complete")
+	ll.Printf("%s v1:%v\n", exampid, "main senders complete")
 	wgr.Wait()
-	ll.Println(exampid, "main receivers complete")
+	ll.Printf("%s v1:%v\n", exampid, "main receivers complete")
 	//
-	ll.Println(exampid, "main ends", time.Since(tn))
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "main ends", time.Since(tn))
 }

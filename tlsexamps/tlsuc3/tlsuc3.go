@@ -109,7 +109,7 @@ func main() {
 			ll.Printf("%s handshake EOF, Is the broker port TLS enabled? port:%s\n",
 				exampid, p)
 		}
-		ll.Fatalln(exampid, "netHandshake", e) // Handle this .....
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "netHandshake", e) // Handle this .....
 	}
 
 	ll.Printf("%s handshake_complete\n", exampid)

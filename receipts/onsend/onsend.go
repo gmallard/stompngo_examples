@@ -104,7 +104,7 @@ func main() {
 		t)
 	e = conn.Send(sh, t)
 	if e != nil {
-		ll.Fatalln(exampid, "bad send", e) // Handle this ...
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "bad send", e) // Handle this ...
 	}
 	ll.Printf("%s connsess:%s send_complete t:%s\n",
 		exampid, conn.Session(),
@@ -126,7 +126,7 @@ func main() {
 	rd := <-conn.MessageData
 
 	if rd.Message.Command != stompngo.RECEIPT {
-		ll.Fatalln(exampid, rd) // Handle this
+		ll.Fatalf("%s v1:%v\n", exampid, rd) // Handle this
 	}
 
 	ll.Printf("%s connsess:%s end_receipt_read t:%s\n",
@@ -155,7 +155,7 @@ func main() {
 		irid)
 	// Check that it matches what we asked for
 	if rid != irid {
-		ll.Fatalln(exampid, "notsame", rid, irid) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "notsame", rid, irid) // Handle this ......
 	}
 
 	ll.Printf("%s connsess:%s validation_complete\n",
