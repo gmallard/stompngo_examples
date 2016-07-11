@@ -618,6 +618,16 @@ A broker's (DNS) host name.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
+hap
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+A host and port name returned from net.JoinHostPort(h, p), type string.<br />
+Example: localhost:61613.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
 i
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >

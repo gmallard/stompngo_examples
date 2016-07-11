@@ -49,7 +49,7 @@ var (
 
 // Connect to a STOMP 1.0 broker using TLS and disconnect.
 func main() {
-	ll.Println(exampid + "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts_...")
 
 	// TLS Configuration.  This configuration assumes that:
 	// a) The server used does *not* require client certificates
@@ -62,12 +62,13 @@ func main() {
 
 	// Open a net connection
 	h, p := senv.HostAndPort()
+	hap := net.JoinHostPort(h, p)
 	// Use tls.Dial, not net.Dial
-	n, e := tls.Dial("tcp", net.JoinHostPort(h, p), tc)
+	n, e := tls.Dial("tcp", hap, tc)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid+"dial complete ...", net.JoinHostPort(h, p))
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "dial complete ...", hap)
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
@@ -78,9 +79,9 @@ func main() {
 	// b) the Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "stomp connect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_connect_complete_...")
 
 	// *NOTE* your application functionaltiy goes here!
 
@@ -93,22 +94,22 @@ func main() {
 	//
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid+"sngDisconnectTLS", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "sngDisconnectTLS", e) // Handle this ......
 	}
-	ll.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
 
 	// After a DISCONNECT there is (by default) a 'Disconnect
 	// Receipt' available.  The disconnect receipt is an instance of
 	// stompngo.MessageData.
-	ll.Println(exampid+"disconnect receipt", conn.DisconnectReceipt)
-	ll.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "disconnect receipt", conn.DisconnectReceipt)
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "network close complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "network_close_complete_...")
 
-	ll.Println(exampid + "ends ...")
+	ll.Printf("%s v1:%v\n", exampid, "ends_...")
 }

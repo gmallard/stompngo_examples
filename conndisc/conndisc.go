@@ -62,17 +62,17 @@ var (
 
 // Connect to a STOMP broker and disconnect.
 func main() {
-	ll.Println(exampid + "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts_...")
 
 	// Open a net connection
 	h, p := senv.HostAndPort()
-	jhp := net.JoinHostPort(h, p)
-	ll.Println(exampid+"will dial ...", jhp)
-	n, e := net.Dial("tcp", jhp)
+	hap := net.JoinHostPort(h, p)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "will dial ...", hap)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
-		ll.Fatalln("netdial", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "netdial", e) // Handle this ......
 	}
-	ll.Println(exampid+"dial complete ...", jhp)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "dial complete ...", hap)
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
@@ -83,17 +83,16 @@ func main() {
 	// b) the Connect Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln("sngConnect", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "sngConnect", e) // Handle this ......
 	}
-	ll.Println(exampid+"stomp connect complete, protocol level is:",
-		conn.Protocol())
+	ll.Printf("%s v1:%v v2:%v v3:%v\n", exampid, "stomp connect complete, protocol level is:", conn.Protocol())
 
 	// Show connect response
-	ll.Println(exampid+"connect response:", conn.ConnectResponse)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "connect response:", conn.ConnectResponse)
 
 	if senv.Heartbeats() != "" {
-		ll.Println(exampid+"heart-beat send:", conn.SendTickerInterval())
-		ll.Println(exampid+"heart-beat receive:", conn.ReceiveTickerInterval())
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "heart-beat send:", conn.SendTickerInterval())
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "heart-beat receive:", conn.ReceiveTickerInterval())
 	}
 
 	// *NOTE* your application functionaltiy goes here!
@@ -107,21 +106,21 @@ func main() {
 	//
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln("sngDisconnect", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "sngDisconnect", e) // Handle this ......
 	}
-	ll.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
 
 	// After a DISCONNECT there is (by default) a 'Disconnect
 	// Receipt' available.  The disconnect receipt is an instance of
 	// stompngo.MessageData.
-	ll.Println(exampid+"disconnect receipt", conn.DisconnectReceipt)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "disconnect receipt", conn.DisconnectReceipt)
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "network close complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "network_close_complete_...")
 
-	ll.Println(exampid + "ends ...")
+	ll.Printf("%s v1:%v\n", exampid, "ends_...")
 }

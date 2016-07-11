@@ -37,23 +37,23 @@ var (
 
 // Connect to a STOMP 1.2 broker, send some messages and disconnect.
 func main() {
-	ll.Println(exampid + "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts_...")
 
 	// Open a net connection
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "dial complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "dial_complete_...")
 
 	// Connect to broker
 	ch := stompngo.Headers{"login", "userr", "passcode", "passw0rd",
 		"host", "localhost", "accept-version", "1.2"}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "stomp connect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_connect_complete_...")
 
 	// Suppress content length here, so JMS will treat this as a 'text' message.
 	sh := stompngo.Headers{"destination", "/queue/allards.queue",
@@ -66,24 +66,24 @@ func main() {
 		mse := ms + fmt.Sprintf("%d", i)
 		e := conn.Send(sh, mse)
 		if e != nil {
-			ll.Fatalln(e) // Handle this ...
+			ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 		}
-		ll.Println(exampid, "send complete:", mse)
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "send complete:", mse)
 	}
 
 	// Disconnect from the Stomp server
 	dh := stompngo.Headers{}
 	e = conn.Disconnect(dh)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "network close complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "network_close_complete_...")
 
-	ll.Println(exampid + "ends ...")
+	ll.Printf("%s v1:%v\n", exampid, "ends_...")
 }

@@ -71,9 +71,10 @@ func main() {
 	tc.ServerName = h
 
 	// Connect logic: use net.Dial and tls.Client
-	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
-		ll.Fatalln(exampid, "nedDial", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "nedDial", e) // Handle this ......
 	}
 	ll.Printf("%s dial_complete\n", exampid)
 
@@ -81,10 +82,10 @@ func main() {
 	e = nc.Handshake()
 	if e != nil {
 		if e.Error() == "EOF" {
-			ll.Println(exampid, "handshake EOF", "Is the broker port TLS enabled?",
-				"port:"+p)
+			ll.Printf("%s handshake EOF, Is the broker port TLS enabled? port:%s\n",
+				exampid, p)
 		}
-		ll.Fatalln(exampid, "netHandshake", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "netHandshake", e) // Handle this ......
 	}
 	ll.Printf("%s handshake_complete\n", exampid)
 	sngecomm.DumpTLSConfig(exampid, tc, nc)
@@ -96,7 +97,7 @@ func main() {
 	// b) the connect Headers
 	conn, e := stompngo.Connect(nc, ch)
 	if e != nil {
-		ll.Fatalln(exampid, "sngConnect", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "sngConnect", e) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_connect_complete\n",
 		exampid, conn.Session())
@@ -107,7 +108,7 @@ func main() {
 	// Empty headers here.
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid, "sngDisconnect", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "sngDisconnect", e) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_disconnect_complete\n",
 		exampid, conn.Session())
@@ -115,7 +116,7 @@ func main() {
 	// Close the net connection.
 	e = nc.Close()
 	if e != nil {
-		ll.Fatalln(exampid, "netClose", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "netClose", e) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s net_close_complete\n",
 		exampid, conn.Session())

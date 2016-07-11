@@ -35,21 +35,21 @@ var (
 
 // Connect to a STOMP 1.2 broker, receive some messages and disconnect.
 func main() {
-	ll.Println(exampid + "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts_...")
 
 	// Set up the connection.
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "dial complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "dial_complete_...")
 	ch := stompngo.Headers{"login", "userr", "passcode", "passw0rd",
 		"host", "localhost", "accept-version", "1.2"}
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "stomp connect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_connect_complete_...")
 
 	// Setup Headers ...
 	id := stompngo.Uuid() // Use package convenience function for unique ID
@@ -59,9 +59,9 @@ func main() {
 	// Subscribe
 	sc, e := conn.Subscribe(sbh)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ...
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 	}
-	ll.Println(exampid + "stomp subscribe complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_subscribe_complete_...")
 
 	var md stompngo.MessageData
 	// Read data from the returned channel
@@ -70,14 +70,14 @@ func main() {
 		case md = <-sc:
 		case md = <-conn.MessageData:
 			// A RECEIPT or ERROR frame is unexpected here
-			ll.Fatalln(exampid, md) // Handle this
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 		}
-		ll.Println(exampid + "channel read complete ...")
+		ll.Printf("%s v1:%v\n", exampid, "channel_read_complete_...")
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
 		if md.Error != nil {
-			ll.Fatalln(md.Error) // Handle this
+			ll.Fatalf("%s  f4v:%v\n", exampid, md.Error) // Handle this
 		}
 		//
 		ll.Printf("Frame Type: %s\n", md.Message.Command) // Should be MESSAGE
@@ -92,23 +92,23 @@ func main() {
 	// to provide it will result in an error return.
 	e = conn.Unsubscribe(sbh) // Same headers as Subscribe
 	if e != nil {
-		ll.Fatalln(e) // Handle this ...
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 	}
-	ll.Println(exampid + "stomp unsubscribe complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_unsubscribe_complete_...")
 
 	// Disconnect from the Stomp server
 	dh := stompngo.Headers{}
 	e = conn.Disconnect(dh)
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Println(exampid + "network close complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "network_close_complete_...")
 
-	ll.Println(exampid + "ends ...")
+	ll.Printf("%s v1:%v\n", exampid, "ends_...")
 }

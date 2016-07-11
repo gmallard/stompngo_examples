@@ -87,7 +87,7 @@ func main() {
 	// cc -> tls.Certificate
 	cc, e := tls.LoadX509KeyPair(cliCertFile, cliKeyFile)
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	tc.Certificates = append(tc.Certificates, cc) // Add cert to config
 
@@ -95,9 +95,10 @@ func main() {
 	tc.BuildNameToCertificate() // Build names map
 
 	// Connect logic: use net.Dial and tls.Client
-	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	t, e := net.Dial("tcp", hap)
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s dial_complete\n", exampid)
 
@@ -105,10 +106,10 @@ func main() {
 	e = n.Handshake()
 	if e != nil {
 		if e.Error() == "EOF" {
-			ll.Println(exampid, "handshake EOF", "Is the broker port TLS enabled?",
-				"port:"+p)
+			ll.Printf("%s handshake EOF, Is the broker port TLS enabled? port:%s\n",
+				exampid, p)
 		}
-		ll.Fatalln(exampid, "netHandshake", e) // Handle this .....
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "netHandshake", e) // Handle this .....
 	}
 
 	ll.Printf("%s handshake_complete\n", exampid)
@@ -122,7 +123,7 @@ func main() {
 	// b) the connect Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_connect_complete\n",
 		exampid, conn.Session())
@@ -133,7 +134,7 @@ func main() {
 	// Empty headers here.
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s stomp_disconnect_complete\n",
 		exampid, conn.Session())
@@ -141,7 +142,7 @@ func main() {
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(exampid, e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s net_close_complete\n",
 		exampid, conn.Session())

@@ -79,15 +79,16 @@ func openSconn() (net.Conn, *stompngo.Connection) {
 	h, p := senv.HostAndPort() // network connection host and port
 	var e error
 	// Network open
-	n, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
-		ll.Fatalln(exampid, "dial error", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "dial error", e) // Handle this ......
 	}
 	// Stomp connect, 1.1(+)
 	ch := sngecomm.ConnectHeaders()
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(exampid, "connect error", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "connect error", e) // Handle this ......
 	}
 	ll.Printf("%s connsess:%s vhost:%s protocol:%s\n", exampid, conn.Session(),
 		senv.Vhost(), senv.Protocol())
@@ -101,12 +102,12 @@ func closeSconn(n net.Conn, conn *stompngo.Connection) {
 	// Disconnect from Stomp server
 	e := conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid, "startSender disconnect error", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "startSender disconnect error", e) // Handle this ......
 	}
 	// Network close
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(exampid, "startSender netclose error", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "startSender netclose error", e) // Handle this ......
 	}
 	return
 }
@@ -142,11 +143,11 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 		case md = <-sc:
 		case md = <-conn.MessageData:
 			// Frames RECEIPT or ERROR not expected here
-			ll.Fatalln(exampid, md) // Handle this
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 		}
 
 		if md.Error != nil {
-			ll.Fatalln(exampid, id, "runReceive error", md.Error, qns)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, id, "runReceive error", md.Error, qns)
 		}
 
 		// Process the inbound message .................
@@ -157,10 +158,10 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 		// Sanity check the message Command, and the queue and message numbers
 		mns := fmt.Sprintf("%d", mc) // string message number
 		if md.Message.Command != stompngo.MESSAGE {
-			ll.Fatalln("Bad Frame", md, qns, mns)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "Bad Frame", md, qns, mns)
 		}
 		if !md.Message.Headers.ContainsKV("qnum", qns) || !md.Message.Headers.ContainsKV("msgnum", mns) {
-			ll.Fatalln("Bad Headers", md.Message.Headers, qns, mns)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "Bad Headers", md.Message.Headers, qns, mns)
 		}
 
 		sl := len(md.Message.Body)
@@ -265,40 +266,29 @@ func startReceivers() {
 	nrc := sngecomm.Nqs() // 1 receiver per each destination
 	nqs := nrc            // Number of queues (destinations) starts the same
 
-	// ll.Println("SRDBG00", nrc, nqs)
-
 	if s := os.Getenv("STOMP_RECVCONNS"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
 		if nil != e {
-			ll.Println("RECVCONNS conversion error", e)
+			ll.Printf("%s v1:%v v2:%v\n", exampid, "RECVCONNS conversion error", e)
 		} else {
 			nrc = int(i)
 		}
 	}
-
-	// ll.Println("SRDBG01", nrc, nqs)
 
 	// Limit max receiver connection count to number of destinations
 	if nrc > nqs {
 		nrc = nqs
 	}
 
-	//ll.Println("SRDBG02", nrc, nqs)
-
 	// Next calc. destinations per receiver
 	dpr := nqs / nrc // Calculation first guess.
-	//ll.Println("SRDBG03", nrc, nqs, dpr)
 	if nqs%nrc != 0 {
 		dpr += 1 // Bump destinations per receiver by 1.
-		// ll.Println("SRDBG04", nrc, nqs, dpr)
 	}
 	// Destinations per receiver must be at least 1
 	if dpr == 0 {
 		dpr = 1
-		// ll.Println("SRDBG05", nrc, nqs, dpr)
 	}
-
-	// ll.Println("SRDBG06", nrc, nqs, dpr)
 
 	ll.Printf("%s startReceivers_start nrc:%d dpr:%d\n",
 		exampid, nrc, dpr)
@@ -351,7 +341,7 @@ func runSender(conn *stompngo.Connection, qns string) {
 			id, qns, mc)
 		e := conn.Send(sh, string(sngecomm.Partial()))
 		if e != nil {
-			ll.Fatalln(exampid, id, "send error", e, qns, mc)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v v5:%v\n", exampid, id, "send error", e, qns, mc)
 		}
 		if mc == nmsgs {
 			break
@@ -407,22 +397,22 @@ func main() {
 	}
 
 	start := time.Now()
-	ll.Println(exampid, "main starts")
-	ll.Println(exampid, "main profiling", sngecomm.Pprof())
-	ll.Println(exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+	ll.Printf("%s v1:%v\n", exampid, "main starts")
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "main profiling", sngecomm.Pprof())
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
-		ll.Println(exampid, "main number of CPUs is:", nc)
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main number of CPUs is:", nc)
 		c := runtime.GOMAXPROCS(nc)
-		ll.Println(exampid, "main previous number of GOMAXPROCS is:", c)
-		ll.Println(exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main previous number of GOMAXPROCS is:", c)
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	}
 	// Wait flags
 	sw = sngecomm.SendWait()
 	rw = sngecomm.RecvWait()
 	sf = sngecomm.SendFactor()
 	rf = sngecomm.RecvFactor()
-	ll.Println(exampid, "main Sleep Factors", "send", sf, "recv", rf)
+	ll.Printf("%s v1:%v v2:%v v3:%v v4:%v v5:%v\n", exampid, "main Sleep Factors", "send", sf, "recv", rf)
 
 	wga.Add(1)
 	go startReceivers()
@@ -432,5 +422,5 @@ func main() {
 
 	// The end
 	dt := time.Since(start)
-	ll.Println(exampid, "main ends", dt)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "main ends", dt)
 }

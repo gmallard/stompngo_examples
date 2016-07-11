@@ -97,7 +97,7 @@ func sender(qn, mc int) {
 		ll.Printf("%s id:%s send_message qn:%d msgnum:%s\n", exampid, id, qn, si)
 		e := conn.Send(sh, string(sngecomm.Partial()))
 		if e != nil {
-			ll.Fatalln(exampid, id, "send error", e, qn)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, id, "send error", e, qn)
 		}
 		if sw {
 			dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
@@ -136,10 +136,10 @@ func receiver(qn, mc int) {
 		case md = <-sc:
 		case md = <-conn.MessageData:
 			// A RECEIPT or ERROR frame is unexpected here
-			ll.Fatalln(exampid, md) // Handle this
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 		}
 		if md.Error != nil {
-			ll.Fatalln(exampid, id, "recv error", md.Error, qn)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, id, "recv error", md.Error, qn)
 		}
 
 		// Process the inbound message .................
@@ -156,10 +156,10 @@ func receiver(qn, mc int) {
 		// Sanity check the message Command, and the queue and message numbers
 		mns := fmt.Sprintf("%d", i) // message number
 		if md.Message.Command != stompngo.MESSAGE {
-			ll.Fatalln(exampid, "Bad Frame", md, qn, mns)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "Bad Frame", md, qn, mns)
 		}
 		if !md.Message.Headers.ContainsKV("qnum", qns) || !md.Message.Headers.ContainsKV("msgnum", mns) {
-			ll.Fatalln(exampid, "Bad Headers", md.Message.Headers, qn, mns)
+			ll.Fatalf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "Bad Headers", md.Message.Headers, qn, mns)
 		}
 
 		if rw {
@@ -238,38 +238,39 @@ func main() {
 	}
 
 	start := time.Now()
-	ll.Println(exampid, "main starts")
-	ll.Println(exampid, "main profiling", sngecomm.Pprof())
-	ll.Println(exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+	ll.Printf("%s v1:%v\n", exampid, "main starts")
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "main profiling", sngecomm.Pprof())
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	if sngecomm.SetMAXPROCS() {
 		nc := runtime.NumCPU()
-		ll.Println(exampid, "main number of CPUs is:", nc)
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main number of CPUs is:", nc)
 		gmp := runtime.GOMAXPROCS(nc)
-		ll.Println(exampid, "main previous number of GOMAXPROCS is:", gmp)
-		ll.Println(exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main previous number of GOMAXPROCS is:", gmp)
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "main current number of GOMAXPROCS is:", runtime.GOMAXPROCS(-1))
 	}
 	// Wait flags
 	sw = sngecomm.SendWait()
 	rw = sngecomm.RecvWait()
 	sf = sngecomm.SendFactor()
 	rf = sngecomm.RecvFactor()
-	ll.Println(exampid, "main Sleep Factors", "send", sf, "recv", rf)
+	ll.Printf("%s v1:%v v2:%v v3:%v v4:%v v5:%v\n", exampid, "main Sleep Factors", "send", sf, "recv", rf)
 	// Number of queues
 	nqs := sngecomm.Nqs()
 	// Open net and stomp connections
 	h, p := senv.HostAndPort() // network connection host and port
+	hap := net.JoinHostPort(h, p)
 	var e error
 	// Network open
-	n, e = net.Dial("tcp", net.JoinHostPort(h, p))
+	n, e = net.Dial("tcp", hap)
 	if e != nil {
-		ll.Fatalln(exampid, "main dial error", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "main dial error", e) // Handle this ......
 	}
 	// Stomp connect, 1.1(+)
 	ch := sngecomm.ConnectHeaders()
-	ll.Println(exampid, "vhost:", senv.Vhost(), "protocol:", senv.Protocol())
+	ll.Printf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "vhost:", senv.Vhost(), "protocol:", senv.Protocol())
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
-		ll.Fatalln(exampid, "main connect error", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "main connect error", e) // Handle this ......
 	}
 
 	// Many receivers running under the same connection can cause
@@ -291,14 +292,14 @@ func main() {
 	// Disconnect from Stomp server
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		ll.Fatalln(exampid, "main disconnect error", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "main disconnect error", e) // Handle this ......
 	}
 	// Network close
 	e = n.Close()
 	if e != nil {
-		ll.Fatalln(exampid, "main netclose error", e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "main netclose error", e) // Handle this ......
 	}
 	sngecomm.ShowStats(exampid, "done", conn)
 	dur := time.Since(start)
-	ll.Println(exampid, "main ends", dur)
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "main ends", dur)
 }
