@@ -547,8 +547,8 @@ Ack headers.  A stompngo.Headers instance.
 c
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A loop couner.  Because in some situations it makes sense. And I enjoy
-writing 'c++' for the end of loop condition.
+A loop couner.  Because in some situations it makes sense. And because
+writing 'c++' for the end of loop action is amusing.
 </td>
 </tr>
 
@@ -567,7 +567,9 @@ CONNECT frame sent to the broker.
 conn
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A instance of a *stompngo.Connection.
+A instance of a *stompngo.Connection, usually obtained from a call to
+stompngo.Connect(...).<br />
+Rename candidate: sc.
 </td>
 </tr>
 
@@ -576,7 +578,7 @@ A instance of a *stompngo.Connection.
 d
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A stomp destination.
+A stomp destination, type string.  Format and semantics are broker specific.
 </td>
 </tr>
 
@@ -603,7 +605,7 @@ A time.Duration instance.
 e
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A go 'error' instance.
+An instance of the go error type.
 </td>
 </tr>
 
@@ -640,16 +642,16 @@ A loop counter.
 id
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A (type 4) UUID.
+A (type 4) UUID obtained from calling stompngo.Uuid(), type string.
 </td>
 </tr>
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jhp
+irid
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A joined host and port pair, returned from net.JoinHostPort(h, p).
+A receipt id, received from the broker, type string.
 </td>
 </tr>
 
@@ -713,7 +715,8 @@ A message body, with addional data, type string.
 n
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-An instance of net.Conn.
+An implementation of the net.Conn interface, obtained by calling
+net.Dial.
 </td>
 </tr>
 
@@ -722,7 +725,8 @@ An instance of net.Conn.
 nmsgs
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-The number of messages to process (produce/consume).
+The number of messages to process (produce/consume).<br />
+Rename candidate: nm.
 </td>
 </tr>
 
@@ -731,7 +735,8 @@ The number of messages to process (produce/consume).
 nqs
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-The number of destinations to use.
+The number of destinations to use.<br />
+Rename candidate: nd.
 </td>
 </tr>
 
@@ -761,7 +766,9 @@ pbc
 The print byte count.  When message bodies are printed, this is the
 maximum number of bytes to print.  Useful when message body sizes are
 large.  This is arbitrarily set to 64 unless overridden.  If this is
-set to 0, message bodies are (usually) not printed at all.
+set to 0, message bodies are (usually) not printed at all.<br />
+Rename candidate: pc.<br />
+TODO: consistently print no message body if this is &lt;= 0.
 </td>
 </tr>
 
@@ -798,8 +805,9 @@ A queue number identifier, type string (from qn).
 r
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A channel of type stompngo.MessageData.  Used in example code to
-receive messages and metadata from the broker.
+Used in the sngecomm subpackage only, for several reasons.<br />
+TODO:  this needs to change to a more meaningful variable name and
+documentation for same added.
 </td>
 </tr>
 
@@ -826,7 +834,7 @@ A receive wait time multiplier.
 rid
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A receipt id.
+A receipt id, type string.
 </td>
 </tr>
 
@@ -1064,7 +1072,8 @@ The full file name of the server CA's public cert in PEM format.
 t
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-An instance of net.Conn obtained from net.Dial.
+An implementation of the net.Conn interface, obtained by calling
+net.Dial.
 </td>
 </tr>
 
@@ -1073,7 +1082,7 @@ An instance of net.Conn obtained from net.Dial.
 tc
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
-A pointer to a tls configuration, type *tls.Config obtained from 'new'.
+A pointer to a tls configuration, type *tls.Config, obtained from 'new'.
 </td>
 </tr>
 
