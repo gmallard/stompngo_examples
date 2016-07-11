@@ -32,19 +32,24 @@ import (
 	"crypto/tls"
 	"log"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
+	// senv methods could be used in general by stompngo clients.
+	"github.com/gmallard/stompngo/senv"
+	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var (
-	exampid    = "conndisc_tls: "
-	testConfig *tls.Config
+	exampid = "conndisc_tls: "
+	tc      *tls.Config
+	ll      = log.New(os.Stdout, "TLCD ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 )
 
 // Connect to a STOMP 1.0 broker using TLS and disconnect.
 func main() {
-	log.Println(exampid + "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts_...")
 
 	// TLS Configuration.  This configuration assumes that:
 	// a) The server used does *not* require client certificates
@@ -52,17 +57,18 @@ func main() {
 	// Note that the tls.Config structure can be modified to support any
 	// authentication scheme, including two-way/mutual authentication. Examples
 	// are provided elsewhere in this project.
-	testConfig = new(tls.Config)
-	testConfig.InsecureSkipVerify = true // Do *not* check the server's certificate
+	tc = new(tls.Config)
+	tc.InsecureSkipVerify = true // Do *not* check the server's certificate
 
 	// Open a net connection
-	h, p := sngecomm.HostAndPort()
+	h, p := senv.HostAndPort()
+	hap := net.JoinHostPort(h, p)
 	// Use tls.Dial, not net.Dial
-	n, e := tls.Dial("tcp", net.JoinHostPort(h, p), testConfig)
+	n, e := tls.Dial("tcp", hap, tc)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "dial complete ...")
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "dial complete ...", hap)
 
 	// All stomp API methods require 'Headers'.  Stomp headers are key/value
 	// pairs.  The stompngo package implements them using a string slice.
@@ -73,26 +79,37 @@ func main() {
 	// b) the Headers
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "stomp connect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_connect_complete_...")
 
 	// *NOTE* your application functionaltiy goes here!
 
-	// Polite Stomp disconnects are not required, but highly recommended.
-	// Empty headers for this DISCONNECT.
+	// Stomp disconnects are not required, but highly recommended.
+	// We use empty headers here for the DISCONNECT.  This will trigger the
+	// disconnect receipt described below.
+	//
+	// If you do *not* want a disconnect receipt use:
+	// stompngo.Headers{"noreceipt", "true"}
+	//
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "sngDisconnectTLS", e) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
+
+	// After a DISCONNECT there is (by default) a 'Disconnect
+	// Receipt' available.  The disconnect receipt is an instance of
+	// stompngo.MessageData.
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "disconnect receipt", conn.DisconnectReceipt)
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
 
 	// Close the net connection.
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "network close complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "network_close_complete_...")
 
-	log.Println(exampid + "ends ...")
+	ll.Printf("%s v1:%v\n", exampid, "ends_...")
 }

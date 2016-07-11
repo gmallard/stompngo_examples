@@ -44,15 +44,21 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
+	// senv methods could be used in general by stompngo clients.
+	"github.com/gmallard/stompngo/senv"
+	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var (
-	exampid    = "tlsuc2:"
-	testConfig *tls.Config
-	srvCAFile  string // Name of file with broker's CA certificate, PEM format
+	exampid   = "tlsuc2:"
+	tc        *tls.Config
+	srvCAFile string // Name of file with broker's CA certificate, PEM format
+
+	ll = log.New(os.Stdout, "TLSU2 ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 )
 
 func init() {
@@ -61,66 +67,72 @@ func init() {
 
 // Connect to a STOMP broker using TLS and disconnect.
 func main() {
-	log.Println(exampid, "starts ...")
+	ll.Printf("%s starts\n", exampid)
 
 	flag.Parse() // Parse flags
-
-	log.Println(exampid, "using srvCAFile", srvCAFile)
+	ll.Printf("%s using srvCAFile srvCAFile:%s\n",
+		exampid, srvCAFile)
 
 	// TLS Configuration.
-	testConfig = new(tls.Config)
-	testConfig.InsecureSkipVerify = false // *Do* check the broker's certificate
+	tc = new(tls.Config)
+	tc.InsecureSkipVerify = false // *Do* check the broker's certificate
 
 	// Get host and port
-	h, p := sngecomm.HostAndPort()
-	log.Println(exampid, "host", h, "port", p)
+	h, p := senv.HostAndPort()
+	ll.Printf("%s host_and_port host:%s port:%s\n", exampid, h, p)
 
 	// Be polite, allow SNI (Server Virtual Hosting)
-	testConfig.ServerName = h
+	tc.ServerName = h
 
 	// Finish TLS Config initialization, so client can authenticate broker.
 	b, e := ioutil.ReadFile(srvCAFile) // Read broker's CA cert (PEM)
 	if e != nil {
-		log.Fatalln(e)
+		ll.Fatalf("%s %s\n", exampid, e.Error())
 	}
-	k, _ := pem.Decode(b) // Decode PEM format
-	if e != nil {
-		log.Fatalln(e)
+	k, _ := pem.Decode(b) // Decode PEM format (*pem.Block)
+	if k == nil {
+		ll.Fatalf("%s %s\n", exampid, e.Error())
 	}
-	//
 	c, e := x509.ParseCertificate(k.Bytes) // Create *x509.Certificate
 	if e != nil {
-		log.Fatalln(e)
+		ll.Fatalf("%s %s\n", exampid, e.Error())
 	}
-	testConfig.RootCAs = x509.NewCertPool() // Create a cert "pool"
-	testConfig.RootCAs.AddCert(c)           // Add the CA cert to the pool
+
+	tc.RootCAs = x509.NewCertPool() // Create a cert "pool"
+	tc.RootCAs.AddCert(c)           // Add the CA cert to the pool
 
 	// Connect logic: use net.Dial and tls.Client
-	t, e := net.Dial("tcp", net.JoinHostPort(h, p))
+	hap := net.JoinHostPort(h, p)
+	t, e := net.Dial("tcp", hap)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid, "dial complete ...")
-	n := tls.Client(t, testConfig)
-	e = n.Handshake()
+	ll.Printf("%s dial_complete\n", exampid)
+
+	nc := tls.Client(t, tc)
+	e = nc.Handshake()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		if e.Error() == "EOF" {
+			ll.Printf("%s handshake EOF, Is the broker port TLS enabled? port:%s\n",
+				exampid, p)
+		}
+		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "netHandshake", e) // Handle this .....
 	}
-	log.Println(exampid, "handshake complete ...")
+	ll.Printf("%s handshake_complete\n", exampid)
 
-	sngecomm.DumpTLSConfig(exampid, testConfig, n)
+	sngecomm.DumpTLSConfig(exampid, tc, nc)
 
-	// Connect Headers
+	// stompngo Connect Headers
 	ch := sngecomm.ConnectHeaders()
-
 	// Get a stomp connection.  Parameters are:
 	// a) the opened net connection
 	// b) the connect Headers
-	conn, e := stompngo.Connect(n, ch)
+	conn, e := stompngo.Connect(nc, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid, "stomp connect complete ...")
+	ll.Printf("%s connsess:%s stomp_connect_complete\n",
+		exampid, conn.Session())
 
 	// *NOTE* your application functionaltiy goes here!
 
@@ -128,16 +140,18 @@ func main() {
 	// Empty headers here.
 	e = conn.Disconnect(stompngo.Headers{})
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid, "stomp disconnect complete ...")
+	ll.Printf("%s connsess:%s stomp_disconnect_complete\n",
+		exampid, conn.Session())
 
 	// Close the net connection.
-	e = n.Close()
+	e = nc.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid, "network close complete ...")
+	ll.Printf("%s connsess:%s net_close_complete\n",
+		exampid, conn.Session())
 
-	log.Println(exampid, "ends ...")
+	ll.Printf("%s ends\n", exampid)
 }

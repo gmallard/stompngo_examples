@@ -20,7 +20,5 @@ class Constants {
 	static final boolean DO_WORK_WAIT = false;
 	static final int RECEIVE_WAIT = 15000;
 	static final int MIN_WORK = 10;
-	static final int WORK_SPAN = 100;
-	
-	
+	static final int WORK_SPAN = 100;	
 }

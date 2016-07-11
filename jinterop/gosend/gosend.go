@@ -23,59 +23,67 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
+	"github.com/gmallard/stompngo/senv"
 )
 
-var exampid = "gosend: "
+var (
+	exampid = "gosend: "
+	ll      = log.New(os.Stdout, "GOJSND ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	nmsgs   = 1
+)
 
-var nmsgs = 1
-
-// Connect to a STOMP 1.1 broker, send some messages and disconnect.
+// Connect to a STOMP 1.2 broker, send some messages and disconnect.
 func main() {
-	log.Println(exampid + "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts_...")
 
 	// Open a net connection
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "dial complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "dial_complete_...")
 
 	// Connect to broker
-	eh := stompngo.Headers{"login", "users", "passcode", "passw0rd"}
-	conn, e := stompngo.Connect(n, eh)
+	ch := stompngo.Headers{"login", "userr", "passcode", "passw0rd",
+		"host", "localhost", "accept-version", "1.2"}
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "stomp connect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_connect_complete_...")
 
 	// Suppress content length here, so JMS will treat this as a 'text' message.
-	s := stompngo.Headers{"destination", "/queue/allards.queue",
+	sh := stompngo.Headers{"destination", "/queue/allards.queue",
 		"suppress-content-length", "true"} // send headers, suppress content-length
-	m := exampid + " message: "
+	if senv.Persistent() {
+		sh = sh.Add("persistent", "true")
+	}
+	ms := exampid + " message: "
 	for i := 1; i <= nmsgs; i++ {
-		t := m + fmt.Sprintf("%d", i)
-		e := conn.Send(s, t)
+		mse := ms + fmt.Sprintf("%d", i)
+		e := conn.Send(sh, mse)
 		if e != nil {
-			log.Fatalln(e) // Handle this ...
+			ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 		}
-		log.Println(exampid, "send complete:", t)
+		ll.Printf("%s v1:%v v2:%v\n", exampid, "send complete:", mse)
 	}
 
 	// Disconnect from the Stomp server
-	eh = stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	dh := stompngo.Headers{}
+	e = conn.Disconnect(dh)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "network close complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "network_close_complete_...")
 
-	log.Println(exampid + "ends ...")
+	ll.Printf("%s v1:%v\n", exampid, "ends_...")
 }

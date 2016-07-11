@@ -31,15 +31,17 @@ Prime the queue for this demonstration using publish.go.
 
 		# Prime a queue with messages:
 		STOMP_PORT=61613 STOMP_NMSGS=10 go run publish.go
-
-		# Review ActiveMQ balancing characteristics:
-		STOMP_PORT=61613 go run recv_mds.go
+		# Review ActiveMQ balancing characteristics.  Note:
+		# this will eventually block, and the program will have to be
+		# forcibly stopped.
+		STOMP_PORT=61613 STOMP_ACKMODE="client-individual" go run recv_mds.go
 
 		# Prime a queue with messages again:
 		STOMP_PORT=62613 STOMP_NMSGS=10 go run publish.go
-
-		# Review Apollo balancing characteristics:
-		STOMP_PORT=62613 go run recv_mds.go
+		# Review Apollo balancing characteristics.  Note:
+		# this will eventually block, and the program will have to be
+		# forcibly stopped.
+		STOMP_PORT=62613 STOMP_ACKMODE="client-individual" go run recv_mds.go
 
 */
 package main
@@ -47,10 +49,14 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 	"runtime"
 	"time"
 	//
 	"github.com/gmallard/stompngo"
+	// senv methods could be used in general by stompngo clients.
+	"github.com/gmallard/stompngo/senv"
+	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
@@ -61,42 +67,52 @@ var (
 	conn    *stompngo.Connection          // Stomp Connection
 	ackMode string               = "auto" // ackMode control
 	port    string
+	ll      = log.New(os.Stdout, "EMDS ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 )
 
-func recv(s int) {
-	log.Println(exampid, "receiver", s, "starts")
+func recv(conn *stompngo.Connection, s int) {
+	ll.Printf("%s v1:%v v2:%v v3:%v\n", exampid, "receiver", s, "starts")
 	// Setup Headers ...
 	id := stompngo.Uuid() // Use package convenience function for unique ID
-	d := sngecomm.Dest()
+	d := senv.Dest()
 	ackMode = sngecomm.AckMode() // get ack mode
 
 	pbc := sngecomm.Pbc() // Print byte count
 
-	var r <-chan stompngo.MessageData
-	r = sngecomm.Subscribe(conn, d, id, ackMode)
-	// Receive loop
+	sc := sngecomm.HandleSubscribe(conn, d, id, ackMode)
+	// Receive loop.
 	mc := 0
+	var md stompngo.MessageData
 	for {
-		d := <-r // Read a messagedata struct
-		mc++
-		if d.Error != nil {
-			panic(d.Error)
+		select {
+		case md = <-sc: // Read a messagedata struct, with a MESSAGE frame
+		case md = <-conn.MessageData: // Read a messagedata struct, with a ERROR/RECEIPT frame
+			// Unexpected here in this example.
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
 		}
-		log.Println(exampid, "subnumber", s, id, mc)
+		//
+		mc++
+		if md.Error != nil {
+			panic(md.Error)
+		}
+		ll.Printf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "subnumber", s, id, mc)
 		if pbc > 0 {
 			maxlen := pbc
-			if len(d.Message.Body) < maxlen {
-				maxlen = len(d.Message.Body)
+			if len(md.Message.Body) < maxlen {
+				maxlen = len(md.Message.Body)
 			}
-			ss := string(d.Message.Body[0:maxlen])
-			log.Printf("Payload: %s\n", ss) // Data payload
+			ss := string(md.Message.Body[0:maxlen])
+			ll.Printf("Payload: %s\n", ss) // Data payload
 		}
 
-		time.Sleep(3 * time.Second)
+		// time.Sleep(3 * time.Second) // A very arbitrary number
+		// time.Sleep(500 * time.Millisecond) // A very arbitrary number
+		runtime.Gosched()
+		time.Sleep(1500 * time.Millisecond) // A very arbitrary number
 		runtime.Gosched()
 		if ackMode != "auto" {
-			sngecomm.Ack(conn, d.Message.Headers, id)
-			log.Println(exampid + "ACK complete ...")
+			sngecomm.HandleAck(conn, md.Message.Headers, id)
+			ll.Printf("%s v1:%v\n", exampid, "ACK_complete_...")
 		}
 		runtime.Gosched()
 	}
@@ -105,26 +121,27 @@ func recv(s int) {
 // Connect to a STOMP broker, receive and ackMode some messages.
 // Disconnect never occurs, kill via ^C.
 func main() {
-	log.Println(exampid, "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts ...")
 
 	// Set up the connection.
-	h, port := sngecomm.HostAndPort() //
-	n, e := net.Dial("tcp", net.JoinHostPort(h, port))
+	h, p := senv.HostAndPort() //
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid, "dial complete ...")
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "dial complete ...", hap)
 	ch := sngecomm.ConnectHeaders()
 	conn, e = stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid, "stomp connect complete ...", conn.Protocol())
+	ll.Printf("%s v1:%v v2:%v\n", exampid, "stomp connect complete ...", conn.Protocol())
 
 	for i := 1; i <= ns; i++ {
-		go recv(i)
+		go recv(conn, i)
 	}
-	log.Println(exampid, ns, "receivers started ...")
+	ll.Printf("%s v1:%v v2:%v\n", exampid, ns, "receivers started ...")
 
 	select {} // This will never complete, use ^C to cancel
 

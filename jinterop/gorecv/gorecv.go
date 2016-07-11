@@ -22,82 +22,93 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 	//
 	"github.com/gmallard/stompngo"
 )
 
-var exampid = "gorecv: "
+var (
+	exampid = "gorecv: "
+	ll      = log.New(os.Stdout, "GOJRCV ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	nmsgs   = 1
+)
 
-var nmsgs = 1
-
-// Connect to a STOMP 1.1 broker, receive some messages and disconnect.
+// Connect to a STOMP 1.2 broker, receive some messages and disconnect.
 func main() {
-	log.Println(exampid + "starts ...")
+	ll.Printf("%s v1:%v\n", exampid, "starts_...")
 
 	// Set up the connection.
 	n, e := net.Dial("tcp", "localhost:61613")
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "dial complete ...")
-	eh := stompngo.Headers{"login", "userr", "passcode", "passw0rd"}
-	conn, e := stompngo.Connect(n, eh)
+	ll.Printf("%s v1:%v\n", exampid, "dial_complete_...")
+	ch := stompngo.Headers{"login", "userr", "passcode", "passw0rd",
+		"host", "localhost", "accept-version", "1.2"}
+	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "stomp connect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_connect_complete_...")
 
 	// Setup Headers ...
-	u := stompngo.Uuid() // Use package convenience function for unique ID
-	s := stompngo.Headers{"destination", "/queue/allards.queue",
-		"id", u} // subscribe/unsubscribe headers
+	id := stompngo.Uuid() // Use package convenience function for unique ID
+	sbh := stompngo.Headers{"destination", "/queue/allards.queue",
+		"id", id} // subscribe/unsubscribe headers
 
 	// Subscribe
-	r, e := conn.Subscribe(s)
+	sc, e := conn.Subscribe(sbh)
 	if e != nil {
-		log.Fatalln(e) // Handle this ...
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 	}
-	log.Println(exampid + "stomp subscribe complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_subscribe_complete_...")
+
+	var md stompngo.MessageData
 	// Read data from the returned channel
 	for i := 1; i <= nmsgs; i++ {
-		m := <-r
-		log.Println(exampid + "channel read complete ...")
+		select {
+		case md = <-sc:
+		case md = <-conn.MessageData:
+			// A RECEIPT or ERROR frame is unexpected here
+			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
+		}
+		ll.Printf("%s v1:%v\n", exampid, "channel_read_complete_...")
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
-		if m.Error != nil {
-			log.Fatalln(m.Error) // Handle this
+		if md.Error != nil {
+			ll.Fatalf("%s  f4v:%v\n", exampid, md.Error) // Handle this
 		}
 		//
-		log.Printf("Frame Type: %s\n", m.Message.Command) // Will be MESSAGE or ERROR!
-		h := m.Message.Headers
-		for j := 0; j < len(h)-1; j += 2 {
-			log.Printf("Header: %s:%s\n", h[j], h[j+1])
+		ll.Printf("Frame Type: %s\n", md.Message.Command) // Should be MESSAGE
+		wh := md.Message.Headers
+		for j := 0; j < len(wh)-1; j += 2 {
+			ll.Printf("Header: %s:%s\n", wh[j], wh[j+1])
 		}
-		log.Printf("Payload: %s\n", string(m.Message.Body)) // Data payload
+		ll.Printf("Payload: %s\n", string(md.Message.Body)) // Data payload
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
-	// With Stomp 1.1, the same unique ID is required on UNSUBSCRIBE.  Failure
+	// With Stomp 1.1+, the same unique ID is required on UNSUBSCRIBE.  Failure
 	// to provide it will result in an error return.
-	e = conn.Unsubscribe(s)
+	e = conn.Unsubscribe(sbh) // Same headers as Subscribe
 	if e != nil {
-		log.Fatalln(e) // Handle this ...
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
 	}
-	log.Println(exampid + "stomp unsubscribe complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_unsubscribe_complete_...")
 
 	// Disconnect from the Stomp server
-	eh = stompngo.Headers{}
-	e = conn.Disconnect(eh)
+	dh := stompngo.Headers{}
+	e = conn.Disconnect(dh)
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "stomp disconnect complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
 	// Close the network connection
 	e = n.Close()
 	if e != nil {
-		log.Fatalln(e) // Handle this ......
+		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	log.Println(exampid + "network close complete ...")
+	ll.Printf("%s v1:%v\n", exampid, "network_close_complete_...")
 
-	log.Println(exampid + "ends ...")
+	ll.Printf("%s v1:%v\n", exampid, "ends_...")
 }
