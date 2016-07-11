@@ -69,11 +69,11 @@ func ShowStats(exampid, tag string, conn *stompngo.Connection) {
 	bw := conn.BytesWritten()
 	s := conn.Running().Seconds()
 	n := conn.Running().Nanoseconds()
-	llu.Println(exampid, tag, "frame read count", r)
-	llu.Println(exampid, tag, "bytes read", br)
-	llu.Println(exampid, tag, "frame write count", w)
-	llu.Println(exampid, tag, "bytes written", bw)
-	llu.Println(exampid, tag, "current duration(ns)", n)
+	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "frame read count", r)
+	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "bytes read", br)
+	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "frame write count", w)
+	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "bytes written", bw)
+	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "current duration(ns)", n)
 	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "current duration(sec)", s)
 	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "frame reads/sec", float64(r)/s)
 	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes read/sec", float64(br)/s)
@@ -89,7 +89,7 @@ func ValueBetween(min, max int64, fact float64) int64 {
 
 // Dump a TLS Configuration Struct
 func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
-	llu.Println()
+	llu.Printf(" f4v:%v\n")
 	llu.Printf("%s Rand: %v\n", exampid, c.Rand)
 	llu.Printf("%s Time: %v\n", exampid, c.Time)
 	llu.Printf("%s Certificates: %v\n", exampid, c.Certificates)
@@ -107,20 +107,20 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 	// Idea Embelluished From:
 	// https://groups.google.com/forum/#!topic/golang-nuts/TMNdOxugbTY
 	cs := n.ConnectionState()
-	llu.Println(exampid, "HandshakeComplete:", cs.HandshakeComplete)
-	llu.Println(exampid, "DidResume:", cs.DidResume)
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "HandshakeComplete:", cs.HandshakeComplete)
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "DidResume:", cs.DidResume)
 	llu.Printf("%s %s %d(0x%X)\n", exampid, "CipherSuite:", cs.CipherSuite, cs.CipherSuite)
-	llu.Println(exampid, "NegotiatedProtocol:", cs.NegotiatedProtocol)
-	llu.Println(exampid, "NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
-	llu.Println(exampid, "ServerName:", cs.ServerName)
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "NegotiatedProtocol:", cs.NegotiatedProtocol)
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "ServerName:", cs.ServerName)
 	// Portions of any Peer Certificates present
 	certs := cs.PeerCertificates
 	if certs == nil || len(certs) < 1 {
-		llu.Println("Could not get server's certificate from the TLS connection.")
-		llu.Println()
+		llu.Printf("v1:%v\n", "Could not get server's certificate from the TLS connection.")
+		llu.Printf(" f4v:%v\n")
 		return
 	}
-	llu.Println(exampid, "Server Certs:")
+	llu.Printf("%s v1:%v\n", exampid, "Server Certs:")
 	for i, cert := range certs {
 		llu.Printf("Certificate chain: %d\n", i)
 		llu.Printf("Common Name:%s \n", cert.Subject.CommonName)
@@ -142,10 +142,10 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 		//
 		llu.Printf("Valid Not Before: %s\n", cert.NotBefore.Local().String())
 		llu.Printf("Valid Not After: %s\n", cert.NotAfter.Local().String())
-		llu.Println("" + strings.Repeat("=", 80) + "\n")
+		llu.Printf("v1:%v v2:%v\n", ""+strings.Repeat("=", 80)+"\n")
 	}
 
-	llu.Println()
+	llu.Printf(" f4v:%v\n")
 }
 
 // Handle a subscribe for the different protocol levels.
@@ -162,12 +162,12 @@ func HandleSubscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.Mes
 	case stompngo.SPL_10:
 		// Nothing else to do here
 	default:
-		llu.Fatalln("subscribe invalid protocol level, should not happen")
+		llu.Fatalf("v1:%v v2:%v\n", "subscribe invalid protocol level, should not happen")
 	}
 	//
 	r, e := c.Subscribe(h)
 	if e != nil {
-		llu.Fatalln("subscribe failed", e)
+		llu.Fatalf("v1:%v v2:%v\n", "subscribe failed", e)
 	}
 	return r
 }
@@ -184,11 +184,11 @@ func HandleUnsubscribe(c *stompngo.Connection, d, i string) {
 	case stompngo.SPL_10:
 		sbh = sbh.Add("destination", d)
 	default:
-		llu.Fatalln("unsubscribe invalid protocol level, should not happen")
+		llu.Fatalf("v1:%v v2:%v\n", "unsubscribe invalid protocol level, should not happen")
 	}
 	e := c.Unsubscribe(sbh)
 	if e != nil {
-		llu.Fatalln("unsubscribe failed", e)
+		llu.Fatalf("v1:%v v2:%v\n", "unsubscribe failed", e)
 	}
 	return
 }
@@ -205,24 +205,24 @@ func HandleAck(c *stompngo.Connection, h stompngo.Headers, id string) {
 	case stompngo.SPL_10:
 		ah = ah.Add("message-id", h.Value("message-id"))
 	default:
-		llu.Fatalln("ack invalid protocol level, should not happen")
+		llu.Fatalf("v1:%v v2:%v\n", "ack invalid protocol level, should not happen")
 	}
 	e := c.Ack(ah)
 	if e != nil {
-		llu.Fatalln("ack failed", e, c.Protocol())
+		llu.Fatalf("v1:%v v2:%v v3:%v\n", "ack failed", e, c.Protocol())
 	}
 	return
 }
 
 func ShowRunParms(exampid string) {
-	llu.Println(exampid, "HOST", os.Getenv("STOMP_HOST"))
-	llu.Println(exampid, "PORT", os.Getenv("STOMP_PORT"))
-	llu.Println(exampid, "PROTOCOL", senv.Protocol())
-	llu.Println(exampid, "VHOST", senv.Vhost())
-	llu.Println(exampid, "NQS", Nqs())
-	llu.Println(exampid, "NMSGS", senv.Nmsgs())
-	llu.Println(exampid, "SUBCHANCAP", senv.SubChanCap())
-	llu.Println(exampid, "RECVFACT", RecvFactor())
-	llu.Println(exampid, "SENDFACT", SendFactor())
-	llu.Println(exampid, "ACKMODE", AckMode())
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "HOST", os.Getenv("STOMP_HOST"))
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "PORT", os.Getenv("STOMP_PORT"))
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "PROTOCOL", senv.Protocol())
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "VHOST", senv.Vhost())
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "NQS", Nqs())
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "NMSGS", senv.Nmsgs())
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "SUBCHANCAP", senv.SubChanCap())
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "RECVFACT", RecvFactor())
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "SENDFACT", SendFactor())
+	llu.Printf("%s v1:%v v2:%v\n", exampid, "ACKMODE", AckMode())
 }

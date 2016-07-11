@@ -60,7 +60,7 @@ func Nqs() int {
 	if s := os.Getenv("STOMP_NQS"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
 		if nil != e {
-			log.Println("NQS conversion error", e)
+			log.Printf("v1:%v v2:%v\n", "NQS conversion error", e)
 		} else {
 			nqs = int(i)
 		}
@@ -73,7 +73,7 @@ func Mdml() int {
 	if s := os.Getenv("STOMP_MDML"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
 		if nil != e {
-			log.Println("MDML conversion error", e)
+			log.Printf("v1:%v v2:%v\n", "MDML conversion error", e)
 		} else {
 			mdml = int(i)
 			p := "_123456789ABCDEF"
@@ -99,7 +99,7 @@ func AckMode() string {
 		if am == "auto" || am == "client" || am == "client-individual" {
 			ackMode = am
 		} else {
-			log.Println("ACKMODE error", am)
+			log.Printf("v1:%v v2:%v\n", "ACKMODE error", am)
 		}
 	}
 	return ackMode
@@ -110,7 +110,7 @@ func SendFactor() float64 {
 	if s := os.Getenv("STOMP_SENDFACT"); s != "" {
 		f, e := strconv.ParseFloat(s, 64)
 		if nil != e {
-			log.Println("SENDFACT conversion error", e)
+			log.Printf("v1:%v v2:%v\n", "SENDFACT conversion error", e)
 		} else {
 			sendFact = float64(f)
 		}
@@ -123,7 +123,7 @@ func RecvFactor() float64 {
 	if s := os.Getenv("STOMP_RECVFACT"); s != "" {
 		f, e := strconv.ParseFloat(s, 64)
 		if nil != e {
-			log.Println("RECVFACT conversion error", e)
+			log.Printf("v1:%v v2:%v\n", "RECVFACT conversion error", e)
 		} else {
 			recvFact = float64(f)
 		}
@@ -142,7 +142,7 @@ func Pbc() int {
 	if s := os.Getenv("STOMP_PBC"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
 		if nil != e {
-			log.Println("PBC conversion error", e)
+			log.Printf("v1:%v v2:%v\n", "PBC conversion error", e)
 		} else {
 			pbc = int(i)
 		}
