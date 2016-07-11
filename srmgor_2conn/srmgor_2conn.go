@@ -208,7 +208,7 @@ func receiver(conn *stompngo.Connection, qn, nmsgs int) {
 	if s := os.Getenv("STOMP_CONN2BUFFER"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
 		if nil != e {
-			log.Fatalln("CONN2BUFFER conversion error", e)
+			ll.Fatalln("CONN2BUFFER conversion error", e)
 		} else {
 			bs = int(i)
 		}
