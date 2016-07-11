@@ -29,10 +29,10 @@ import (
 )
 
 var (
-	pref  = "v" // Prefix
-	major = "1" // Major
-	minor = "0" // Minor
-	patch = "2" // Patch
+	pref  = "v"          // Prefix
+	major = "1"          // Major
+	minor = "0"          // Minor
+	patch = "2.plvl.001" // Patch
 )
 
 func main() {
