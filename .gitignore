@@ -26,3 +26,8 @@ _*
 temp*
 # Ignore vscode artifacts
 .vscode/
+# JAVA Class Files
+*.class
+# HTML Artifacts
+*.htm
+*.html
