@@ -66,7 +66,7 @@ jinterop
 A subdirectory which contains go and Java examples of a producer and consumer.<br />
 This demonstrates interoperability between go and Java, and between STOMP and JMS.<br />
 See individual files for details.<br />
-This example is ActiveMQ specific, but can be easily adapted for other brokers.<br />
+Examples are provided for ActiveMQ and Artemis.  Only the ActiveMQ artifacts are described here.<br />
 It is assumed that the reader is familiar with Java, JMS, and JNDI.<br />
 A number of helper shell scripts are provided.  See the script descriptions below.<br />
 These interoperability examples have some hard coded port numbers and path names.<br />
@@ -75,7 +75,7 @@ These interoperability examples have some hard coded port numbers and path names
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/Constants.java
+jinterop/activemq/Constants.java
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 Static constants used in the other Java programs in this directory.
@@ -84,7 +84,7 @@ Static constants used in the other Java programs in this directory.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/jndi.properties
+jinterop/activemq/jndi.properties
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 The JNDI properties file definition.
@@ -94,7 +94,7 @@ The JNDI properties file definition.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/log4j.properties
+jinterop/activemq/log4j.properties
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 The log4j properties file used by the Java code.
@@ -103,7 +103,7 @@ The log4j properties file used by the Java code.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/gorecv/gorecv.go
+jinterop/activemq/gorecv/gorecv.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 A message consumer written in go.
@@ -112,7 +112,7 @@ A message consumer written in go.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/gosend/gosend.go
+jinterop/activemq/gosend/gosend.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 A message producer written in go.
@@ -121,7 +121,7 @@ A message producer written in go.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/Receiver.java
+jinterop/activemq/Receiver.java
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 A message consumer written in Java using JMS.
@@ -130,7 +130,7 @@ A message consumer written in Java using JMS.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/Sender.java
+jinterop/activemq/Sender.java
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 A message producer written in Java using JMS.
@@ -336,7 +336,7 @@ Description
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/clean.sh
+jinterop/activemq/clean.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 This is the clean up script for the Java / JMS interoperability examples.<br />
@@ -346,7 +346,7 @@ It removes all three .class files and the two go executables.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/compile.sh
+jinterop/activemq/compile.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 This is the compile script for the Java / JMS interoperability examples.<br />
@@ -356,7 +356,7 @@ It compiles the Java and the go interoperability code.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/cp.sh
+jinterop/activemq/cp.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 An internal script, sourced by some of the other scripts.<br />
@@ -367,7 +367,7 @@ This script should be modified to support your environment.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/gorecv.sh
+jinterop/activemq/gorecv.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 This script runs the go receiver/consumer/getter.
@@ -376,7 +376,7 @@ This script runs the go receiver/consumer/getter.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/gosend.sh
+jinterop/activemq/gosend.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 This script runs the go sender/producer/putter.
@@ -385,7 +385,7 @@ This script runs the go sender/producer/putter.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/jrecv.sh
+jinterop/activemq/jrecv.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 This script runs the Java receiver/consumer/getter.
@@ -394,10 +394,19 @@ This script runs the Java receiver/consumer/getter.
 
 <tr>
 <td style="border: 1px solid black;padding-left: 10px;" >
-jinterop/jsend.sh
+jinterop/activemq/jsend.sh
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 This script runs the Java sender/producer/putter.
+</td>
+</tr>
+
+<tr>
+<td style="border: 1px solid black;padding-left: 10px;" >
+jinterop/activemq/runall.sh
+</td>
+<td style="border: 1px solid black;padding-left: 10px;" >
+This script runs all possible combinations of producers / consumers.
 </td>
 </tr>
 
