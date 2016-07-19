@@ -56,8 +56,10 @@ func main() {
 	ll.Printf("%s v1:%v\n", exampid, "stomp_connect_complete_...")
 
 	// Suppress content length here, so JMS will treat this as a 'text' message.
-	sh := stompngo.Headers{"destination", "jms.queue.exampleQueue",
-		"suppress-content-length", "true"} // send headers, suppress content-length
+	sh := stompngo.Headers{"destination", "jms.queue.exampleQueue"}
+	if os.Getenv("STOMP_NOSCL") != "true" {
+		sh = sh.Add("suppress-content-length", "true")
+	}
 	if senv.Persistent() {
 		sh = sh.Add("persistent", "true")
 	}

@@ -19,6 +19,9 @@ import java.util.Random;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
+import javax.jms.BytesMessage;
+import javax.jms.MapMessage;
+import javax.jms.StreamMessage;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
@@ -75,6 +78,27 @@ public class Receiver
     		System.out.println("Object Msg received: "
            + ((ObjectMessage) msg).getObject());
       }
+      else if (msg instanceof BytesMessage)
+      {
+            BytesMessage bmsg = (BytesMessage)msg;
+            long len = bmsg.getBodyLength();
+            byte[] buff = new byte[(int)len];
+            int rlen = bmsg.readBytes(buff);
+            String body = new String(buff);
+    		System.out.println("Bytes Msg received: "
+                + "len:" + rlen + "\n" + "body:" + body);
+      }
+      else if (msg instanceof StreamMessage)
+      {
+    		System.out.println("Stream Msg received: ");
+            System.out.println(msg);
+      }
+      else if (msg instanceof MapMessage)
+      {
+    		System.out.print("Map Msg received: ");
+            System.out.println(msg);
+      }
+
       else
       {
      		System.out.println("Some Other Msg received: " + msg);
