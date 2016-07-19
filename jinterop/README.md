@@ -1,10 +1,21 @@
 # stompngo_examples - Java JMS Interoperability #
 
+## Supported Brokers ##
+
+* ActiveMQ
+* Artemis
+
 ## Assumptions ##
 
 * ActiveMQ Message Broker
-* Openwire port at 61616
+* Openwire / TCP port at 61616
 * STOMP port at 61613
+
+or:
+
+* Artemis Message Broker
+* Artemis / TCP port at 31616
+* STOMP port at 31613
 
 ## Java and go Preparation ##
 
