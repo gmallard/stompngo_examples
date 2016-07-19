@@ -32,7 +32,7 @@ var (
 	pref  = "v"          // Prefix
 	major = "1"          // Major
 	minor = "0"          // Minor
-	patch = "2.plvl.002" // Patch
+	patch = "2.plvl.003" // Patch
 )
 
 func main() {
