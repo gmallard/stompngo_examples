@@ -5,8 +5,10 @@
 dirs = 	ack \
 	conndisc \
 	conndisc_tls \
-	jinterop/gorecv \
-	jinterop/gosend \
+	jinterop/activemq/gorecv \
+	jinterop/activemq/gosend \
+	jinterop/artemis/gorecv \
+	jinterop/artemis/gosend \
 	publish \
 	receipts/onack \
 	receipts/onsend \
