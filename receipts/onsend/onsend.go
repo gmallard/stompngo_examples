@@ -41,8 +41,8 @@ package main
 
 import (
 	"log"
-	"net"
 	"os"
+	"time"
 	//
 	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
@@ -54,44 +54,34 @@ import (
 var (
 	exampid = "onsend: "
 	ll      = log.New(os.Stdout, "OSND ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+
+	tag = "onsendmain"
 )
 
 func main() {
 
-	ll.Printf("%s starts\n", exampid)
+	st := time.Now()
 
 	// ****************************************
 	// Set up the connection.
-	h, p := senv.HostAndPort()
-	hap := net.JoinHostPort(h, p)
-	n, e := net.Dial("tcp", hap)
+	// Standard example connect sequence
+	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
-	ll.Printf("%s dial_complete hap:%s\n",
-		exampid, hap)
-	ch := sngecomm.ConnectHeaders()
-	conn, e := stompngo.Connect(n, ch)
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s connsess:%s stomp_connect_complete protocol:%s\n",
-		exampid, conn.Session(),
-		conn.Protocol())
 
 	// ****************************************
 	// App logic here .....
+	// Send exactly one message.  Ask for a receipt.
 
 	d := senv.Dest()
-	ll.Printf("%s connsess:%s dest d%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s destination:%v\n",
+		exampid, tag, conn.Session(),
 		d)
 
-	// Prep
-
-	// ****************************************
-	// Send exactly one message.  Ask for a receipt.
-	rid := "1" // The receipt ID
+	rid := "recipt-002" // The receipt ID
 	sh := stompngo.Headers{"destination", d,
 		"receipt", rid} // send headers
 	if senv.Persistent() {
@@ -99,85 +89,63 @@ func main() {
 	}
 	ms := exampid + " message: "
 	t := ms + rid
-	ll.Printf("%s connsess:%s sending_now t:%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s sending_now body:%v\n",
+		exampid, tag, conn.Session(),
 		t)
 	e = conn.Send(sh, t)
 	if e != nil {
-		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "bad send", e) // Handle this ...
+		ll.Fatalf("%stag:%s connsess:%s main_bad_send error:%v",
+			exampid, tag, conn.Session(),
+			e.Error()) // Handle this ......
 	}
-	ll.Printf("%s connsess:%s send_complete t:%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s send_complete body:%v\n",
+		exampid, tag, conn.Session(),
 		t)
 
-	// ****************************************
-	// OK, here we are looking for a RECEIPT.
-	// The MessageData struct of the receipt will be on the connection
-	// level MessageData channel.
-	ll.Printf("%s connsess:%s start_receipt_read t:%s\n",
-		exampid, conn.Session(),
-		t)
-
-	// ****************************************
-	// ***IMPORTANT***
-	// ***NOTE*** which channel this RECEIPT MessageData comes in on.
-	// ***NOTE*** we do not use a select here with a subscribe channel.
-	//            because we have not SUBSCRIB'ed.
-	rd := <-conn.MessageData
-
+	// Look for the receipt
+	ll.Printf("%stag:%s connsess:%s start_receipt_read\n",
+		exampid, tag, conn.Session())
+	rd := <-conn.MessageData // The RECEIPT frame should be on this channel
 	if rd.Message.Command != stompngo.RECEIPT {
-		ll.Fatalf("%s v1:%v\n", exampid, rd) // Handle this
+		ll.Fatalf("%stag:%s connsess:%s bad_frame_command rd:%v\n",
+			exampid, tag, conn.Session(),
+			rd) // Handle this ......
 	}
-
-	ll.Printf("%s connsess:%s end_receipt_read t:%s\n",
-		exampid, conn.Session(),
-		t)
+	ll.Printf("%stag:%s connsess:%s end_receipt_read\n",
+		exampid, tag, conn.Session())
 
 	// ****************************************
-	// Show stuff about the RECEIPT MessageData struct
-
-	ll.Printf("%s connsess:%s receipt_COMMAND command:%s\n",
-		exampid, conn.Session(),
+	// Show details about the RECEIPT MessageData struct
+	ll.Printf("%stag:%s connsess:%s receipt_COMMAND command:%s\n",
+		exampid, tag, conn.Session(),
 		rd.Message.Command)
-	ll.Printf("%s connsess:%s receipt_HEADERS headers:%v\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s receipt_HEADERS headers:%v\n",
+		exampid, tag, conn.Session(),
 		rd.Message.Headers)
-	ll.Printf("%s connsess:%s receipt_BODY body:%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s receipt_BODY body:%s\n",
+		exampid, tag, conn.Session(),
 		string(rd.Message.Body))
 
-	// ****************************************
-	// Get the returned ID.
-	irid := rd.Message.Headers.Value("receipt-id")
-
-	ll.Printf("%s connsess:%s received_receipt_id irif:%s\n",
-		exampid, conn.Session(),
-		irid)
-	// Check that it matches what we asked for
-	if rid != irid {
-		ll.Fatalf("%s v1:%v v2:%v v3:%v\n", exampid, "notsame", rid, irid) // Handle this ......
+	// Step 2 of Verify
+	// Verify that the receipt has the id we asked for
+	if rd.Message.Headers.Value("receipt-id") != rid {
+		ll.Fatalf("%stag:%s connsess:%s bad_receipt_id wanted:%v got:%v\n",
+			exampid, tag, conn.Session(),
+			rid, rd.Message.Headers.Value("receipt-id")) // Handle this ......
 	}
+	ll.Printf("%stag:%s connsess:%s receipt_id_verified rid:%s\n",
+		exampid, tag, conn.Session(),
+		rid)
 
-	ll.Printf("%s connsess:%s validation_complete\n",
-		exampid, conn.Session())
-	// ****************************************
-	// Disconnect from the Stomp server
-	e = conn.Disconnect(stompngo.Headers{})
+	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_disconnect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
 
-	ll.Printf("%s connsess:%s stomp_disconnect_complete\n",
-		exampid, conn.Session())
-	// Close the network connection
-	e = n.Close()
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-
-	ll.Printf("%s connsess:%s net_close2_complete\n",
-		exampid, conn.Session())
-
-	ll.Printf("%s ends\n", exampid)
+	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
+		exampid, tag, conn.Session(),
+		time.Now().Sub(st))
 
 }

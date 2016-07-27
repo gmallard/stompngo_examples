@@ -41,8 +41,8 @@ package main
 
 import (
 	"log"
-	"net"
 	"os"
+	"time"
 	//
 	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
@@ -54,6 +54,8 @@ import (
 var (
 	exampid = "onack: "
 	ll      = log.New(os.Stdout, "OACK ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+
+	tag = "onackmain"
 )
 
 func main() {
@@ -62,9 +64,9 @@ func main() {
 	// empty.
 
 	// Following is a lengthy piece of code.  Read it striaght from top
-	// to bottom.  There is zero comlex logic here.
+	// to bottom.  There is zero complex logic here.
 
-	// Here is what we will do:
+	// What this code will do:
 	// Phase 1:
 	// - Connect to a broker
 	// - Verify a connection spec level
@@ -76,42 +78,32 @@ func main() {
 	// - Subscribe to the specified queue, using "ack:client-individual"
 	// - Receive a single message
 	// - Send an ACK, asking for a receipt
-	// - Receive a RECEIPT # The point of this exercise.
-	// - Show data from the RECEIPT and verify it
+	//**************************************************************************
+	// - Receive a RECEIPT // The point of this exercise.
+	// - Show data from the RECEIPT and verify it // The point of this exercise.
+	//**************************************************************************
 	// - Disconnect from the broker
 
-	ll.Printf("%s starts\n", exampid)
+	// Start
+
+	st := time.Now()
 
 	// **************************************** Phase 1
 	// Set up the connection.
-	h, p := senv.HostAndPort()
-	hap := net.JoinHostPort(h, p)
-	n, e := net.Dial("tcp", hap)
+	// Standard example connect sequence
+	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
-	ll.Printf("%s dial1_complete hap:%s\n",
-		exampid, hap)
-	ch := sngecomm.ConnectHeaders()
-	conn, e := stompngo.Connect(n, ch)
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-
-	if conn.Protocol() == stompngo.SPL_10 {
-		ll.Fatalf("%s v1:%v\n", exampid, "STOMP 1.0 not supported for this example")
-	}
-	ll.Printf("%s connsess:%s stomp_connect1_complete protocol:%s\n",
-		exampid, conn.Session(),
-		conn.Protocol())
 
 	// ****************************************
 	// App logic here .....
 
 	d := senv.Dest()
-	// Prep
-	ll.Printf("%s connsess:%s d%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s destination:%v\n",
+		exampid, tag, conn.Session(),
 		d)
 
 	// ****************************************
@@ -122,92 +114,78 @@ func main() {
 	}
 	m := exampid + " message: "
 	t := m + "1"
-
-	ll.Printf("%s connsess:%s sending_now t:%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s sending_now body:%v\n",
+		exampid, tag, conn.Session(),
 		t)
 	e = conn.Send(sh, t)
 	if e != nil {
-		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "bad send", e) // Handle this ...
+		ll.Fatalf("%stag:%s connsess:%s main_bad_send error:%v",
+			exampid, tag, conn.Session(),
+			e.Error()) // Handle this ......
 	}
-
-	ll.Printf("%s connsess:%s send_complete t:%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s send_complete body:%v\n",
+		exampid, tag, conn.Session(),
 		t)
 
 	// ****************************************
 	// Disconnect from the Stomp server
-	e = conn.Disconnect(stompngo.Headers{})
+	// Standard example disconnect sequence
+	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_disconnect error:%v",
+			exampid, tag, conn.Session(),
+			e.Error()) // Handle this ......
 	}
-	ll.Printf("%s connsess:%s stomp_disconnect1_complete t:%s\n",
-		exampid, conn.Session(),
-		t)
-	// Close the network connection
-	e = n.Close()
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s connsess:%s net_close1_complete t:%s\n",
-		exampid, conn.Session(),
-		t)
 
 	// **************************************** Phase 2
 
-	n, e = net.Dial("tcp", net.JoinHostPort(h, p))
+	// Standard example connect sequence
+	n, conn, e = sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
-
-	ll.Printf("%s dial2_complete hap:%s\n",
-		exampid, net.JoinHostPort(h, p))
-
-	conn, e = stompngo.Connect(n, ch)
-	if e != nil {
-		ll.Fatalf("%s  f4v:%v\n", exampid, 10, e) // Handle this ......
-	}
-	ll.Printf("%s connsess:%s stomp_connect2_complete protocol:%s\n",
-		exampid, conn.Session(),
-		conn.Protocol())
 
 	// ****************************************
 	// Subscribe here
 	id := stompngo.Uuid()
-
-	var md stompngo.MessageData // A message data instance
-
 	// Get the "subscribe channel"
 	sc := sngecomm.HandleSubscribe(conn, d, id, "client-individual")
-	ll.Printf("%s connsess:%s stomp_subscribe_complete\n",
-		exampid, conn.Session())
+	ll.Printf("%stag:%s connsess:%s stomp_subscribe_complete\n",
+		exampid, tag, conn.Session())
 
 	// Get data from the broker
+	var md stompngo.MessageData // A message data instance
 	select {
 	case md = <-sc:
 	case md = <-conn.MessageData:
 		// This would be contain an ERROR or RECEIPT frame.  Both are unexpected
 		// in this example.
-		ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
+		ll.Fatalf("%stag:%s connsess:%s bad_frame md:%v",
+			exampid, tag, conn.Session(),
+			md) // Handle this ......
 	}
-	ll.Printf("%s connsess:%s channel_read_complete\n",
-		exampid, conn.Session())
+	ll.Printf("%stag:%s connsess:%s channel_read_complete\n",
+		exampid, tag, conn.Session())
 
 	// MessageData has two components:
 	// a) a Message struct
 	// b) an Error value.  Check the error value as usual
 	if md.Error != nil {
-		ll.Fatalf("%s v1:%v\n", exampid, md.Error) // Handle this
+		ll.Fatalf("%stag:%s connsess:%s message_error md:%v",
+			exampid, tag, conn.Session(),
+			md.Error) // Handle this ......
 	}
 
-	ll.Printf("%s connsess:%s read_message_COMMAND command:%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s read_message_COMMAND command:%s\n",
+		exampid, tag, conn.Session(),
 		md.Message.Command)
-	ll.Printf("%s connsess:%s read_message_HEADERS headers:%v\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s read_message_HEADERS headers:%s\n",
+		exampid, tag, conn.Session(),
 		md.Message.Headers)
-	ll.Printf("%s connsess:%s read_message_BODY body:%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s read_message_BODY body:%s\n",
+		exampid, tag, conn.Session(),
 		string(md.Message.Body))
 
 	// Here we need to send an ACK.  Required Headers are different between
@@ -219,14 +197,18 @@ func main() {
 	} else { // 1.2
 		ah = ah.Add("id", md.Message.Headers.Value("ack"))
 	}
-
 	// We are also going to ask for a RECEIPT for the ACK
-	rid := "1"
+	rid := "receipt-001"
 	ah = ah.Add("receipt", rid)
 	//
+	ll.Printf("%stag:%s connsess:%s ACK_receipt_headers headers:%v\n",
+		exampid, tag, conn.Session(),
+		ah)
 	e = conn.Ack(ah)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s ack_error error:%v",
+			exampid, tag, conn.Session(),
+			e.Error()) // Handle this ......
 	}
 
 	// ****************************************
@@ -238,50 +220,63 @@ func main() {
 
 	// ***IMPORTANT***
 	// ***NOTE*** which channel this RECEIPT MessageData comes in on.
-	var rd stompngo.MessageData
 
-	ll.Printf("%s connsess:%s start_receipt_read\n",
-		exampid, conn.Session())
+	ll.Printf("%stag:%s connsess:%s start_receipt_read\n",
+		exampid, tag, conn.Session())
+	var rd stompngo.MessageData
 	select {
 	case rd = <-sc:
 		// This would contain a MESSAGE frame.  It is unexpected here
 		// in this example.
-		ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
+		ll.Fatalf("%stag:%s connsess:%s bad_frame_channel rd:%v\n",
+			exampid, tag, conn.Session(),
+			rd) // Handle this ......
 	case rd = <-conn.MessageData: // RECEIPT frame s/b in the MessageData
+		// Step 1 of Verify
 		if rd.Message.Command != stompngo.RECEIPT {
-			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
+			ll.Fatalf("%stag:%s connsess:%s bad_frame_command rd:%v\n",
+				exampid, tag, conn.Session(),
+				rd) // Handle this ......
 		}
 	}
-	ll.Printf("%s connsess:%s end_receipt_read\n",
-		exampid, conn.Session())
-	// ****************************************
-	// Show stuff about the RECEIPT MessageData struct
+	ll.Printf("%stag:%s connsess:%s end_receipt_read\n",
+		exampid, tag, conn.Session())
 
-	ll.Printf("%s connsess:%s receipt_COMMAND command:%s\n",
-		exampid, conn.Session(),
+	// ****************************************
+	// Show details about the RECEIPT MessageData struct
+	ll.Printf("%stag:%s connsess:%s receipt_COMMAND command:%s\n",
+		exampid, tag, conn.Session(),
 		rd.Message.Command)
-	ll.Printf("%s connsess:%s receipt_HEADERS headers:%v\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s receipt_HEADERS headers:%v\n",
+		exampid, tag, conn.Session(),
 		rd.Message.Headers)
-	ll.Printf("%s connsess:%s receipt_BODY body:%s\n",
-		exampid, conn.Session(),
+	ll.Printf("%stag:%s connsess:%s receipt_BODY body:%s\n",
+		exampid, tag, conn.Session(),
 		string(rd.Message.Body))
+
+	// Step 2 of Verify
+	// Verify that the receipt has the id we asked for
+	if rd.Message.Headers.Value("receipt-id") != rid {
+		ll.Fatalf("%stag:%s connsess:%s bad_receipt_id wanted:%v got:%v\n",
+			exampid, tag, conn.Session(),
+			rid, rd.Message.Headers.Value("receipt-id")) // Handle this ......
+	}
+	ll.Printf("%stag:%s connsess:%s receipt_id_verified rid:%s\n",
+		exampid, tag, conn.Session(),
+		rid)
 
 	// ****************************************
 	// Disconnect from the Stomp server
-	e = conn.Disconnect(stompngo.Headers{})
+	// Standard example disconnect sequence
+	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_disconnect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
 
-	ll.Printf("%s connsess:%s stomp_disconnect2_complete\n",
-		exampid, conn.Session())
-	// Close the network connection
-	e = n.Close()
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
+	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
+		exampid, tag, conn.Session(),
+		time.Now().Sub(st))
 
-	ll.Printf("%s connsess:%s net_close2_complete\n",
-		exampid, conn.Session())
 }
