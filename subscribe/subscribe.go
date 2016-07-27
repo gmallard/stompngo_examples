@@ -71,7 +71,9 @@ func main() {
 	// Standard example connect sequence
 	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
 
 	pbc := sngecomm.Pbc() // Print byte count
@@ -114,7 +116,10 @@ func main() {
 				e.Error()) // Handle this ......
 		}
 		//
-		ll.Printf("Frame Type: %s\n", md.Message.Command) // Will be MESSAGE or ERROR!
+		ll.Printf("%stag:%s connsess:%s frame_type cmd:%s\n",
+			exampid, tag, conn.Session(),
+			md.Message.Command)
+
 		if md.Message.Command != stompngo.MESSAGE {
 			ll.Fatalf("%stag:%s connsess:%s error_frame_type error:%v",
 				exampid, tag, conn.Session(),
@@ -147,7 +152,9 @@ func main() {
 	// Standard example disconnect sequence
 	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_on_disconnect error:%v",
+			exampid, tag, conn.Session(),
+			e.Error()) // Handle this ......
 	}
 
 	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
