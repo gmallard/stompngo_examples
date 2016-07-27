@@ -35,7 +35,7 @@ var (
 
 	//patch = "3" // Patch
 
-	patch = "3.plvl.005" // Patch
+	patch = "3.plvl.006" // Patch
 )
 
 func Version() string {

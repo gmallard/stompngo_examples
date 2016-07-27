@@ -91,63 +91,61 @@ func ValueBetween(min, max int64, fact float64) int64 {
 
 // Dump a TLS Configuration Struct
 func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
-	llu.Printf(" f4v:%v\n")
-	llu.Printf("%s Rand: %v\n", exampid, c.Rand)
-	llu.Printf("%s Time: %v\n", exampid, c.Time)
-	llu.Printf("%s Certificates: %v\n", exampid, c.Certificates)
-	llu.Printf("%s NameToCertificate: %v\n", exampid, c.NameToCertificate)
-	llu.Printf("%s RootCAs: %v\n", exampid, c.RootCAs)
-	llu.Printf("%s NextProtos: %v\n", exampid, c.NextProtos)
-	llu.Printf("%s ServerName: %v\n", exampid, c.ServerName)
-	llu.Printf("%s ClientAuth: %v\n", exampid, c.ClientAuth)
-	llu.Printf("%s ClientCAs: %v\n", exampid, c.ClientCAs)
-	llu.Printf("%s CipherSuites: %v\n", exampid, c.CipherSuites)
-	llu.Printf("%s PreferServerCipherSuites: %v\n", exampid, c.PreferServerCipherSuites)
-	llu.Printf("%s SessionTicketsDisabled: %v\n", exampid, c.SessionTicketsDisabled)
-	llu.Printf("%s SessionTicketKey: %v\n", exampid, c.SessionTicketKey)
+	llu.Printf("%s TLSConfig:\n", exampid)
+	llu.Printf("%s Rand:%v\n", exampid, c.Rand)
+	llu.Printf("%s Time:%v\n", exampid, c.Time)
+	llu.Printf("%s Certificates:%v\n", exampid, c.Certificates)
+	llu.Printf("%s NameToCertificate:%v\n", exampid, c.NameToCertificate)
+	llu.Printf("%s RootCAs:%v\n", exampid, c.RootCAs)
+	llu.Printf("%s NextProtos:%v\n", exampid, c.NextProtos)
+	llu.Printf("%s ServerName:%v\n", exampid, c.ServerName)
+	llu.Printf("%s ClientAuth:%v\n", exampid, c.ClientAuth)
+	llu.Printf("%s ClientCAs:%v\n", exampid, c.ClientCAs)
+	llu.Printf("%s CipherSuites:%v\n", exampid, c.CipherSuites)
+	llu.Printf("%s PreferServerCipherSuites:%v\n", exampid, c.PreferServerCipherSuites)
+	llu.Printf("%s SessionTicketsDisabled:%v\n", exampid, c.SessionTicketsDisabled)
+	llu.Printf("%s SessionTicketKey:%v\n", exampid, c.SessionTicketKey)
 
 	// Idea Embelluished From:
 	// https://groups.google.com/forum/#!topic/golang-nuts/TMNdOxugbTY
 	cs := n.ConnectionState()
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "HandshakeComplete:", cs.HandshakeComplete)
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "DidResume:", cs.DidResume)
-	llu.Printf("%s %s %d(0x%X)\n", exampid, "CipherSuite:", cs.CipherSuite, cs.CipherSuite)
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "NegotiatedProtocol:", cs.NegotiatedProtocol)
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "NegotiatedProtocolIsMutual:", cs.NegotiatedProtocolIsMutual)
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "ServerName:", cs.ServerName)
+	llu.Printf("%s HandshakeComplete:%v\n", exampid, cs.HandshakeComplete)
+	llu.Printf("%s DidResume:%v\n", exampid, cs.DidResume)
+	llu.Printf("%s CipherSuite:%d(0x%X)\n", exampid, cs.CipherSuite, cs.CipherSuite)
+	llu.Printf("%s NegotiatedProtocol:%v\n", exampid, cs.NegotiatedProtocol)
+	llu.Printf("%s NegotiatedProtocolIsMutual:%v\n", exampid, cs.NegotiatedProtocolIsMutual)
+	// llu.Printf("%s ServerName:%v\n", exampid, cs.ServerName) // Server side only
 	// Portions of any Peer Certificates present
 	certs := cs.PeerCertificates
 	if certs == nil || len(certs) < 1 {
-		llu.Printf("v1:%v\n", "Could not get server's certificate from the TLS connection.")
-		llu.Printf(" f4v:%v\n")
+		llu.Printf("Could not get server's certificate from the TLS connection.\n")
 		return
 	}
-	llu.Printf("%s v1:%v\n", exampid, "Server Certs:")
+	llu.Printf("%s Server Certs:\n", exampid)
 	for i, cert := range certs {
-		llu.Printf("Certificate chain: %d\n", i)
-		llu.Printf("Common Name:%s \n", cert.Subject.CommonName)
+		llu.Printf("%s Certificate chain:%d\n", exampid, i)
+		llu.Printf("%s Common Name:%s\n", exampid, cert.Subject.CommonName)
 		//
-		llu.Printf("Subject Alternative Names (DNSNames):\n")
+		llu.Printf("%s Subject Alternative Names (DNSNames):\n", exampid)
 		for idx, dnsn := range cert.DNSNames {
-			llu.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, dnsn)
+			llu.Printf("%s \tNumber:%d, DNS Name:%s\n", exampid, idx+1, dnsn)
 		}
 		//
-		llu.Printf("Subject Alternative Names (Emailaddresses):\n")
+		llu.Printf("%s Subject Alternative Names (Emailaddresses):\n", exampid)
 		for idx, enn := range cert.EmailAddresses {
-			llu.Printf("\tNumber: %d, DNS Name: %s\n", idx+1, enn)
+			llu.Printf("%s \tNumber:%d, DNS Name:%s\n", exampid, idx+1, enn)
 		}
 		//
-		llu.Printf("Subject Alternative Names (IPAddresses):\n")
+		llu.Printf("%s Subject Alternative Names (IPAddresses):\n", exampid)
 		for idx, ipadn := range cert.IPAddresses {
-			llu.Printf("\tNumber: %d, DNS Name: %v\n", idx+1, ipadn)
+			llu.Printf("%s \tNumber:%d, DNS Name:%v\n", exampid, idx+1, ipadn)
 		}
 		//
-		llu.Printf("Valid Not Before: %s\n", cert.NotBefore.Local().String())
-		llu.Printf("Valid Not After: %s\n", cert.NotAfter.Local().String())
-		llu.Printf("v1:%v v2:%v\n", ""+strings.Repeat("=", 80)+"\n")
+		llu.Printf("%s Valid Not Before:%s\n", exampid, cert.NotBefore.Local().String())
+		llu.Printf("%s Valid Not After:%s\n", exampid, cert.NotAfter.Local().String())
+		llu.Println(strings.Repeat("=", 80))
 	}
 
-	llu.Printf(" f4v:%v\n")
 }
 
 // Handle a subscribe for the different protocol levels.
@@ -266,7 +264,7 @@ func CommonConnect(exampid, tag string, l *log.Logger) (net.Conn,
 		ch)
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		return n, nil, e
+		return nil, nil, e
 	}
 	l.Printf("%stag:%s connsess:%s common_connect_complete host:%s vhost:%s protocol:%s server:%s\n",
 		exampid, tag, conn.Session(),
@@ -326,4 +324,79 @@ func CommonDisconnect(n net.Conn, conn *stompngo.Connection,
 
 	//
 	return nil
+}
+
+// Common example TLS connect logic
+func CommonTLSConnect(exampid, tag string, l *log.Logger,
+	c *tls.Config) (net.Conn, *stompngo.Connection, error) {
+
+	l.Printf("%stag:%s consess:%s common_tls_connect_starts\n",
+		exampid, tag, Lcs)
+
+	// Set up the connection.
+	h, p := senv.HostAndPort()
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
+	if e != nil {
+		return nil, nil, e
+	}
+
+	c.ServerName = h // SNI
+
+	nc := tls.Client(n, c) // Returns: *tls.Conn : implements net.Conn
+	e = nc.Handshake()
+	if e != nil {
+		if e.Error() == "EOF" {
+			l.Printf("%stag:%s consess:%s common_tls_handshake_EOF_Is_the_broker_port_TLS_enabled? port:%s\n",
+				exampid, tag, Lcs,
+				p)
+		}
+		l.Fatalf("%stag:%s consess:%s common_tls_handshake_failed error:%v\n",
+			exampid, tag, Lcs,
+			e.Error())
+	}
+	l.Printf("%stag:%s consess:%s common_tls_handshake_complete\n",
+		exampid, tag, Lcs)
+
+	l.Printf("%stag:%s connsess:%s common_tls_connect_host_and_port:%v\n",
+		exampid, tag, Lcs,
+		hap)
+
+	// Create connect headers and connect to stompngo
+	ch := ConnectHeaders()
+	l.Printf("%stag:%s connsess:%s common_tls_connect_headers headers:%v\n",
+		exampid, tag, Lcs,
+		ch)
+	conn, e := stompngo.Connect(nc, ch)
+	if e != nil {
+		return nil, nil, e
+	}
+	l.Printf("%stag:%s connsess:%s common_tls_connect_complete host:%s vhost:%s protocol:%s server:%s\n",
+		exampid, tag, conn.Session(),
+		h, senv.Vhost(), conn.Protocol(), ServerIdent(conn))
+
+	// Show connect response
+	l.Printf("%stag:%s connsess:%s common_tls_connect_response connresp:%v\n",
+		exampid, tag, conn.Session(),
+		conn.ConnectResponse)
+
+	// Show heartbeat data (if heart beats are being used)
+	if senv.Heartbeats() != "" {
+		l.Printf("%stag:%s connsess:%s common_tls_connect_heart_beat_send hbsend:%v\n",
+			exampid, tag, conn.Session(),
+			conn.SendTickerInterval())
+		l.Printf("%stag:%s connsess:%s common_tls_connect_heart_beat_recv hbrecv:%v\n",
+			exampid, tag, conn.Session(),
+			conn.ReceiveTickerInterval())
+	}
+
+	l.Printf("%stag:%s connsess:%s common_tls_connect_local_addr:%s\n",
+		exampid, tag, conn.Session(),
+		n.LocalAddr().String())
+	l.Printf("%stag:%s connsess:%s common_tls_connect_remote_addr:%s\n",
+		exampid, tag, conn.Session(),
+		n.RemoteAddr().String())
+
+	//
+	return nc, conn, nil
 }

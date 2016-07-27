@@ -39,10 +39,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"log"
-	"net"
 	"os"
-	//
-	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
 	"github.com/gmallard/stompngo/senv"
 	// sngecomm methods are used specifically for these example clients.
@@ -55,6 +52,8 @@ var (
 	cliCertFile string
 	cliKeyFile  string
 	ll          = log.New(os.Stdout, "TLSU3 ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+
+	tag = "tuc3main"
 )
 
 func init() {
@@ -64,88 +63,52 @@ func init() {
 
 // Connect to a STOMP broker using TLS and disconnect.
 func main() {
-	ll.Printf("%s starts\n", exampid)
 
 	flag.Parse() // Parse flags
-	ll.Printf("%s using cliCertFile cliCertFile:%s\n",
-		exampid, cliCertFile)
-	ll.Printf("%s using cliKeyFile cliKeyFile:%s\n",
-		exampid, cliKeyFile)
+	ll.Printf("%stag:%s connsess:%s main_using_cliCertFile:%s\n",
+		exampid, tag, sngecomm.Lcs,
+		cliCertFile)
+	ll.Printf("%stag:%s connsess:%s main_using_cliKeyFile:%s\n",
+		exampid, tag, sngecomm.Lcs,
+		cliKeyFile)
 
 	// TLS Configuration.
 	tc = new(tls.Config)
 	tc.InsecureSkipVerify = true // Do *not* check the broker's certificate
-
-	// Get host and port
-	h, p := senv.HostAndPort()
-	ll.Printf("%s host_and_port host:%s port:%s\n", exampid, h, p)
-
 	// Be polite, allow SNI (Server Virtual Hosting)
-	tc.ServerName = h
-
+	tc.ServerName = senv.Host()
 	// Finish TLS Config initialization, so broker can authenticate client.
 	// cc -> tls.Certificate
 	cc, e := tls.LoadX509KeyPair(cliCertFile, cliKeyFile)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_load_pair error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
-	tc.Certificates = append(tc.Certificates, cc) // Add cert to config
-
+	// Add cert to config
+	tc.Certificates = append(tc.Certificates, cc)
 	// This is OK, but does not seem to be required
 	tc.BuildNameToCertificate() // Build names map
 
-	// Connect logic: use net.Dial and tls.Client
-	hap := net.JoinHostPort(h, p)
-	t, e := net.Dial("tcp", hap)
+	// Standard example TLS connect sequence
+	n, conn, e := sngecomm.CommonTLSConnect(exampid, tag, ll, tc)
+	if e != nil {
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
+	}
+
+	nc := n.(*tls.Conn)
+	sngecomm.DumpTLSConfig(exampid, tc, nc)
+
+	// *NOTE* application specific functionaltiy starts here!
+	// For you to add.
+	// *NOTE* application specific functionaltiy ends here!
+
+	// Standard example disconnect sequence
+	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Printf("%s dial_complete\n", exampid)
 
-	n := tls.Client(t, tc)
-	e = n.Handshake()
-	if e != nil {
-		if e.Error() == "EOF" {
-			ll.Printf("%s handshake EOF, Is the broker port TLS enabled? port:%s\n",
-				exampid, p)
-		}
-		ll.Fatalf("%s v1:%v v2:%v\n", exampid, "netHandshake", e) // Handle this .....
-	}
-
-	ll.Printf("%s handshake_complete\n", exampid)
-	sngecomm.DumpTLSConfig(exampid, tc, n)
-
-	// Connect Headers
-	ch := sngecomm.ConnectHeaders()
-
-	// Get a stomp connection.  Parameters are:
-	// a) the opened net connection
-	// b) the connect Headers
-	conn, e := stompngo.Connect(n, ch)
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s connsess:%s stomp_connect_complete\n",
-		exampid, conn.Session())
-
-	// *NOTE* your application functionaltiy goes here!
-
-	// Polite Stomp disconnects are not required, but highly recommended.
-	// Empty headers here.
-	e = conn.Disconnect(stompngo.Headers{})
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s connsess:%s stomp_disconnect_complete\n",
-		exampid, conn.Session())
-
-	// Close the net connection.
-	e = n.Close()
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s connsess:%s net_close_complete\n",
-		exampid, conn.Session())
-
-	ll.Printf("%s ends\n", exampid)
 }
