@@ -46,8 +46,8 @@ package main
 
 import (
 	"log"
-	"net"
 	"os"
+	"time"
 	//
 	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
@@ -59,30 +59,23 @@ import (
 var (
 	exampid = "subscribe: "
 	ll      = log.New(os.Stdout, "ESUBS ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+
+	tag = "subscribemain"
 )
 
 // Connect to a STOMP broker, subscribe and receive some messages and disconnect.
 func main() {
-	ll.Printf("%s v1:%v\n", exampid, "starts ...")
 
-	// Set up the connection.
-	h, p := senv.HostAndPort()
-	hap := net.JoinHostPort(h, p)
-	n, e := net.Dial("tcp", hap)
+	st := time.Now()
+
+	// Standard example connect sequence
+	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Printf("%s v1:%v v2:%v\n", exampid, "dial complete ...", hap)
-	ch := sngecomm.ConnectHeaders()
-	conn, e := stompngo.Connect(n, ch)
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s v1:%v v2:%v\n", exampid, "stomp connect complete ...", conn.Protocol())
 
 	pbc := sngecomm.Pbc() // Print byte count
 
-	ll.Printf("%s v1:%v v2:%v\n", exampid, "connected headers", conn.ConnectResponse.Headers)
 	// *NOTE* your application functionaltiy goes here!
 	// With Stomp, you must SUBSCRIBE to a destination in order to receive.
 	// Subscribe returns a channel of MessageData struct.
@@ -91,7 +84,8 @@ func main() {
 	d := senv.Dest()
 	id := stompngo.Uuid()
 	sc := sngecomm.HandleSubscribe(conn, d, id, "auto")
-	ll.Printf("%s v1:%v\n", exampid, "stomp subscribe complete ...")
+	ll.Printf("%stag:%s connsess:%s stomp_subscribe_complete\n",
+		exampid, tag, conn.Session())
 	// Read data from the returned channel
 	var md stompngo.MessageData
 	for i := 1; i <= senv.Nmsgs(); i++ {
@@ -100,25 +94,37 @@ func main() {
 		case md = <-sc:
 		case md = <-conn.MessageData:
 			// Frames RECEIPT or ERROR not expected here
-			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
+			ll.Fatalf("%stag:%s connsess:%s bad_frame error:%v",
+				exampid, tag, conn.Session(),
+				e.Error()) // Handle this ......
 		}
 
-		ll.Printf("%s v1:%v\n", exampid, "channel read complete ...")
-		ll.Printf("%s v1:%v v2:%v\n", exampid, "Message Number:", i)
+		ll.Printf("%stag:%s connsess:%s channel_read_complete\n",
+			exampid, tag, conn.Session())
+		ll.Printf("%stag:%s connsess:%s message_number:%v\n",
+			exampid, tag, conn.Session(),
+			i)
+
 		// MessageData has two components:
 		// a) a Message struct
 		// b) an Error value.  Check the error value as usual
 		if md.Error != nil {
-			ll.Fatalf("%s v1:%v\n", exampid, md.Error) // Handle this
+			ll.Fatalf("%stag:%s connsess:%s error_read error:%v",
+				exampid, tag, conn.Session(),
+				e.Error()) // Handle this ......
 		}
 		//
 		ll.Printf("Frame Type: %s\n", md.Message.Command) // Will be MESSAGE or ERROR!
 		if md.Message.Command != stompngo.MESSAGE {
-			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this ...
+			ll.Fatalf("%stag:%s connsess:%s error_frame_type error:%v",
+				exampid, tag, conn.Session(),
+				e.Error()) // Handle this ......
 		}
 		wh := md.Message.Headers
 		for j := 0; j < len(wh)-1; j += 2 {
-			ll.Printf("Header: %s:%s\n", wh[j], wh[j+1])
+			ll.Printf("%stag:%s connsess:%s Header:%s:%s\n",
+				exampid, tag, conn.Session(),
+				wh[j], wh[j+1])
 		}
 		if pbc > 0 {
 			maxlen := pbc
@@ -126,27 +132,26 @@ func main() {
 				maxlen = len(md.Message.Body)
 			}
 			ss := string(md.Message.Body[0:maxlen])
-			ll.Printf("Payload: %s\n", ss) // Data payload
+			ll.Printf("%stag:%s connsess:%s payload body:%s\n",
+				exampid, tag, conn.Session(),
+				ss)
 		}
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
 	// Again we use a utility routine to handle the different protocol level
 	// requirements.
 	sngecomm.HandleUnsubscribe(conn, d, id)
-	ll.Printf("%s v1:%v\n", exampid, "unsubscribe complete")
+	ll.Printf("%stag:%s connsess:%s stomp_unsubscribe_complete\n",
+		exampid, tag, conn.Session())
 
-	// Disconnect from the Stomp server
-	e = conn.Disconnect(stompngo.Headers{})
+	// Standard example disconnect sequence
+	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
-	ll.Printf("%s v1:%v\n", exampid, "stomp disconnect complete ...")
-	// Close the network connection
-	e = n.Close()
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s v1:%v\n", exampid, "network close complete ...")
 
-	ll.Printf("%s v1:%v\n", exampid, "ends ...")
+	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
+		exampid, tag, conn.Session(),
+		time.Now().Sub(st))
+
 }
