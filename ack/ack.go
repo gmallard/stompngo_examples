@@ -47,6 +47,7 @@ import (
 	"github.com/gmallard/stompngo"
 	"log"
 	"os"
+	"time"
 	// senv methods could be used in general by stompngo clients.
 	"github.com/gmallard/stompngo/senv"
 	// sngecomm methods are used specifically for these example clients.
@@ -61,6 +62,8 @@ var (
 
 // Connect to a STOMP broker, receive some messages, ACK them, and disconnect.
 func main() {
+
+	st := time.Now()
 
 	// Standard example connect sequence
 	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
@@ -152,4 +155,9 @@ func main() {
 			exampid, tag, conn.Session(),
 			e.Error()) // Handle this ......
 	}
+
+	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
+		exampid, tag, conn.Session(),
+		time.Now().Sub(st))
+
 }

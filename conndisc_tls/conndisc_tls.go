@@ -32,6 +32,7 @@ import (
 	"crypto/tls"
 	"log"
 	"os"
+	"time"
 	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
@@ -45,6 +46,11 @@ var (
 
 // Connect to a STOMP broker using TLS and disconnect.
 func main() {
+
+	st := time.Now()
+
+	ll.Printf("%stag:%s connsess:%s starts\n",
+		exampid, tag, sngecomm.Lcs)
 
 	// TLS Configuration.  This configuration assumes that:
 	// a) The server used does *not* require client certificates
@@ -75,5 +81,9 @@ func main() {
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
+
+	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
+		exampid, tag, conn.Session(),
+		time.Now().Sub(st))
 
 }

@@ -44,6 +44,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 	//
 	"github.com/gmallard/stompngo/senv"
 	// sngecomm methods are used specifically for these example clients.
@@ -66,6 +67,11 @@ func init() {
 
 // Connect to a STOMP broker using TLS and disconnect.
 func main() {
+
+	st := time.Now()
+
+	ll.Printf("%stag:%s connsess:%s starts\n",
+		exampid, tag, sngecomm.Lcs)
 
 	flag.Parse() // Parse flags
 	ll.Printf("%stag:%s connsess:%s main_using_srvCAFile:%s\n",
@@ -120,5 +126,9 @@ func main() {
 	if e != nil {
 		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
 	}
+
+	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
+		exampid, tag, conn.Session(),
+		time.Now().Sub(st))
 
 }
