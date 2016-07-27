@@ -22,38 +22,35 @@ package main
 import (
 	"fmt"
 	"log"
-	"net"
 	"os"
+	"time"
 	//
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo/senv"
+	// sngecomm methods are used specifically for these example clients.
+	"github.com/gmallard/stompngo_examples/sngecomm"
 )
 
 var (
 	exampid = "gosend: "
 	ll      = log.New(os.Stdout, "GOJSND ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 	nmsgs   = 1
+	tag     = "jintamqjs"
 )
 
-// Connect to a STOMP 1.2 broker, send some messages and disconnect.
+// Connect to a STOMP broker, send some messages and disconnect.
 func main() {
-	ll.Printf("%s v1:%v\n", exampid, "starts_...")
 
-	// Open a net connection
-	n, e := net.Dial("tcp", "localhost:61613")
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s v1:%v\n", exampid, "dial_complete_...")
+	st := time.Now()
 
-	// Connect to broker
-	ch := stompngo.Headers{"login", "userr", "passcode", "passw0rd",
-		"host", "localhost", "accept-version", "1.2"}
-	conn, e := stompngo.Connect(n, ch)
+	// Standard example connect sequence
+	// Use AMQ port here
+	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
-	ll.Printf("%s v1:%v\n", exampid, "stomp_connect_complete_...")
 
 	// Suppress content length here, so JMS will treat this as a 'text' message.
 	sh := stompngo.Headers{"destination", "/queue/allards.queue"}
@@ -68,24 +65,24 @@ func main() {
 		mse := ms + fmt.Sprintf("%d", i)
 		e := conn.Send(sh, mse)
 		if e != nil {
-			ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ...
+			ll.Fatalf("%stag:%s connsess:%s send_error error:%v\n",
+				exampid, tag, conn.Session(),
+				e.Error()) // Handle this ......
 		}
-		ll.Printf("%s v1:%v v2:%v\n", exampid, "send complete:", mse)
+		ll.Printf("%stag:%s connsess:%s send_complete\n",
+			exampid, tag, conn.Session())
 	}
 
-	// Disconnect from the Stomp server
-	dh := stompngo.Headers{}
-	e = conn.Disconnect(dh)
+	// Standard example disconnect sequence
+	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_disconnect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
-	ll.Printf("%s v1:%v\n", exampid, "stomp_disconnect_complete_...")
-	// Close the network connection
-	e = n.Close()
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s v1:%v\n", exampid, "network_close_complete_...")
 
-	ll.Printf("%s v1:%v\n", exampid, "ends_...")
+	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
+		exampid, tag, conn.Session(),
+		time.Now().Sub(st))
+
 }
