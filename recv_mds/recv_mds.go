@@ -68,10 +68,17 @@ var (
 	ackMode string               = "auto" // ackMode control
 	port    string
 	ll      = log.New(os.Stdout, "EMDS ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+
+	tag = "recvmdsmain"
 )
 
 func recv(conn *stompngo.Connection, s int) {
-	ll.Printf("%s v1:%v v2:%v v3:%v\n", exampid, "receiver", s, "starts")
+	ltag := tag + "-recv"
+
+	ll.Printf("%stag:%s connsess:%s receiver_starts s:%d\n",
+		exampid, ltag, conn.Session(),
+		s)
+
 	// Setup Headers ...
 	id := stompngo.Uuid() // Use package convenience function for unique ID
 	d := senv.Dest()
@@ -87,22 +94,30 @@ func recv(conn *stompngo.Connection, s int) {
 		select {
 		case md = <-sc: // Read a messagedata struct, with a MESSAGE frame
 		case md = <-conn.MessageData: // Read a messagedata struct, with a ERROR/RECEIPT frame
-			// Unexpected here in this example.
-			ll.Fatalf("%s v1:%v\n", exampid, md) // Handle this
+			// Frames RECEIPT or ERROR not expected here
+			ll.Fatalf("%stag:%s connsess:%s bad_frame md:%v",
+				exampid, ltag, conn.Session(),
+				md) // Handle this ......
 		}
 		//
 		mc++
 		if md.Error != nil {
-			panic(md.Error)
+			ll.Fatalf("%stag:%s connsess:%s error_read error:%v",
+				exampid, ltag, conn.Session(),
+				md.Error) // Handle this ......
 		}
-		ll.Printf("%s v1:%v v2:%v v3:%v v4:%v\n", exampid, "subnumber", s, id, mc)
+		ll.Printf("%stag:%s connsess:%s received_message s:%d id:%s mc:%d\n",
+			exampid, ltag, conn.Session(),
+			s, id, mc)
 		if pbc > 0 {
 			maxlen := pbc
 			if len(md.Message.Body) < maxlen {
 				maxlen = len(md.Message.Body)
 			}
 			ss := string(md.Message.Body[0:maxlen])
-			ll.Printf("Payload: %s\n", ss) // Data payload
+			ll.Printf("%stag:%s connsess:%s payload body:%s\n",
+				exampid, tag, conn.Session(),
+				ss)
 		}
 
 		// time.Sleep(3 * time.Second) // A very arbitrary number
@@ -112,7 +127,9 @@ func recv(conn *stompngo.Connection, s int) {
 		runtime.Gosched()
 		if ackMode != "auto" {
 			sngecomm.HandleAck(conn, md.Message.Headers, id)
-			ll.Printf("%s v1:%v\n", exampid, "ACK_complete_...")
+			ll.Printf("%stag:%s connsess:%s ack_complete s:%d id:%s mc:%d\n",
+				exampid, ltag, conn.Session(),
+				s, id, mc)
 		}
 		runtime.Gosched()
 	}
@@ -121,27 +138,20 @@ func recv(conn *stompngo.Connection, s int) {
 // Connect to a STOMP broker, receive and ackMode some messages.
 // Disconnect never occurs, kill via ^C.
 func main() {
-	ll.Printf("%s v1:%v\n", exampid, "starts ...")
 
-	// Set up the connection.
-	h, p := senv.HostAndPort() //
-	hap := net.JoinHostPort(h, p)
-	n, e := net.Dial("tcp", hap)
+	// Standard example connect sequence
+	_, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
 	}
-	ll.Printf("%s v1:%v v2:%v\n", exampid, "dial complete ...", hap)
-	ch := sngecomm.ConnectHeaders()
-	conn, e = stompngo.Connect(n, ch)
-	if e != nil {
-		ll.Fatalf("%s %s\n", exampid, e.Error()) // Handle this ......
-	}
-	ll.Printf("%s v1:%v v2:%v\n", exampid, "stomp connect complete ...", conn.Protocol())
 
 	for i := 1; i <= ns; i++ {
 		go recv(conn, i)
 	}
-	ll.Printf("%s v1:%v v2:%v\n", exampid, ns, "receivers started ...")
+	ll.Printf("%stag:%s connsess:%s receivers_started\n",
+		exampid, tag, conn.Session())
 
 	select {} // This will never complete, use ^C to cancel
 
