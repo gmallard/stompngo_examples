@@ -25,6 +25,7 @@ import (
 	"crypto/tls"
 	"log"
 	"math/big"
+	"net"
 	"os"
 	"strings"
 	//
@@ -34,6 +35,7 @@ import (
 
 var (
 	llu = log.New(os.Stdout, "UTIL ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	Lcs = "NotAvailable"
 )
 
 // Provide connect headers
@@ -188,7 +190,7 @@ func HandleUnsubscribe(c *stompngo.Connection, d, i string) {
 	}
 	e := c.Unsubscribe(sbh)
 	if e != nil {
-		llu.Fatalf("v1:%v v2:%v\n", "unsubscribe failed", e)
+		llu.Fatalf("v1:%v v2:%v d:%v\n", "unsubscribe failed", e, d)
 	}
 	return
 }
@@ -225,4 +227,103 @@ func ShowRunParms(exampid string) {
 	llu.Printf("%s v1:%v v2:%v\n", exampid, "RECVFACT", RecvFactor())
 	llu.Printf("%s v1:%v v2:%v\n", exampid, "SENDFACT", SendFactor())
 	llu.Printf("%s v1:%v v2:%v\n", exampid, "ACKMODE", AckMode())
+}
+
+// Return broker identity
+func ServerIdent(c *stompngo.Connection) string {
+	cdh := c.ConnectResponse
+	sr, ok := cdh.Headers.Contains("server")
+	if !ok {
+		return "N/A"
+	}
+	return sr
+}
+
+// Common example connect logic
+func CommonConnect(exampid, tag string, l *log.Logger) (net.Conn,
+	*stompngo.Connection,
+	error) {
+
+	l.Printf("%stag:%s consess:%v common_connect_starts\n",
+		exampid, tag, Lcs)
+
+	// Set up the connection.
+	h, p := senv.HostAndPort()
+	hap := net.JoinHostPort(h, p)
+	n, e := net.Dial("tcp", hap)
+	if e != nil {
+		return nil, nil, e
+	}
+
+	l.Printf("%stag:%s connsess:%s common_connect_host_and_port:%v\n",
+		exampid, tag, Lcs,
+		hap)
+
+	// Create connect headers and connect to stompngo
+	ch := ConnectHeaders()
+	l.Printf("%stag:%s connsess:%s common_connect_headers headers:%v\n",
+		exampid, tag, Lcs,
+		ch)
+	conn, e := stompngo.Connect(n, ch)
+	if e != nil {
+		return n, nil, e
+	}
+	l.Printf("%stag:%s connsess:%s common_connect_complete host:%s vhost:%s protocol:%s server:%s\n",
+		exampid, tag, conn.Session(),
+		h, senv.Vhost(), conn.Protocol(), ServerIdent(conn))
+
+	// Show connect response
+	l.Printf("%stag:%s connsess:%s common_connect_response connresp:%v\n",
+		exampid, tag, conn.Session(),
+		conn.ConnectResponse)
+
+	// Show heartbeat data (if heart beats are being used)
+	if senv.Heartbeats() != "" {
+		l.Printf("%stag:%s connsess:%s common_connect_heart_beat_send hbsend:%v\n",
+			exampid, tag, conn.Session(),
+			conn.SendTickerInterval())
+		l.Printf("%stag:%s connsess:%s common_connect_heart_beat_recv hbrecv:%v\n",
+			exampid, tag, conn.Session(),
+			conn.ReceiveTickerInterval())
+	}
+
+	l.Printf("%stag:%s connsess:%s common_connect_local_addr:%s\n",
+		exampid, tag, conn.Session(),
+		n.LocalAddr().String())
+	l.Printf("%stag:%s connsess:%s common_connect_remote_addr:%s\n",
+		exampid, tag, conn.Session(),
+		n.RemoteAddr().String())
+
+	//
+	return n, conn, nil
+}
+
+// Common example disconnect logic
+func CommonDisconnect(n net.Conn, conn *stompngo.Connection,
+	exampid, tag string,
+	l *log.Logger) error {
+
+	// Disconnect from the Stomp server
+	e := conn.Disconnect(stompngo.Headers{})
+	if e != nil {
+		return e
+	}
+	l.Printf("%stag:%s consess:%v common_disconnect_complete local_addr:%s remote_addr:%s\n",
+		exampid, tag, conn.Session(),
+		n.LocalAddr().String(), n.RemoteAddr().String())
+
+	// Close the network connection
+	e = n.Close()
+	if e != nil {
+		return e
+	}
+
+	// Parting messages
+	l.Printf("%stag:%s consess:%v common_disconnect_network_close_complete\n",
+		exampid, tag, conn.Session())
+	l.Printf("%stag:%s consess:%v common_disconnect_ends\n",
+		exampid, tag, conn.Session())
+
+	//
+	return nil
 }
