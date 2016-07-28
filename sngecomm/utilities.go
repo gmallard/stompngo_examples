@@ -71,16 +71,17 @@ func ShowStats(exampid, tag string, conn *stompngo.Connection) {
 	bw := conn.BytesWritten()
 	s := conn.Running().Seconds()
 	n := conn.Running().Nanoseconds()
-	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "frame read count", r)
-	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "bytes read", br)
-	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "frame write count", w)
-	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "bytes written", bw)
-	llu.Printf("%s v1:%v v2:%v v3:%v\n", exampid, tag, "current duration(ns)", n)
-	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "current duration(sec)", s)
-	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "frame reads/sec", float64(r)/s)
-	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes read/sec", float64(br)/s)
-	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "frame writes/sec", float64(w)/s)
-	llu.Printf("%s %s %s %20.6f\n", exampid, tag, "bytes written/sec", float64(bw)/s)
+	llu.Printf("%stag:%s frame_read_count:%v\n", exampid, tag, r)
+	llu.Printf("%stag:%s bytes_read:%v\n", exampid, tag, br)
+	llu.Printf("%stag:%s frame_write_count:%v\n", exampid, tag, w)
+	llu.Printf("%stag:%s bytes_written:%v\n", exampid, tag, bw)
+	llu.Printf("%stag:%s current_duration(ns):%v\n", exampid, tag, n)
+
+	llu.Printf("%stag:%s current_duration(sec):%20.6f\n", exampid, tag, s)
+	llu.Printf("%stag:%s frame_reads/sec:%20.6f\n", exampid, tag, float64(r)/s)
+	llu.Printf("%stag:%s bytes_read/sec:%20.6f\n", exampid, tag, float64(br)/s)
+	llu.Printf("%stag:%s frame_writes/sec:%20.6f\n", exampid, tag, float64(w)/s)
+	llu.Printf("%stag:%s bytes_written/sec:%20.6f\n", exampid, tag, float64(bw)/s)
 }
 
 // Get a value between min amd max
@@ -215,16 +216,16 @@ func HandleAck(c *stompngo.Connection, h stompngo.Headers, id string) {
 }
 
 func ShowRunParms(exampid string) {
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "HOST", os.Getenv("STOMP_HOST"))
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "PORT", os.Getenv("STOMP_PORT"))
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "PROTOCOL", senv.Protocol())
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "VHOST", senv.Vhost())
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "NQS", Nqs())
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "NMSGS", senv.Nmsgs())
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "SUBCHANCAP", senv.SubChanCap())
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "RECVFACT", RecvFactor())
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "SENDFACT", SendFactor())
-	llu.Printf("%s v1:%v v2:%v\n", exampid, "ACKMODE", AckMode())
+	llu.Printf("%sHOST:%v\n", exampid, os.Getenv("STOMP_HOST"))
+	llu.Printf("%sPORT:%v\n", exampid, os.Getenv("STOMP_PORT"))
+	llu.Printf("%sPROTOCOL:%v\n", exampid, senv.Protocol())
+	llu.Printf("%sVHOST:%v\n", exampid, senv.Vhost())
+	llu.Printf("%sNQS:%v\n", exampid, Nqs())
+	llu.Printf("%sNMSGS:%v\n", exampid, senv.Nmsgs())
+	llu.Printf("%sSUBCHANCAP:%v\n", exampid, senv.SubChanCap())
+	llu.Printf("%sRECVFACT:%vn", exampid, RecvFactor())
+	llu.Printf("%sSENDFACT:%v\n", exampid, SendFactor())
+	llu.Printf("%sACKMODE:%v\n", exampid, AckMode())
 }
 
 // Return broker identity
@@ -259,16 +260,16 @@ func CommonConnect(exampid, tag string, l *log.Logger) (net.Conn,
 
 	// Create connect headers and connect to stompngo
 	ch := ConnectHeaders()
-	l.Printf("%stag:%s connsess:%s common_connect_headers headers:%v\n",
+	l.Printf("%s tag:%s connsess:%s common_connect_headers headers:%v\n",
 		exampid, tag, Lcs,
 		ch)
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
 		return nil, nil, e
 	}
-	l.Printf("%stag:%s connsess:%s common_connect_complete host:%s vhost:%s protocol:%s server:%s\n",
+	l.Printf("%stag:%s connsess:%s common_connect_complete host:%s port:%s vhost:%s protocol:%s server:%s\n",
 		exampid, tag, conn.Session(),
-		h, senv.Vhost(), conn.Protocol(), ServerIdent(conn))
+		h, p, senv.Vhost(), conn.Protocol(), ServerIdent(conn))
 
 	// Show connect response
 	l.Printf("%stag:%s connsess:%s common_connect_response connresp:%v\n",
