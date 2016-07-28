@@ -260,7 +260,7 @@ func CommonConnect(exampid, tag string, l *log.Logger) (net.Conn,
 
 	// Create connect headers and connect to stompngo
 	ch := ConnectHeaders()
-	l.Printf("%s tag:%s connsess:%s common_connect_headers headers:%v\n",
+	l.Printf("%stag:%s connsess:%s common_connect_headers headers:%v\n",
 		exampid, tag, Lcs,
 		ch)
 	conn, e := stompngo.Connect(n, ch)
