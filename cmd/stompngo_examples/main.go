@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package stompngo_examples
+package main
 
 /*
 	Provide package version information.  A nod to the concept of semver.
@@ -26,18 +26,10 @@ package stompngo_examples
 
 import (
 	"fmt"
+	//
+	"github.com/gmallard/stompngo_examples"
 )
 
-var (
-	pref  = "v"
-	major = "1" // Major
-	minor = "0" // Minor
-
-	//patch = "3" // Patch
-
-	patch = "3.plvl.003" // Patch
-)
-
-func Version() string {
-	return fmt.Sprintf("%s%s.%s.%s\n", pref, major, minor, patch)
+func main() {
+	fmt.Printf(stompngo_examples.Version())
 }
