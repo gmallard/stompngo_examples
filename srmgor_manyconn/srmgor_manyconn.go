@@ -113,8 +113,6 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if sw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
-			//ll.Printf("%s connsess:%s sendMessages_stagger dt:%v qnum:%d\n",
-			//	exampid, conn.Session(), dt, qnum)
 			ll.Printf("%stag:%s connsess:%s send_stagger dt:%v qnum:%s mc:%d\n",
 				exampid, ltag, conn.Session(),
 				dt, qnum, mc)
@@ -198,8 +196,6 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if rw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, rf))
-			//ll.Printf("%s connsess:%s recvMessages_stagger dt:%v qnum:%d\n",
-			//	exampid, conn.Session(), dt, qnum)
 			ll.Printf("%stag:%s connsess:%s recv_stagger dt:%v qns:%s mc:%d\n",
 				exampid, ltag, conn.Session(),
 				dt, qns, mc)

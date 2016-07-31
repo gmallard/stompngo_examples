@@ -405,7 +405,6 @@ func main() {
 	go startSenders(q)
 	wga.Wait()
 
-	// ll.Printf("%s v1:%v v2:%v\n", exampid, "main ends", time.Since(tn))
 	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
 		exampid, tag, sngecomm.Lcs,
 		time.Now().Sub(st))
