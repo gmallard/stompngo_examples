@@ -208,6 +208,9 @@ func HandleAck(c *stompngo.Connection, h stompngo.Headers, id string) {
 	default:
 		llu.Fatalf("v1:%v v2:%v\n", "ack invalid protocol level, should not happen")
 	}
+	if cv, ok := h.Contains(stompngo.HK_RECEIPT); ok {
+		ah = ah.Add(stompngo.HK_RECEIPT, cv)
+	}
 	e := c.Ack(ah)
 	if e != nil {
 		llu.Fatalf("v1:%v v2:%v v3:%v\n", "ack failed", e, c.Protocol())
