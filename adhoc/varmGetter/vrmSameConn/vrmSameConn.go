@@ -137,7 +137,7 @@ func runNextQueue(qn int, conn *stompngo.Connection) {
 	mc := 1                      // Initial message number
 
 	// Loop for the requested number of messages
-SendLoop:
+GetLoop:
 	for {
 		ll.Printf("%stag:%s connsess:%s start_of_read_loop mc:%v nmsgs:%v\n",
 			exampid, tag, conn.Session(), mc, nmsgs)
@@ -153,9 +153,9 @@ SendLoop:
 				ll.Printf("%stag:%s connsess:%s have_receipt md:%v\n",
 					exampid, tag, conn.Session(),
 					md)
-				continue SendLoop
+				continue GetLoop
 			}
-			ll.Fatalf("%stag:%s connsess:%s ERROR_frame hdrs:%v body:v\n",
+			ll.Fatalf("%stag:%s connsess:%s ERROR_frame hdrs:%v body:%v\n",
 				exampid, tag, conn.Session(),
 				md.Message.Headers, string(md.Message.Body)) // Handle this ......
 		}
@@ -272,7 +272,7 @@ func doSubscribe(c *stompngo.Connection, d, id, a string, h stompngo.Headers) <-
 	case stompngo.SPL_10:
 		// Nothing else to do here
 	default:
-		ll.Fatalf("v1:%v v2:%v\n", "subscribe invalid protocol level, should not happen")
+		ll.Fatalf("v1:%v\n", "subscribe invalid protocol level, should not happen")
 	}
 	//
 	r, e := c.Subscribe(h)

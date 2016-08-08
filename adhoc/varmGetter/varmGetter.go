@@ -106,7 +106,7 @@ func main() {
 	mc := 1                      // Initial message number
 
 	// Loop for the requested number of messages
-SendLoop:
+GetLoop:
 	for {
 		ll.Printf("%stag:%s connsess:%s start_of_read_loop mc:%v nmsgs:%v\n",
 			exampid, tag, conn.Session(), mc, nmsgs)
@@ -122,9 +122,9 @@ SendLoop:
 				ll.Printf("%stag:%s connsess:%s have_receipt md:%v\n",
 					exampid, tag, conn.Session(),
 					md)
-				continue SendLoop
+				continue GetLoop
 			}
-			ll.Fatalf("%stag:%s connsess:%s ERROR_frame hdrs:%v body:v\n",
+			ll.Fatalf("%stag:%s connsess:%s ERROR_frame hdrs:%v body:%v\n",
 				exampid, tag, conn.Session(),
 				md.Message.Headers, string(md.Message.Body)) // Handle this ......
 		}
@@ -183,8 +183,8 @@ SendLoop:
 		// Run individual ACK if required
 		if am == stompngo.AckModeClientIndividual {
 			wh := md.Message.Headers // Copy Headers
-			if ar { // ACK receipt wanted
-				wh = wh.Add(stompngo.HK_RECEIPT, "rwanted-" + mcs)
+			if ar {                  // ACK receipt wanted
+				wh = wh.Add(stompngo.HK_RECEIPT, "rwanted-"+mcs)
 			}
 			sngecomm.HandleAck(conn, wh, id)
 			ll.Printf("%stag:%s connsess:%s  individual_ack_complete mc:%v headers:%v\n",
@@ -205,14 +205,14 @@ SendLoop:
 	// Issue the final ACK if needed
 	if nfa {
 		wh := lmd.Message.Headers // Copy Headers
-		if ar { // ACK receipt wanted
+		if ar {                   // ACK receipt wanted
 			wh = wh.Add(stompngo.HK_RECEIPT, "rwanted-fin")
 		}
 		sngecomm.HandleAck(conn, wh, id)
 		ll.Printf("%stag:%s connsess:%s  final_ack_complete\n",
 			exampid, tag, conn.Session())
 		if ar {
-			getReceipt(conn) 
+			getReceipt(conn)
 		}
 	}
 
@@ -264,7 +264,7 @@ func doSubscribe(c *stompngo.Connection, d, id, a string, h stompngo.Headers) <-
 	case stompngo.SPL_10:
 		// Nothing else to do here
 	default:
-		ll.Fatalf("v1:%v v2:%v\n", "subscribe invalid protocol level, should not happen")
+		ll.Fatalf("v1:%v\n", "subscribe invalid protocol level, should not happen")
 	}
 	//
 	r, e := c.Subscribe(h)
@@ -281,4 +281,3 @@ func getReceipt(conn *stompngo.Connection) {
 		exampid, tag, conn.Session(),
 		rd)
 }
-
