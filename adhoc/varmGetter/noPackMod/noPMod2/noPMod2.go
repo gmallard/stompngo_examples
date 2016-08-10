@@ -40,7 +40,8 @@ var (
 	dodisc  = true
 	ar      = false // Want ACK RECEIPT
 	session = ""
-	wlp     = "publish: message: " // Left part wanted
+	qcb     []chan bool
+	wlp     = "publish: message: "
 )
 
 func init() {
@@ -74,7 +75,13 @@ func main() {
 		runNextQueue(qn, conn)
 	}
 	//******************
-
+	ll.Printf("%stag:%s connsess:%s start_drain_receives\n",
+		exampid, tag, session)
+	for _, v := range qcb {
+		_ = <-v
+	}
+	ll.Printf("%stag:%s connsess:%s end_drain_receives\n",
+		exampid, tag, session)
 	// Standard example disconnect sequence
 	if dodisc {
 		e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
@@ -98,18 +105,15 @@ func main() {
 
 func runNextQueue(qn int, conn *stompngo.Connection) {
 
-	qns := fmt.Sprintf("%d", qn)    // string number of the queue
-	conn.SetLogger(ll)              // stompngo logging
-	pbc := sngecomm.Pbc()           // Print byte count
-	d := senv.Dest() + qns          // Destination
-	id := stompngo.Uuid()           // A unique name/id
-	nmsgs := qn                     // int number of messages to get, same as queue number
-	mns := fmt.Sprintf("%d", nmsgs) // string number of messages to get
-	am := sngecomm.AckMode()        // ACK mode to use on SUBSCRIBE
-	nfa := true                     // Need "final" ACK (possiby reset below)
-	wh := stompngo.Headers{         // Starting SUBSCRIBE headers
-		stompngo.StompPlusDrainAfter,
-		mns} // Need a string here
+	qns := fmt.Sprintf("%d", qn) // string number of the queue
+	conn.SetLogger(ll)           // stompngo logging
+	pbc := sngecomm.Pbc()        // Print byte count
+	d := senv.Dest() + qns       // Destination
+	id := stompngo.Uuid()        // A unique name/id
+	nmsgs := qn                  // int number of messages to get, same as queue number
+	am := sngecomm.AckMode()     // ACK mode to use on SUBSCRIBE
+	nfa := true                  // Need "final" ACK (possiby reset below)
+	wh := stompngo.Headers{}     // Starting SUBSCRIBE headers
 
 	// Sanity check ACK mode
 	if conn.Protocol() == stompngo.SPL_10 &&
@@ -249,6 +253,11 @@ GetLoop:
 		mc++
 	}
 
+	qc := make(chan bool)
+	qcb = append(qcb, qc)
+	go drainSub(session, sc, qc, qn)
+	// dd := false
+
 	// Issue the final ACK if needed
 	if nfa {
 		wh := lmd.Message.Headers // Copy Headers
@@ -259,10 +268,30 @@ GetLoop:
 		ll.Printf("%stag:%s connsess:%s  final_ack_complete\n",
 			exampid, tag, session)
 		if ar {
+			/*
+				ll.Printf("%stag:%s connsess:%s  ack_receive_wait_for_drain qn:%d\n",
+					exampid, tag, session,
+					qn)
+				<-qc // Wait for drainSub
+				ll.Printf("%stag:%s connsess:%s  ack_receive_drain_complete qn:%d\n",
+					exampid, tag, session,
+					qn)
+				dd = true
+			*/
 			getReceipt(conn)
 		}
 	}
-
+	/*
+		if !dd {
+			ll.Printf("%stag:%s connsess:%s  message_loop_wait_for_drain qn:%d\n",
+				exampid, tag, session,
+				qn)
+			<-qc
+			ll.Printf("%stag:%s connsess:%s  message_loop_drain_complete qn:%d\n",
+				exampid, tag, session,
+				qn)
+		}
+	*/
 	// Unsubscribe (may be skipped if requested)
 	if unsub {
 		sngecomm.HandleUnsubscribe(conn, d, id)
@@ -304,4 +333,30 @@ func getReceipt(conn *stompngo.Connection) {
 	ll.Printf("%stag:%s connsess:%s have_receipt_sub md:%v\n",
 		exampid, tag, session,
 		rd)
+}
+
+// Drain a subscription
+func drainSub(s string, sc <-chan stompngo.MessageData, dc chan bool, qn int) {
+	ll.Printf("%stag:%s connsess:%s drain_starts qn:%d\n",
+		exampid, tag, s,
+		qn)
+	tmr := time.NewTimer(1 * time.Second) // Time to wait, YMMV
+	q := false
+	for {
+		select {
+		case md := <-sc:
+			ll.Printf("%stag:%s connsess:%s drained md:%v\n",
+				exampid, tag, s,
+				md)
+		case _ = <-tmr.C:
+			q = true
+		}
+		if q {
+			dc <- true
+			break
+		}
+	}
+	ll.Printf("%stag:%s connsess:%s drain_ends qn:%d\n",
+		exampid, tag, s,
+		qn)
 }
