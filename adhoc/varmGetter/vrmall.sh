@@ -37,30 +37,35 @@ VMG_NODISC=y VMG_NOUNSUB=y ./varmGetter
 # ------------------- Phase 2 --------------------------------------------------
 export VMG_GETAR=y
 # ------------------------------------------------------------------------------
-# One message from queue 5
+# Five messages from queue 5
 echo "5555555555555555555555555555555555555555555555555555555555555555555555555"
 export STOMP_DEST=/queue/varmGetter.5
-export STOMP_NMSGS=1
+export STOMP_NMSGS=5
 ./varmGetter
 # ------------------------------------------------------------------------------
-# Two messages from queue 6, skip UNSUBSCRIBE
+# Six messages from queue 6, skip UNSUBSCRIBE
 echo "6666666666666666666666666666666666666666666666666666666666666666666666666"
 export STOMP_DEST=/queue/varmGetter.6
-export STOMP_NMSGS=2
+export STOMP_NMSGS=6
 VMG_NOUNSUB=y ./varmGetter
 # ------------------------------------------------------------------------------
-# Three messages from queue 7, skip DISCONNECT
+# Seven messages from queue 7, skip DISCONNECT
 echo "7777777777777777777777777777777777777777777777777777777777777777777777777"
 export STOMP_DEST=/queue/varmGetter.7
-export STOMP_NMSGS=3
+export STOMP_NMSGS=7
 VMG_NODISC=y ./varmGetter
 # ------------------------------------------------------------------------------
-# Four messages from queue 8, skip UNSUBSCRIBE and DISCONNECT
+# Eight messages from queue 8, skip UNSUBSCRIBE and DISCONNECT
 echo "8888888888888888888888888888888888888888888888888888888888888888888888888"
 export STOMP_DEST=/queue/varmGetter.8
-export STOMP_NMSGS=4
+export STOMP_NMSGS=8
 VMG_NODISC=y VMG_NOUNSUB=y ./varmGetter
+# ------------------------------------------------------------------------------
+# 9 messages from queue 9.
+echo "9999999999999999999999999999999999999999999999999999999999999999999999999"
+export STOMP_DEST=/queue/varmGetter.9
+export STOMP_NMSGS=9
+./varmGetter
 # ------------------------------------------------------------------------------
 popd
 set +x
-
