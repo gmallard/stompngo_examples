@@ -76,7 +76,7 @@ func main() {
 	// App logic here .....
 	// Send exactly one message.  Ask for a receipt.
 
-	d := senv.Dest()
+	d := sngecomm.Dest()
 	ll.Printf("%stag:%s connsess:%s destination:%v\n",
 		exampid, tag, conn.Session(),
 		d)

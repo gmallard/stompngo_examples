@@ -55,7 +55,7 @@ import (
 	//
 	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
-	"github.com/gmallard/stompngo/senv"
+
 	// sngecomm methods are used specifically for these example clients.
 	"github.com/gmallard/stompngo_examples/sngecomm"
 )
@@ -81,7 +81,7 @@ func recv(conn *stompngo.Connection, s int) {
 
 	// Setup Headers ...
 	id := stompngo.Uuid() // Use package convenience function for unique ID
-	d := senv.Dest()
+	d := sngecomm.Dest()
 	ackMode = sngecomm.AckMode() // get ack mode
 
 	pbc := sngecomm.Pbc() // Print byte count

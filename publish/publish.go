@@ -76,7 +76,7 @@ func main() {
 	}
 
 	// *NOTE* application specific functionaltiy starts here!
-	sh := stompngo.Headers{"destination", senv.Dest()}
+	sh := stompngo.Headers{"destination", sngecomm.Dest()}
 	if senv.Persistent() {
 		sh = sh.Add("persistent", "true")
 	}

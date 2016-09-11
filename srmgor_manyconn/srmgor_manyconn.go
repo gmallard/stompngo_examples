@@ -81,7 +81,7 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	ltag := tag + "-sendmessages"
 
 	qns := fmt.Sprintf("%d", qnum) // queue number
-	d := senv.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + qns
 	ll.Printf("%stag:%s connsess:%s start d:%s qnum:%d\n",
 		exampid, ltag, conn.Session(),
 		d, qnum)
@@ -126,7 +126,7 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	ltag := tag + "-receivemessages"
 
 	qns := fmt.Sprintf("%d", qnum) // queue number
-	d := senv.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + qns
 	id := stompngo.Uuid() // A unique subscription ID
 
 	ll.Printf("%stag:%s connsess:%s receiveMessages_start id:%s d:%s qnum:%d nmsgs:%d\n",

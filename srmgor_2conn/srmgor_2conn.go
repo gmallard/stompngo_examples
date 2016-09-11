@@ -78,7 +78,7 @@ func sender(conn *stompngo.Connection, qn, nmsgs int) {
 	ltag := tag + "-sender"
 
 	qns := fmt.Sprintf("%d", qn) // queue number
-	d := senv.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + qns
 	ll.Printf("%stag:%s connsess:%s starts qn:%d nmsgs:%d d:%s\n",
 		exampid, ltag, conn.Session(),
 		qn, nmsgs, d)
@@ -205,7 +205,7 @@ func receiver(conn *stompngo.Connection, qn, nmsgs int) {
 		exampid, ltag, conn.Session(),
 		qn, nmsgs)
 	//
-	qp := senv.Dest() // queue name prefix
+	qp := sngecomm.Dest() // queue name prefix
 	q := qp + "." + qns
 	ll.Printf("%stag:%s connsess:%s queue_info q:%s qn:%d nmsgs:%d\n",
 		exampid, ltag, conn.Session(),

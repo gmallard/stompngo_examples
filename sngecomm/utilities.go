@@ -270,7 +270,7 @@ func CommonConnect(exampid, tag string, l *log.Logger) (net.Conn,
 		ch)
 	conn, e := stompngo.Connect(n, ch)
 	if e != nil {
-		return nil, nil, e
+		return nil, conn, e
 	}
 	l.Printf("%stag:%s connsess:%s common_connect_complete host:%s port:%s vhost:%s protocol:%s server:%s\n",
 		exampid, tag, conn.Session(),
@@ -403,4 +403,17 @@ func CommonTLSConnect(exampid, tag string, l *log.Logger,
 
 	//
 	return nc, conn, nil
+}
+
+// Example destination
+func Dest() string {
+	d := senv.Dest()
+	if os.Getenv("STOMP_ARTEMIS") == "" {
+		return d
+	}
+	pref := "jms.queue"
+	if strings.Index(d, "topic") >= 0 {
+		pref = "jms.topic"
+	}
+	return pref + strings.Replace(d, "/", ".", -1)
 }

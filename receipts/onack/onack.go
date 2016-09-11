@@ -101,14 +101,14 @@ func main() {
 	// ****************************************
 	// App logic here .....
 
-	d := senv.Dest()
+	d := sngecomm.Dest()
 	ll.Printf("%stag:%s connsess:%s destination:%v\n",
 		exampid, tag, conn.Session(),
 		d)
 
 	// ****************************************
 	// Send exactly one message.
-	sh := stompngo.Headers{"destination", senv.Dest()}
+	sh := stompngo.Headers{"destination", sngecomm.Dest()}
 	if senv.Persistent() {
 		sh = sh.Add("persistent", "true")
 	}

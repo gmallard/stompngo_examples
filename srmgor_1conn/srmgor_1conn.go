@@ -82,7 +82,7 @@ func sender(qn, mc int) {
 
 	qns := fmt.Sprintf("%d", qn) // string queue number
 	id := stompngo.Uuid()        // A unique sender id
-	d := senv.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + qns
 
 	ll.Printf("%stag:%s connsess:%s queue_info id:%v d:%v qnum:%v mc:%v\n",
 		exampid, ltag, conn.Session(),
@@ -136,7 +136,7 @@ func receiver(qn, mc int) {
 	qns := fmt.Sprintf("%d", qn) // string queue number
 	pbc := sngecomm.Pbc()
 	id := stompngo.Uuid() // A unique subscription ID
-	d := senv.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + qns
 
 	ll.Printf("%stag:%s connsess:%s queue_info id:%v d:%v qnum:%v mc:%v\n",
 		exampid, ltag, conn.Session(),
@@ -159,9 +159,9 @@ func receiver(qn, mc int) {
 		case md = <-sc:
 		case md = <-conn.MessageData:
 			// A RECEIPT or ERROR frame is unexpected here
-			ll.Fatalf("%stag:%s connsess:%s bad_frame qnum:%v md:%v",
+			ll.Fatalf("%stag:%s connsess:%s bad_frame qnum:%v headers:%v body:%s",
 				exampid, tag, conn.Session(),
-				qn, md) // Handle this ......
+				qn, md.Message.Headers, md.Message.Body) // Handle this ......
 		}
 		if md.Error != nil {
 			ll.Fatalf("%stag:%s connsess:%s recv_error qnum:%v error:%v",
@@ -342,6 +342,11 @@ func main() {
 	var e error
 	n, conn, e = sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
+		if conn != nil {
+			ll.Printf("%stag:%s  connsess:%s Connect Response headers:%v body%s\n",
+				exampid, tag, conn.Session(), conn.ConnectResponse.Headers,
+				string(conn.ConnectResponse.Body))
+		}
 		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
 			exampid, tag, sngecomm.Lcs,
 			e.Error()) // Handle this ......
