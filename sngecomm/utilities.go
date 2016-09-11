@@ -281,15 +281,13 @@ func CommonConnect(exampid, tag string, l *log.Logger) (net.Conn,
 		exampid, tag, conn.Session(),
 		conn.ConnectResponse)
 
-	// Show heartbeat data (if heart beats are being used)
-	if senv.Heartbeats() != "" {
-		l.Printf("%stag:%s connsess:%s common_connect_heart_beat_send hbsend:%v\n",
-			exampid, tag, conn.Session(),
-			conn.SendTickerInterval())
-		l.Printf("%stag:%s connsess:%s common_connect_heart_beat_recv hbrecv:%v\n",
-			exampid, tag, conn.Session(),
-			conn.ReceiveTickerInterval())
-	}
+	// Heartbeat Data
+	l.Printf("%stag:%s connsess:%s common_connect_heart_beat_send hbsend:%d\n",
+		exampid, tag, conn.Session(),
+		conn.SendTickerInterval())
+	l.Printf("%stag:%s connsess:%s common_connect_heart_beat_recv hbrecv:%d\n",
+		exampid, tag, conn.Session(),
+		conn.ReceiveTickerInterval())
 
 	l.Printf("%stag:%s connsess:%s common_connect_local_addr:%s\n",
 		exampid, tag, conn.Session(),
