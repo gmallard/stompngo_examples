@@ -228,6 +228,8 @@ func ShowRunParms(exampid string) {
 	llu.Printf("%sSUBCHANCAP:%v\n", exampid, senv.SubChanCap())
 	llu.Printf("%sRECVFACT:%vn", exampid, RecvFactor())
 	llu.Printf("%sSENDFACT:%v\n", exampid, SendFactor())
+	llu.Printf("%sRECVWAIT:%t\n", exampid, RecvWait())
+	llu.Printf("%sSENDWAIT:%t\n", exampid, SendWait())
 	llu.Printf("%sACKMODE:%v\n", exampid, AckMode())
 }
 

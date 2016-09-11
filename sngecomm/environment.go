@@ -152,7 +152,7 @@ func Pbc() int {
 
 // Does receive wait to simulate message processing
 func RecvWait() bool {
-	f := os.Getenv("STOMP_NORECVW")
+	f := os.Getenv("STOMP_RECVWAIT")
 	if f == "" {
 		return true
 	}
@@ -161,7 +161,7 @@ func RecvWait() bool {
 
 // Does send wait to simulate message building
 func SendWait() bool {
-	f := os.Getenv("STOMP_NOSENDW")
+	f := os.Getenv("STOMP_SENDWAIT")
 	if f == "" {
 		return true
 	}
