@@ -151,7 +151,7 @@ func receiver(qn, mc int) {
 	var md stompngo.MessageData
 	// Receive loop
 	for i := 1; i <= mc; i++ {
-		ll.Printf("%stag:%s connsess:%s recv_ranchek id:%v d:%v qnum:%v mc:%v chlen:%v chcap%v\n",
+		ll.Printf("%stag:%s connsess:%s recv_ranchek id:%v d:%v qnum:%v mc:%v chlen:%v chcap:%v\n",
 			exampid, ltag, conn.Session(),
 			id, d, qn, mc, len(sc), cap(sc))
 
@@ -188,15 +188,15 @@ func receiver(qn, mc int) {
 		// Sanity check the message Command, and the queue and message numbers
 		mns := fmt.Sprintf("%d", i) // message number
 		if md.Message.Command != stompngo.MESSAGE {
-			ll.Fatalf("%stag:%s connsess:%s bad_frame qnum:%v md:%v",
+			ll.Fatalf("%stag:%s connsess:%s bad_frame qnum:%v command:%v headers:%v body:%v\n",
 				exampid, tag, conn.Session(),
-				qn, md) // Handle this ......
+				qn, md.Message.Command, md.Message.Headers, string(md.Message.Body)) // Handle this ......
 
 		}
 		if !md.Message.Headers.ContainsKV("qnum", qns) || !md.Message.Headers.ContainsKV("msgnum", mns) {
-			ll.Fatalf("%stag:%s connsess:%s dirty_message qns:%v msgnum:%v md:%v",
+			ll.Fatalf("%stag:%s connsess:%s dirty_message qns:%v msgnum:%v command:%v headers:%v body:%v\n",
 				exampid, tag, conn.Session(),
-				qns, mns, md) // Handle this ......
+				qns, mns, md.Message.Command, md.Message.Headers, string(md.Message.Body)) // Handle this ......) // Handle this ......
 		}
 
 		if i == mc {
@@ -375,6 +375,8 @@ func main() {
 			exampid, tag, conn.Session(),
 			e.Error()) // Handle this ......
 	}
+
+	sngecomm.ShowStats(exampid, tag, conn)
 
 	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
 		exampid, tag, conn.Session(),

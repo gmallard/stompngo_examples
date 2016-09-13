@@ -53,12 +53,12 @@ func ConnectHeaders() stompngo.Headers {
 	p := senv.Protocol()
 	if p != stompngo.SPL_10 { // 1.1 and 1.2
 		h = h.Add("accept-version", p).Add("host", senv.Vhost())
+		hb := senv.Heartbeats()
+		if hb != "" {
+			h = h.Add("heart-beat", hb)
+		}
 	}
 	//
-	hb := senv.Heartbeats()
-	if hb != "" {
-		h = h.Add("heart-beat", hb)
-	}
 
 	return h
 }

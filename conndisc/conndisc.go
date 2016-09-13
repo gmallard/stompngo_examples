@@ -66,7 +66,7 @@ func main() {
 	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
 		if conn != nil {
-			ll.Printf("%stag%s connsess:%s Connect Response headers:%v body%s\n",
+			ll.Printf("%stag%s connsess:%s main_on_connect error Connect Response headers:%v body%s\n",
 				exampid, tag, conn.Session(), conn.ConnectResponse.Headers,
 				string(conn.ConnectResponse.Body))
 		}
@@ -74,6 +74,10 @@ func main() {
 			exampid, tag, sngecomm.Lcs,
 			e.Error()) // Handle this ......
 	}
+
+	ll.Printf("%stag%s connsess:%s Connect Response headers:%v body%s\n",
+		exampid, tag, conn.Session(), conn.ConnectResponse.Headers,
+		string(conn.ConnectResponse.Body))
 
 	// *NOTE* application specific functionaltiy starts here!
 	// For you to add.

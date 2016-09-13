@@ -77,6 +77,9 @@ func main() {
 
 	// *NOTE* application specific functionaltiy starts here!
 	sh := stompngo.Headers{"destination", sngecomm.Dest()}
+	ll.Printf("%stag:%s connsess:%s destination dest:%s\n",
+		exampid, tag, conn.Session(),
+		sngecomm.Dest())
 	if senv.Persistent() {
 		sh = sh.Add("persistent", "true")
 	}
