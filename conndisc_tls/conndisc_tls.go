@@ -22,8 +22,9 @@ that TLS is requested by using a specific port and tls.Dial.
 
 	Example:
 
-		# Connect to a broker using TLS:
-		STOMP_PORT=61612 go run conndisc_tls.go
+		# Connect to a broker using TLS.  Note: this is a local TLS port.
+		# The broker does not require authentication.
+		STOMP_PORT=61611 go run conndisc_tls.go
 
 */
 package main

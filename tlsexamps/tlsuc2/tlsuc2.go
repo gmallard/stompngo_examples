@@ -31,7 +31,7 @@ Connect and Disconnect from a STOMP broker with a TLS connection, use case 2.
 	Example use might be:
 
 		go build
-		./tlsuc2 -srvCAFile=/ad3/gma/sslwork/2013/TestCA.crt # PEM format file
+		STOMP_PORT=61611 ./tlsuc2 -srvCAFile=/ad3/gma/sslwork/2016-02/ca.crt # PEM format file
 
 */
 package main

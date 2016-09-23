@@ -30,7 +30,7 @@ Connect and Disconnect from a STOMP broker with a TLS connection, use case 1.
 	Example use might be:
 
 		go build
-		./tlsuc1
+		STOMP_PORT=61611 ./tlsuc1
 
 */
 package main

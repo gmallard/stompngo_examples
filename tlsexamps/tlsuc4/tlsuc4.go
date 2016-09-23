@@ -30,7 +30,7 @@ Connect and Disconnect from a STOMP broker with a TLS connection, use case 4.
 	Example use might be:
 
 		go build
-		./tlsuc4 -srvCAFile=/ad3/gma/sslwork/2013/TestCA.crt -cliCertFile=/ad3/gma/sslwork/2013/client.crt -cliKeyFile=/ad3/gma/sslwork/2013/client.key
+		STOMP_PORT=61611 ./tlsuc4 -srvCAFile=/ad3/gma/sslwork/2016-02/ca.crt -cliCertFile=/ad3/gma/sslwork/2016-02/client.crt -cliKeyFile=/ad3/gma/sslwork/2016-02/client.key
 
 */
 package main
