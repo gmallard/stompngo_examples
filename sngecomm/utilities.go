@@ -93,19 +93,19 @@ func ValueBetween(min, max int64, fact float64) int64 {
 // Dump a TLS Configuration Struct
 func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 	llu.Printf("%s TLSConfig:\n", exampid)
-	llu.Printf("%s Rand:%v\n", exampid, c.Rand)
+	llu.Printf("%s Rand:%#v\n", exampid, c.Rand)
 	llu.Printf("%s Time:%v\n", exampid, c.Time)
-	llu.Printf("%s Certificates:%v\n", exampid, c.Certificates)
-	llu.Printf("%s NameToCertificate:%v\n", exampid, c.NameToCertificate)
-	llu.Printf("%s RootCAs:%v\n", exampid, c.RootCAs)
+	llu.Printf("%s Certificates:%#v\n", exampid, c.Certificates)
+	llu.Printf("%s NameToCertificate:%#v\n", exampid, c.NameToCertificate)
+	llu.Printf("%s RootCAs:%#v\n", exampid, c.RootCAs)
 	llu.Printf("%s NextProtos:%v\n", exampid, c.NextProtos)
 	llu.Printf("%s ServerName:%v\n", exampid, c.ServerName)
 	llu.Printf("%s ClientAuth:%v\n", exampid, c.ClientAuth)
-	llu.Printf("%s ClientCAs:%v\n", exampid, c.ClientCAs)
-	llu.Printf("%s CipherSuites:%v\n", exampid, c.CipherSuites)
+	llu.Printf("%s ClientCAs:%v#\n", exampid, c.ClientCAs)
+	llu.Printf("%s CipherSuites:%#v\n", exampid, c.CipherSuites)
 	llu.Printf("%s PreferServerCipherSuites:%v\n", exampid, c.PreferServerCipherSuites)
 	llu.Printf("%s SessionTicketsDisabled:%v\n", exampid, c.SessionTicketsDisabled)
-	llu.Printf("%s SessionTicketKey:%v\n", exampid, c.SessionTicketKey)
+	llu.Printf("%s SessionTicketKey:%#v\n", exampid, c.SessionTicketKey)
 
 	// Idea Embelluished From:
 	// https://groups.google.com/forum/#!topic/golang-nuts/TMNdOxugbTY
@@ -122,7 +122,12 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 		llu.Printf("Could not get server's certificate from the TLS connection.\n")
 		return
 	}
-	llu.Printf("%s Server Certs:\n", exampid)
+	if len(certs) == 1 {
+		llu.Printf("%s There is %d Server Cert:\n", exampid, len(certs))
+	} else {
+		llu.Printf("%s There are %d Server Certs:\n", exampid, len(certs))
+	}
+
 	for i, cert := range certs {
 		llu.Printf("%s Certificate chain:%d\n", exampid, i)
 		llu.Printf("%s Common Name:%s\n", exampid, cert.Subject.CommonName)
