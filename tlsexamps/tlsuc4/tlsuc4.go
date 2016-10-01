@@ -59,17 +59,6 @@ var (
 
 	ll = log.New(os.Stdout, "TLSU4 ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 
-	// TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 = 0xC0,0x2F
-	// TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 = 0xC0,0x2B
-	// TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 = 0xC0,0x30
-	cipherSuites = []uint16{
-		0xc02f,
-		0xc02b,
-		0xc030,
-	}
-
-	setCS = false // Set Custom Cipher Suite list
-
 	tag = "tuc4main"
 )
 
@@ -109,8 +98,8 @@ func main() {
 	// Usually one will use the default cipher suites that go provides.
 	// However, if a custom cipher squite list is needed/required this
 	// is how it is accomplished.
-	if setCS { // Set custom cipher suite list
-		tc.CipherSuites = append(tc.CipherSuites, cipherSuites...)
+	if sngecomm.UseCustomCiphers() { // Set custom cipher suite list
+		tc.CipherSuites = append(tc.CipherSuites, sngecomm.CustomCiphers()...)
 	}
 
 	b, e := ioutil.ReadFile(srvCAFile) // Read broker's CA cert (PEM)

@@ -65,6 +65,13 @@ func main() {
 	tc = new(tls.Config)
 	tc.InsecureSkipVerify = true // Do *not* check the server's certificate
 
+	// Usually one will use the default cipher suites that go provides.
+	// However, if a custom cipher squite list is needed/required this
+	// is how it is accomplished.
+	if sngecomm.UseCustomCiphers() { // Set custom cipher suite list
+		tc.CipherSuites = append(tc.CipherSuites, sngecomm.CustomCiphers()...)
+	}
+
 	// Standard example TLS connect sequence
 	n, conn, e := sngecomm.CommonTLSConnect(exampid, tag, ll, tc)
 	if e != nil {

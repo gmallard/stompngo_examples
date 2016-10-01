@@ -43,6 +43,18 @@ var (
 	ackMode = "auto" // The default ack mode
 	//
 	pprof = false // Do not do profiling
+
+	// TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 = 0xC0,0x2F
+	// TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 = 0xC0,0x2B
+	// TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 = 0xC0,0x30
+	cipherSuites = []uint16{
+		0xc02f,
+		0xc02b,
+		0xc030,
+	}
+
+	useCustomCiphers = false // Set Custom Cipher Suite list
+
 )
 
 // Initialization
@@ -175,4 +187,22 @@ func SetMAXPROCS() bool {
 		return false
 	}
 	return true
+}
+
+// Use Custon Cipher List
+func UseCustomCiphers() bool {
+	f := os.Getenv("STOMP_USECUSTOMCIPHERS")
+	if f == "" {
+		return useCustomCiphers
+	}
+	useCustomCiphers = true
+	return useCustomCiphers
+}
+
+// CustomCiphers()
+func CustomCiphers() []uint16 {
+	if UseCustomCiphers() {
+		return cipherSuites
+	}
+	return []uint16{}
 }

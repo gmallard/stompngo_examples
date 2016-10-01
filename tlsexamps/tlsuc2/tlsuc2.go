@@ -83,6 +83,14 @@ func main() {
 	tc.InsecureSkipVerify = false // *Do* check the broker's certificate
 	// Be polite, allow SNI (Server Virtual Hosting)
 	tc.ServerName = senv.Host()
+
+	// Usually one will use the default cipher suites that go provides.
+	// However, if a custom cipher squite list is needed/required this
+	// is how it is accomplished.
+	if sngecomm.UseCustomCiphers() { // Set custom cipher suite list
+		tc.CipherSuites = append(tc.CipherSuites, sngecomm.CustomCiphers()...)
+	}
+
 	// Finish TLS Config initialization, so client can authenticate broker.
 	b, e := ioutil.ReadFile(srvCAFile) // Read broker's CA cert (PEM)
 	if e != nil {
