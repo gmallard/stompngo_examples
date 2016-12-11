@@ -35,8 +35,6 @@ import (
 	"sync"
 	"time"
 	//
-	"github.com/davecheney/profile"
-	//
 	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
 	"github.com/gmallard/stompngo/senv"
@@ -292,16 +290,6 @@ func main() {
 	st := time.Now()
 
 	sngecomm.ShowRunParms(exampid)
-
-	if sngecomm.Pprof() {
-		cfg := profile.Config{
-			MemProfile:     true,
-			CPUProfile:     true,
-			BlockProfile:   true,
-			NoShutdownHook: false, // Hook SIGINT
-		}
-		defer profile.Start(&cfg).Stop()
-	}
 
 	ll.Printf("%stag:%s connsess:%s main_starts\n",
 		exampid, tag, sngecomm.Lcs)
