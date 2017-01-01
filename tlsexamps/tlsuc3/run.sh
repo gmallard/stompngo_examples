@@ -2,7 +2,11 @@
 #
 set -x
 go build
-./tlsuc3 -cliCertFile=/ad3/gma/sslwork/2016-02/client.crt \
-	-cliKeyFile=/ad3/gma/sslwork/2016-02/client.key
+CERTBASE=${CERTBASE:-/ad3/gma/ad3/sslwork/2016-02}
+CLICERT=${CLICERT:-client.crt}
+CLIKEY=${CLIKEY:-client.key}
+#
+./tlsuc3 -cliCertFile=$CERTBASE/$CLICERT \
+	-cliKeyFile=$CERTBASE/$CLIKEY
 set +x
 
