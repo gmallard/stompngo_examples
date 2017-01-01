@@ -4,6 +4,11 @@
 
 dirs = 	ack \
 	conndisc \
+	adhoc/reader \
+	adhoc/varmGetter/noPackMod/noPMod1 \
+	adhoc/varmGetter/noPackMod/noPMod2 \
+	adhoc/varmGetter/vrmSameConn \
+	cmd/stompngo_examples \
 	conndisc_tls \
 	jinterop/activemq/gorecv \
 	jinterop/activemq/gosend \
