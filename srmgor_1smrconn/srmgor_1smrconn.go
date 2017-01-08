@@ -111,7 +111,7 @@ func runReceive(conn *stompngo.Connection, q int, w *sync.WaitGroup) {
 
 	qns := fmt.Sprintf("%d", q) // queue number
 	id := stompngo.Uuid()       // A unique subscription ID
-	d := sngecomm.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + string(exampid[:len(exampid)-2]) + "." + qns
 
 	ll.Printf("%stag:%s connsess:%s starts id:%s qns:%s d:%s\n",
 		exampid, ltag, conn.Session(),
@@ -345,7 +345,7 @@ runSender sends all messages to a specified queue.
 func runSender(conn *stompngo.Connection, qns string) {
 	ltag := tag + "-runsender"
 
-	d := sngecomm.Dest() + "." + qns
+	d := sngecomm.Dest() + "."  + string(exampid[:len(exampid)-2]) + "." + qns
 	id := stompngo.Uuid() // A unique sender id
 	ll.Printf("%stag:%s connsess:%s start id:%s dest:%s\n",
 		exampid, ltag, conn.Session(),

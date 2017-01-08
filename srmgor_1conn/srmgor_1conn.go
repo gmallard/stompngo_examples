@@ -80,7 +80,7 @@ func sender(qn, mc int) {
 
 	qns := fmt.Sprintf("%d", qn) // string queue number
 	id := stompngo.Uuid()        // A unique sender id
-	d := sngecomm.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + string(exampid[:len(exampid)-2]) + "." + qns
 
 	ll.Printf("%stag:%s connsess:%s queue_info id:%v d:%v qnum:%v mc:%v\n",
 		exampid, ltag, conn.Session(),
@@ -134,7 +134,7 @@ func receiver(qn, mc int) {
 	qns := fmt.Sprintf("%d", qn) // string queue number
 	pbc := sngecomm.Pbc()
 	id := stompngo.Uuid() // A unique subscription ID
-	d := sngecomm.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + string(exampid[:len(exampid)-2]) + "." + qns
 
 	ll.Printf("%stag:%s connsess:%s queue_info id:%v d:%v qnum:%v mc:%v\n",
 		exampid, ltag, conn.Session(),

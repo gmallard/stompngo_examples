@@ -79,7 +79,7 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	ltag := tag + "-sendmessages"
 
 	qns := fmt.Sprintf("%d", qnum) // queue number
-	d := sngecomm.Dest() + "." + qns
+	d := sngecomm.Dest() + "." + string(exampid[:len(exampid)-2]) + "." + qns
 	ll.Printf("%stag:%s connsess:%s start d:%s qnum:%d\n",
 		exampid, ltag, conn.Session(),
 		d, qnum)
@@ -111,7 +111,7 @@ func sendMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 		if sw {
 			runtime.Gosched() // yield for this example
 			dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
-			ll.Printf("%stag:%s connsess:%s send_stagger dt:%v qnum:%s mc:%d\n",
+			ll.Printf("%stag:%s connsess:%s send_stagger dt:%v qnum:%d mc:%d\n",
 				exampid, ltag, conn.Session(),
 				dt, qnum, mc)
 			tmr.Reset(dt)
@@ -124,7 +124,7 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	ltag := tag + "-receivemessages"
 
 	qns := fmt.Sprintf("%d", qnum) // queue number
-	d := sngecomm.Dest() + "." + qns
+	d := sngecomm.Dest() + "."  + string(exampid[:len(exampid)-2]) + "." + qns
 	id := stompngo.Uuid() // A unique subscription ID
 
 	ll.Printf("%stag:%s connsess:%s receiveMessages_start id:%s d:%s qnum:%d nmsgs:%d\n",
