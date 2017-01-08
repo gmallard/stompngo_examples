@@ -5,6 +5,7 @@
 dirs = 	ack \
 	conndisc \
 	adhoc/reader \
+	adhoc/varmGetter \
 	adhoc/varmGetter/noPackMod/noPMod1 \
 	adhoc/varmGetter/noPackMod/noPMod2 \
 	adhoc/varmGetter/vrmSameConn \
