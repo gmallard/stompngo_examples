@@ -31,3 +31,6 @@ temp*
 # HTML Artifacts
 *.htm
 *.html
+#
+runlog*
+
