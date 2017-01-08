@@ -206,3 +206,8 @@ func CustomCiphers() []uint16 {
 	}
 	return []uint16{}
 }
+
+// Connection logger
+func Logger() string {
+	return os.Getenv("STOMP_LOGGER")
+}

@@ -277,6 +277,7 @@ func CommonConnect(exampid, tag string, l *log.Logger) (net.Conn,
 	if e != nil {
 		return nil, conn, e
 	}
+	SetLogger(conn) // Maybe set a connection logger
 	l.Printf("%stag:%s connsess:%s common_connect_complete host:%s port:%s vhost:%s protocol:%s server:%s\n",
 		exampid, tag, conn.Session(),
 		h, p, senv.Vhost(), conn.Protocol(), ServerIdent(conn))
@@ -380,6 +381,7 @@ func CommonTLSConnect(exampid, tag string, l *log.Logger,
 	if e != nil {
 		return nil, nil, e
 	}
+	SetLogger(conn)
 	l.Printf("%stag:%s connsess:%s common_tls_connect_complete host:%s vhost:%s protocol:%s server:%s\n",
 		exampid, tag, conn.Session(),
 		h, senv.Vhost(), conn.Protocol(), ServerIdent(conn))
@@ -421,4 +423,12 @@ func Dest() string {
 		pref = "jms.topic"
 	}
 	return pref + strings.Replace(d, "/", ".", -1)
+}
+
+// Set Logger
+func SetLogger(conn *stompngo.Connection) {
+	if Logger() != "" {
+		ul := log.New(os.Stdout, Logger()+" ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+		conn.SetLogger(ul)
+	}
 }

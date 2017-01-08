@@ -124,7 +124,7 @@ func receiveMessages(conn *stompngo.Connection, qnum int, nc net.Conn) {
 	ltag := tag + "-receivemessages"
 
 	qns := fmt.Sprintf("%d", qnum) // queue number
-	d := sngecomm.Dest() + "."  + string(exampid[:len(exampid)-2]) + "." + qns
+	d := sngecomm.Dest() + "." + string(exampid[:len(exampid)-2]) + "." + qns
 	id := stompngo.Uuid() // A unique subscription ID
 
 	ll.Printf("%stag:%s connsess:%s receiveMessages_start id:%s d:%s qnum:%d nmsgs:%d\n",
@@ -351,5 +351,5 @@ func main() {
 	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
 		exampid, tag, sngecomm.Lcs,
 		time.Now().Sub(st))
-
+	time.Sleep(250 * time.Millisecond)
 }

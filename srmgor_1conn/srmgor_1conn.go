@@ -370,4 +370,5 @@ func main() {
 		exampid, tag, conn.Session(),
 		time.Now().Sub(st))
 
+	time.Sleep(250 * time.Millisecond)
 }

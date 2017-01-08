@@ -345,7 +345,7 @@ runSender sends all messages to a specified queue.
 func runSender(conn *stompngo.Connection, qns string) {
 	ltag := tag + "-runsender"
 
-	d := sngecomm.Dest() + "."  + string(exampid[:len(exampid)-2]) + "." + qns
+	d := sngecomm.Dest() + "." + string(exampid[:len(exampid)-2]) + "." + qns
 	id := stompngo.Uuid() // A unique sender id
 	ll.Printf("%stag:%s connsess:%s start id:%s dest:%s\n",
 		exampid, ltag, conn.Session(),
@@ -464,4 +464,5 @@ func main() {
 	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
 		exampid, tag, sngecomm.Lcs,
 		time.Now().Sub(st))
+	time.Sleep(250 * time.Millisecond)
 }
