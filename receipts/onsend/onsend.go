@@ -133,9 +133,9 @@ func main() {
 			exampid, tag, conn.Session(),
 			rid, rd.Message.Headers.Value("receipt-id")) // Handle this ......
 	}
-	ll.Printf("%stag:%s connsess:%s receipt_id_verified rid:%s\n",
+	ll.Printf("%stag:%s connsess:%s receipt_id_verified rid:%s headers:%+v\n",
 		exampid, tag, conn.Session(),
-		rid)
+		rid, rd.Message.Headers)
 
 	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
