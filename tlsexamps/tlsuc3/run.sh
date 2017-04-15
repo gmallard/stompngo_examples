@@ -2,7 +2,7 @@
 #
 set -x
 go build
-CERTBASE=${CERTBASE:-/ad3/gma/ad3/sslwork/2016-02}
+CERTBASE=${CERTBASE:-/ad3/gma/ad3/sslwork/2017-01}
 CLICERT=${CLICERT:-client.crt}
 CLIKEY=${CLIKEY:-client.key}
 #
