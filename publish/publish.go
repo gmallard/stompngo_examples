@@ -46,7 +46,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
+	"sync"
 	"time"
 	//
 	"github.com/gmallard/stompngo"
@@ -60,22 +62,15 @@ var (
 	exampid = "publish: "
 	ll      = log.New(os.Stdout, "EPUB ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 	tag     = "pubmain"
+	wg      sync.WaitGroup
+	conn    *stompngo.Connection
+	n       net.Conn
+	e       error
 )
 
-// Connect to a STOMP broker, publish some messages and disconnect.
-func main() {
-
-	st := time.Now()
-
-	// Standard example connect sequence
-	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
-	if e != nil {
-		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
-			exampid, tag, sngecomm.Lcs,
-			e.Error()) // Handle this ......
-	}
-
+func runSends(gr int) {
 	// *NOTE* application specific functionaltiy starts here!
+	grs := fmt.Sprintf("%d", gr)
 	sh := stompngo.Headers{"destination", sngecomm.Dest()}
 	ll.Printf("%stag:%s connsess:%s destination dest:%s\n",
 		exampid, tag, conn.Session(),
@@ -85,22 +80,48 @@ func main() {
 	}
 	ms := exampid + "message: "
 	for i := 1; i <= senv.Nmsgs(); i++ {
-		mse := ms + fmt.Sprintf("%d", i)
+		mse := ms + " grs:" + grs + " msgnum:" + fmt.Sprintf("%d", i)
 		ll.Printf("%stag:%s connsess:%s main_sending mse:~%s~\n",
 			exampid, tag, conn.Session(),
 			mse)
-		e := conn.Send(sh, mse)
-		if e != nil {
+
+		if os.Getenv("STOMP_GORSLEEP") != "" {
+			time.Sleep(50 * time.Millisecond)
+		}
+
+		err := conn.Send(sh, mse)
+		if err != nil {
 			ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
 				exampid, tag, conn.Session(),
-				e.Error()) // Handle this ......
+				err.Error()) // Handle this ......
 		}
 		ll.Printf("%stag:%s connsess:%s main_send_complete mse:~%s~\n",
 			exampid, tag, conn.Session(),
 			mse)
 		time.Sleep(100 * time.Millisecond)
 	}
+	wg.Done()
 	// *NOTE* application specific functionaltiy ends here!
+}
+
+// Connect to a STOMP broker, publish some messages and disconnect.
+func main() {
+
+	st := time.Now()
+
+	// Standard example connect sequence
+	n, conn, e = sngecomm.CommonConnect(exampid, tag, ll)
+	if e != nil {
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+			exampid, tag, sngecomm.Lcs,
+			e.Error()) // Handle this ......
+	}
+
+	for i := 0; i < sngecomm.Ngors(); i++ {
+		wg.Add(1)
+		go runSends(i)
+	}
+	wg.Wait()
 
 	// Standard example disconnect sequence
 	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)

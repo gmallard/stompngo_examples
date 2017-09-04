@@ -34,8 +34,11 @@ var (
 	nqs  = 1               // Default number of queues for multi-queue demo(s)
 	mdml = 1024 * 32       // Message data max length of variable message, 32K
 	md   = make([]byte, 1) // Additional message data, primed during init()
-	pbc  = 64              // Number of bytes to print (used in some
-	// 																 // examples that receive).
+	pbc  = 64              // Number of bytes to print (used in some examples that receive).
+
+	ngors    = 1  // Number of go routines to use (publish)
+	gorsleep = "" // If non-empty, go routines will sleep (publish)
+
 	//
 	sendFact float64 = 1.0 // Send sleep time factor
 	recvFact float64 = 1.0 // Receive sleep time factor
@@ -64,6 +67,20 @@ func init() {
 	b := []byte(p)
 	md = bytes.Repeat(b, c) // A long string
 	//
+}
+
+// Number of go routines
+func Ngors() int {
+	//
+	if s := os.Getenv("STOMP_NGORS"); s != "" {
+		i, e := strconv.ParseInt(s, 10, 32)
+		if nil != e {
+			log.Printf("v1:%v v2:%v\n", "NGORS conversion error", e)
+		} else {
+			ngors = int(i)
+		}
+	}
+	return ngors
 }
 
 // Number of queues
@@ -160,6 +177,12 @@ func Pbc() int {
 		}
 	}
 	return pbc
+}
+
+// Whether go routines will sleep or not
+func Gorsleep() string {
+	gorsleep = os.Getenv("STOMP_GORSLEEP")
+	return gorsleep
 }
 
 // Does receive wait to simulate message processing
