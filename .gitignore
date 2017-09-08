@@ -33,4 +33,6 @@ temp*
 *.html
 #
 runlog*
+#
+*.prof
 
