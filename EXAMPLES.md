@@ -143,7 +143,7 @@ publish/publish.go
 </td>
 <td style="border: 1px solid black;padding-left: 10px;" >
 A classic 'putter'.  Used to send an arbitrary number of messages to
-a given destination.
+a given destination or destinations.
 </td>
 </tr>
 

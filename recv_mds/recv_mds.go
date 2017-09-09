@@ -106,9 +106,9 @@ func recv(conn *stompngo.Connection, s int) {
 				exampid, ltag, conn.Session(),
 				md.Error) // Handle this ......
 		}
-		ll.Printf("%stag:%s connsess:%s received_message s:%d id:%s mc:%d\n",
+		ll.Printf("%stag:%s connsess:%s received_message s:%d id:%s mc:%d hdrs:%v\n",
 			exampid, ltag, conn.Session(),
-			s, id, mc)
+			s, id, mc, md.Message.Headers)
 		if pbc > 0 {
 			maxlen := pbc
 			if len(md.Message.Body) < maxlen {

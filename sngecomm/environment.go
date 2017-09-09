@@ -58,6 +58,8 @@ var (
 
 	useCustomCiphers = false // Set Custom Cipher Suite list
 
+	memprof = "" // memory profile file
+	cpuprof = "" // cpu profile file
 )
 
 // Initialization
@@ -67,6 +69,8 @@ func init() {
 	b := []byte(p)
 	md = bytes.Repeat(b, c) // A long string
 	//
+	memprof = os.Getenv("STOMP_MEMPROF")
+	cpuprof = os.Getenv("STOMP_CPUPROF")
 }
 
 // Number of go routines
@@ -122,6 +126,16 @@ func Pprof() bool {
 	return pprof
 }
 
+// Memory profile file
+func Memprof() string {
+	return memprof
+}
+
+// Cpu profile file
+func Cpuprof() string {
+	return cpuprof
+}
+
 // ACK mode for those examples that use it.
 func AckMode() string {
 	if am := os.Getenv("STOMP_ACKMODE"); am != "" {
@@ -164,6 +178,11 @@ func RecvFactor() float64 {
 func Partial() []byte {
 	r := int(ValueBetween(1, int64(mdml-1), 1.0))
 	return md[0:r]
+}
+
+// Get partial string, fixed length
+func PartialSubstr(l int) []byte {
+	return md[0:l]
 }
 
 // Print Byte Count

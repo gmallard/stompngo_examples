@@ -48,6 +48,9 @@ import (
 	"log"
 	"net"
 	"os"
+	"runtime"
+	"runtime/pprof"
+	"strconv"
 	"sync"
 	"time"
 	//
@@ -66,46 +69,158 @@ var (
 	conn    *stompngo.Connection
 	n       net.Conn
 	e       error
+	nqs     int
+	ngor    int
+	MNHDR   = "sng_msgnum"
+	gorstr  = 1 // Starting destination number
+	//
+	msfl  = true // Fixed message length
+	mslen = 1024 // The fixed length
+	msf   []byte
+	//
+	gorsl   = false
+	gorslfb = false
+	gorslfx = time.Duration(250 * time.Millisecond)
+	gorslms = 250
+	//
+	max int64 = 1e9      // Max stagger time (nanoseconds)
+	min int64 = max / 10 // Min stagger time (nanoseconds)
+	// Sleep multipliers
+	sf float64 = 1.0
+	rf float64 = 1.0
 )
 
-func runSends(gr int) {
-	// *NOTE* application specific functionaltiy starts here!
-	grs := fmt.Sprintf("%d", gr)
-	sh := stompngo.Headers{"destination", sngecomm.Dest()}
+func init() {
+	ngor = sngecomm.Ngors()
+	nqs = sngecomm.Nqs()
+
+	// Options around message length:
+	// 1) fixed length
+	// 2) randomly variable length
+	if os.Getenv("STOMP_VARMSL") != "" {
+		msfl = false // Use randomly variable message lengths
+	}
+	if msfl {
+		if s := os.Getenv("STOMP_FXMSLEN"); s != "" {
+			i, e := strconv.ParseInt(s, 10, 32)
+			if nil != e {
+				log.Printf("v1:%v v2:%v\n", "FXMSLEN conversion error", e)
+			} else {
+				mslen = int(i) // The fixed length to use
+			}
+		}
+		msf = sngecomm.PartialSubstr(mslen)
+	}
+
+	// Options controlling sleeps between message sends.  Options are:
+	// 1) Don't sleep
+	// 2) Sleep a fixed amount of time
+	// 3) Sleep a random variable amount of time
+	if os.Getenv("STOMP_DOSLEEP") != "" {
+		gorsl = true // Do sleep
+	}
+	if os.Getenv("STOMP_FIXSLEEP") != "" {
+		gorslfb = true // Do a fixed length sleep
+	}
+	if gorsl {
+		var err error
+		if s := os.Getenv("STOMP_SLEEPMS"); s != "" { // Fixed length milliseconds
+			mss := fmt.Sprintf("%s", s) + "ms"
+			gorslfx, err = time.ParseDuration(mss)
+			if err != nil {
+				log.Printf("v1:%v v2:%v v3:%v\n", "ParseDuration conversion error", mss, e)
+			}
+		}
+	}
+	//
+	if s := os.Getenv("STOMP_GORNSTR"); s != "" {
+		i, e := strconv.ParseInt(s, 10, 32)
+		if nil != e {
+			log.Printf("v1:%v v2:%v\n", "GORNSTR conversion error", e)
+		} else {
+			gorstr = int(i) // The fixed length to use
+		}
+	}
+}
+func runSends(gr int, qn int) {
+	var err error
+	qns := fmt.Sprintf("%d", qn)
+	qname := sngecomm.Dest() + "." + qns
+	sh := stompngo.Headers{"destination", qname}
 	ll.Printf("%stag:%s connsess:%s destination dest:%s\n",
 		exampid, tag, conn.Session(),
-		sngecomm.Dest())
+		qname)
 	if senv.Persistent() {
 		sh = sh.Add("persistent", "true")
 	}
-	ms := exampid + "message: "
+	sh = sh.Add(MNHDR, "0")
+	mnhnum := sh.Index(MNHDR)
+	ll.Printf("%stag:%s connsess:%s send headers:%v\n",
+		exampid, tag, conn.Session(),
+		sh)
 	for i := 1; i <= senv.Nmsgs(); i++ {
-		mse := ms + " grs:" + grs + " msgnum:" + fmt.Sprintf("%d", i)
-		ll.Printf("%stag:%s connsess:%s main_sending mse:~%s~\n",
+		is := fmt.Sprintf("%d", i) // Next message number
+		sh[mnhnum+1] = is          // Put message number in headers
+		// Log send headers
+		ll.Printf("%stag:%s connsess:%s main_sending hdrs:%v\n",
 			exampid, tag, conn.Session(),
-			mse)
+			sh)
 
-		if os.Getenv("STOMP_GORSLEEP") != "" {
-			time.Sleep(50 * time.Millisecond)
+		// Handle fixed or variable message length
+		rml := 0
+		if msfl {
+			err = conn.SendBytes(sh, msf)
+			rml = len(msf)
+		} else {
+			// ostr := string(sngecomm.Partial())
+			// err = conn.Send(sh, ostr)
+			oby := sngecomm.Partial()
+			err = conn.SendBytes(sh, oby)
+			rml = len(oby)
 		}
-
-		err := conn.Send(sh, mse)
 		if err != nil {
 			ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
 				exampid, tag, conn.Session(),
 				err.Error()) // Handle this ......
 		}
-		ll.Printf("%stag:%s connsess:%s main_send_complete mse:~%s~\n",
+		ll.Printf("%stag:%s connsess:%s main_send_complete msfl:~%t~len:%d\n",
 			exampid, tag, conn.Session(),
-			mse)
-		time.Sleep(100 * time.Millisecond)
+			msfl, rml)
+
+		// Handle sleep options
+		if gorsl {
+			if gorslfb {
+				// Fixed time to sleep
+				ll.Printf("%stag:%s connsess:%s main_fixed sleep:~%v\n",
+					exampid, tag, conn.Session(), gorslfx)
+				time.Sleep(gorslfx)
+			} else {
+				// Variable time to sleep
+				dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
+				ll.Printf("%stag:%s connsess:%s main_rand sleep:~%v\n",
+					exampid, tag, conn.Session(), dt)
+				time.Sleep(dt)
+			}
+		}
 	}
-	wg.Done()
-	// *NOTE* application specific functionaltiy ends here!
+	wg.Done() // signal a goroutine completion
 }
 
 // Connect to a STOMP broker, publish some messages and disconnect.
 func main() {
+
+	if sngecomm.Pprof() {
+		if sngecomm.Cpuprof() != "" {
+			f, err := os.Create(sngecomm.Cpuprof())
+			if err != nil {
+				log.Fatal("could not create CPU profile: ", err)
+			}
+			if err := pprof.StartCPUProfile(f); err != nil {
+				log.Fatal("could not start CPU profile: ", err)
+			}
+			defer pprof.StopCPUProfile()
+		}
+	}
 
 	st := time.Now()
 
@@ -117,9 +232,14 @@ func main() {
 			e.Error()) // Handle this ......
 	}
 
-	for i := 0; i < sngecomm.Ngors(); i++ {
+	rqn := gorstr - 1
+	for i := gorstr; i <= gorstr+ngor-1; i++ {
 		wg.Add(1)
-		go runSends(i)
+		rqn++
+		if nqs > 1 && rqn > nqs {
+			rqn = gorstr
+		}
+		go runSends(i, rqn)
 	}
 	wg.Wait()
 
@@ -134,4 +254,19 @@ func main() {
 	ll.Printf("%stag:%s connsess:%s main_elapsed:%v\n",
 		exampid, tag, conn.Session(),
 		time.Now().Sub(st))
+
+	if sngecomm.Pprof() {
+		if sngecomm.Memprof() != "" {
+			f, err := os.Create(sngecomm.Memprof())
+			if err != nil {
+				log.Fatal("could not create memory profile: ", err)
+			}
+			runtime.GC() // get up-to-date statistics
+			if err := pprof.WriteHeapProfile(f); err != nil {
+				log.Fatal("could not write memory profile: ", err)
+			}
+			f.Close()
+		}
+	}
+
 }
