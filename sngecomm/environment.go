@@ -62,6 +62,10 @@ var (
 	cpuprof = "" // cpu profile file
 )
 
+const (
+	EOF_MSG = "STOMP_EOF"
+)
+
 // Initialization
 func init() {
 	p := "_123456789ABCDEF"
@@ -252,4 +256,12 @@ func CustomCiphers() []uint16 {
 // Connection logger
 func Logger() string {
 	return os.Getenv("STOMP_LOGGER")
+}
+
+// Use special EOF message
+func UseEOF() bool {
+	if os.Getenv("STOMP_USEEOF") != "" {
+		return true
+	}
+	return false
 }

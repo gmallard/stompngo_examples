@@ -101,11 +101,17 @@ func main() {
 				qn, md.Error) // Handle this ......
 		}
 
+		mbs := string(md.Message.Body)
 		ll.Printf("%stag:%s connsess:%s next_frame mc:%v command:%v headers:%v body:%v\n",
 			exampid, tag, conn.Session(),
-			mc, md.Message.Command, md.Message.Headers, string(md.Message.Body)) // Handle this ......
+			mc, md.Message.Command, md.Message.Headers, mbs) // Handle this ......
 
 		mc++
+		if sngecomm.UseEOF() && mbs == sngecomm.EOF_MSG {
+			ll.Printf("%stag:%s connsess:%s received EOF\n",
+				exampid, tag, conn.Session())
+			break
+		}
 	}
 
 	//**

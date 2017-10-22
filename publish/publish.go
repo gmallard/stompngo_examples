@@ -203,6 +203,12 @@ func runSends(gr int, qn int) {
 			}
 		}
 	}
+	if sngecomm.UseEOF() {
+		sh := stompngo.Headers{"destination", qname}
+		_ = conn.Send(sh, sngecomm.EOF_MSG)
+		ll.Printf("%stag:%s connsess:%s sent EOF [%s]\n",
+			exampid, tag, conn.Session(), sngecomm.EOF_MSG)
+	}
 	wg.Done() // signal a goroutine completion
 }
 
