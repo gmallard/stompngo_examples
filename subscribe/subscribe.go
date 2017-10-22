@@ -141,6 +141,12 @@ func main() {
 				exampid, tag, conn.Session(),
 				ss)
 		}
+		mbs := string(md.Message.Body)
+		if sngecomm.UseEOF() && mbs == sngecomm.EOF_MSG {
+			ll.Printf("%stag:%s connsess:%s received EOF\n",
+				exampid, tag, conn.Session())
+			break
+		}
 	}
 	// It is polite to unsubscribe, although unnecessary if a disconnect follows.
 	// Again we use a utility routine to handle the different protocol level
