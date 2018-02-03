@@ -147,9 +147,9 @@ func runSends(gr int, qn int) {
 	qns := fmt.Sprintf("%d", qn)
 	qname := sngecomm.Dest() + "." + qns
 	sh := stompngo.Headers{"destination", qname}
-	ll.Printf("%stag:%s connsess:%s destination dest:%s\n",
+	ll.Printf("%stag:%s connsess:%s destination dest:%s BEGIN_runSends %d\n",
 		exampid, tag, conn.Session(),
-		qname)
+		qname, gr)
 	if senv.Persistent() {
 		sh = sh.Add("persistent", "true")
 	}
@@ -237,6 +237,9 @@ func main() {
 			exampid, tag, sngecomm.Lcs,
 			e.Error()) // Handle this ......
 	}
+
+	ll.Printf("%stag:%s connsess:%s START %d %d\n",
+		exampid, tag, conn.Session(), gorstr, ngor)
 
 	rqn := gorstr - 1
 	for i := gorstr; i <= gorstr+ngor-1; i++ {
