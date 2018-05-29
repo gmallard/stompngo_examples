@@ -40,6 +40,18 @@ Publish messages to a STOMP broker.
 		# Publish to a broker using a custom login and passcode:
 		STOMP_LOGIN="userid" STOMP_PASSCODE="t0ps3cr3t" go run publish.go
 
+		# Important environment variables for this program are:
+
+		# STOMP_NGORS - the number of go routines used to write to the
+		# sepcified queues.
+
+		# STOMP_NMSGS - the number of messages each go routine will write.
+
+		# STOMP_NQS - The number of queues to write messages to.  If this
+		# variable is absent, the value defaults to the value specified
+		# for STOMP_NGORS.  If this value is specified, all go routines
+		# are multi-plexed across this number of queues.
+
 */
 package main
 
@@ -71,8 +83,9 @@ var (
 	e       error
 	nqs     int
 	ngor    int
-	MNHDR   = "sng_msgnum"
-	gorstr  = 1 // Starting destination number
+	// MNHDR is the message number, in message headers
+	MNHDR  = "sng_msgnum"
+	gorstr = 1 // Starting destination number
 	//
 	msfl  = true // Fixed message length
 	mslen = 1024 // The fixed length
@@ -84,10 +97,10 @@ var (
 	gorslms = 250
 	//
 	max int64 = 1e9      // Max stagger time (nanoseconds)
-	min int64 = max / 10 // Min stagger time (nanoseconds)
+	min       = max / 10 // Min stagger time (nanoseconds)
 	// Sleep multipliers
-	sf float64 = 1.0
-	rf float64 = 1.0
+	sf = 1.0
+	rf = 1.0
 )
 
 func init() {
@@ -162,9 +175,9 @@ func runSends(gr int, qn int) {
 		is := fmt.Sprintf("%d", i) // Next message number
 		sh[mnhnum+1] = is          // Put message number in headers
 		// Log send headers
-		ll.Printf("%stag:%s connsess:%s main_sending hdrs:%v\n",
+		ll.Printf("%stag:%s connsess:%s main_sending gr:%d hdrs:%v\n",
 			exampid, tag, conn.Session(),
-			sh)
+			gr, sh)
 
 		// Handle fixed or variable message length
 		rml := 0
@@ -183,22 +196,22 @@ func runSends(gr int, qn int) {
 				exampid, tag, conn.Session(),
 				err.Error()) // Handle this ......
 		}
-		ll.Printf("%stag:%s connsess:%s main_send_complete msfl:~%t~len:%d\n",
+		ll.Printf("%stag:%s connsess:%s main_send_complete gr:%d msfl:~%t~len:%d\n",
 			exampid, tag, conn.Session(),
-			msfl, rml)
+			gr, msfl, rml)
 
 		// Handle sleep options
 		if gorsl {
 			if gorslfb {
 				// Fixed time to sleep
-				ll.Printf("%stag:%s connsess:%s main_fixed sleep:~%v\n",
-					exampid, tag, conn.Session(), gorslfx)
+				ll.Printf("%stag:%s connsess:%s gr:%d main_fixed sleep:~%v\n",
+					exampid, tag, conn.Session(), gr, gorslfx)
 				time.Sleep(gorslfx)
 			} else {
 				// Variable time to sleep
 				dt := time.Duration(sngecomm.ValueBetween(min, max, sf))
-				ll.Printf("%stag:%s connsess:%s main_rand sleep:~%v\n",
-					exampid, tag, conn.Session(), dt)
+				ll.Printf("%stag:%s connsess:%s gr:%d main_rand sleep:~%v\n",
+					exampid, tag, conn.Session(), gr, dt)
 				time.Sleep(dt)
 			}
 		}
@@ -206,8 +219,8 @@ func runSends(gr int, qn int) {
 	if sngecomm.UseEOF() {
 		sh := stompngo.Headers{"destination", qname}
 		_ = conn.Send(sh, sngecomm.EOF_MSG)
-		ll.Printf("%stag:%s connsess:%s sent EOF [%s]\n",
-			exampid, tag, conn.Session(), sngecomm.EOF_MSG)
+		ll.Printf("%stag:%s connsess:%s gr:%d sent EOF [%s]\n",
+			exampid, tag, conn.Session(), gr, sngecomm.EOF_MSG)
 	}
 	wg.Done() // signal a goroutine completion
 }
@@ -217,6 +230,8 @@ func main() {
 
 	if sngecomm.Pprof() {
 		if sngecomm.Cpuprof() != "" {
+			ll.Printf("%stag:%s connsess:%s CPUPROF %s\n",
+				exampid, tag, sngecomm.Lcs, sngecomm.Cpuprof())
 			f, err := os.Create(sngecomm.Cpuprof())
 			if err != nil {
 				log.Fatal("could not create CPU profile: ", err)
@@ -238,8 +253,8 @@ func main() {
 			e.Error()) // Handle this ......
 	}
 
-	ll.Printf("%stag:%s connsess:%s START %d %d\n",
-		exampid, tag, conn.Session(), gorstr, ngor)
+	ll.Printf("%stag:%s connsess:%s START gorstr:%d ngor:%d nqs:%d nmsgs:%d\n",
+		exampid, tag, conn.Session(), gorstr, ngor, nqs, senv.Nmsgs())
 
 	rqn := gorstr - 1
 	for i := gorstr; i <= gorstr+ngor-1; i++ {
@@ -266,6 +281,8 @@ func main() {
 
 	if sngecomm.Pprof() {
 		if sngecomm.Memprof() != "" {
+			ll.Printf("%stag:%s connsess:%s MEMPROF %s\n",
+				exampid, tag, conn.Session(), sngecomm.Memprof())
 			f, err := os.Create(sngecomm.Memprof())
 			if err != nil {
 				log.Fatal("could not create memory profile: ", err)
