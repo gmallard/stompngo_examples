@@ -142,7 +142,7 @@ func main() {
 				ss)
 		}
 		mbs := string(md.Message.Body)
-		if sngecomm.UseEOF() && mbs == sngecomm.EOF_MSG {
+		if sngecomm.UseEOF() && mbs == sngecomm.EOFMsg {
 			ll.Printf("%stag:%s connsess:%s received EOF\n",
 				exampid, tag, conn.Session())
 			break

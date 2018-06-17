@@ -218,9 +218,9 @@ func runSends(gr int, qn int) {
 	}
 	if sngecomm.UseEOF() {
 		sh := stompngo.Headers{"destination", qname}
-		_ = conn.Send(sh, sngecomm.EOF_MSG)
+		_ = conn.Send(sh, sngecomm.EOFMsg)
 		ll.Printf("%stag:%s connsess:%s gr:%d sent EOF [%s]\n",
-			exampid, tag, conn.Session(), gr, sngecomm.EOF_MSG)
+			exampid, tag, conn.Session(), gr, sngecomm.EOFMsg)
 	}
 	wg.Done() // signal a goroutine completion
 }

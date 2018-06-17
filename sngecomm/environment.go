@@ -40,8 +40,8 @@ var (
 	gorsleep = "" // If non-empty, go routines will sleep (publish)
 
 	//
-	sendFact float64 = 1.0 // Send sleep time factor
-	recvFact float64 = 1.0 // Receive sleep time factor
+	sendFact = 1.0 // Send sleep time factor
+	recvFact = 1.0 // Receive sleep time factor
 	//
 	ackMode = "auto" // The default ack mode
 	//
@@ -63,7 +63,8 @@ var (
 )
 
 const (
-	EOF_MSG = "STOMP_EOF"
+	// EOFMsg is the EOF message body
+	EOFMsg = "STOMP_EOF"
 )
 
 // Initialization
@@ -77,7 +78,7 @@ func init() {
 	cpuprof = os.Getenv("STOMP_CPUPROF")
 }
 
-// Number of go routines
+// Ngors sets the number of go routines
 func Ngors() int {
 	//
 	if s := os.Getenv("STOMP_NGORS"); s != "" {
@@ -91,7 +92,7 @@ func Ngors() int {
 	return ngors
 }
 
-// Number of queues
+// Nqs sets the number of queues
 func Nqs() int {
 	//
 	if s := os.Getenv("STOMP_NQS"); s != "" {
@@ -105,7 +106,7 @@ func Nqs() int {
 	return nqs
 }
 
-// Max Data Message Length
+// Mdml sets the Max Data Message Length
 func Mdml() int {
 	if s := os.Getenv("STOMP_MDML"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
@@ -122,7 +123,7 @@ func Mdml() int {
 	return mdml
 }
 
-// Use profiling or not
+// Pprof indicates whether to use profiling or not
 func Pprof() bool {
 	if am := os.Getenv("STOMP_PPROF"); am != "" {
 		pprof = true
@@ -130,17 +131,17 @@ func Pprof() bool {
 	return pprof
 }
 
-// Memory profile file
+// Memprof returns the memory profile file name
 func Memprof() string {
 	return memprof
 }
 
-// Cpu profile file
+// Cpuprof returns the CPU profile file name
 func Cpuprof() string {
 	return cpuprof
 }
 
-// ACK mode for those examples that use it.
+// AckMode returns an ACK mode value for those examples that use it.
 func AckMode() string {
 	if am := os.Getenv("STOMP_ACKMODE"); am != "" {
 		if am == "auto" || am == "client" || am == "client-individual" {
@@ -152,7 +153,7 @@ func AckMode() string {
 	return ackMode
 }
 
-// Get Send Sleep Factor
+// SendFactor returns the send sleep factor
 func SendFactor() float64 {
 	if s := os.Getenv("STOMP_SENDFACT"); s != "" {
 		f, e := strconv.ParseFloat(s, 64)
@@ -165,7 +166,7 @@ func SendFactor() float64 {
 	return sendFact
 }
 
-// Get Recv Sleep Factor
+// RecvFactor returns the recv sleep factor
 func RecvFactor() float64 {
 	if s := os.Getenv("STOMP_RECVFACT"); s != "" {
 		f, e := strconv.ParseFloat(s, 64)
@@ -178,18 +179,18 @@ func RecvFactor() float64 {
 	return recvFact
 }
 
-// Get partial string, random length
+// Partial returns the partial byte slice for logging, random length
 func Partial() []byte {
 	r := int(ValueBetween(1, int64(mdml-1), 1.0))
 	return md[0:r]
 }
 
-// Get partial string, fixed length
+// PartialSubstr returns the partial string for logging, fixed length
 func PartialSubstr(l int) []byte {
 	return md[0:l]
 }
 
-// Print Byte Count
+// Pbc returns the byte count to log
 func Pbc() int {
 	if s := os.Getenv("STOMP_PBC"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
@@ -202,13 +203,13 @@ func Pbc() int {
 	return pbc
 }
 
-// Whether go routines will sleep or not
+// Gorsleep returns an indication of whether go routines will sleep or not
 func Gorsleep() string {
 	gorsleep = os.Getenv("STOMP_GORSLEEP")
 	return gorsleep
 }
 
-// Does receive wait to simulate message processing
+// RecvWait indicates whether to wait in receives to simulate message processing
 func RecvWait() bool {
 	f := os.Getenv("STOMP_RECVWAIT")
 	if f == "" {
@@ -217,7 +218,7 @@ func RecvWait() bool {
 	return false
 }
 
-// Does send wait to simulate message building
+// SendWait indicates whether to wait in sends to simulate message processing
 func SendWait() bool {
 	f := os.Getenv("STOMP_SENDWAIT")
 	if f == "" {
@@ -226,7 +227,7 @@ func SendWait() bool {
 	return false
 }
 
-// True if max procs are to be set
+// SetMAXPROCS returns true if max procs are to be set
 func SetMAXPROCS() bool {
 	f := os.Getenv("STOMP_SETMAXPROCS")
 	if f == "" {
@@ -235,7 +236,7 @@ func SetMAXPROCS() bool {
 	return true
 }
 
-// Use Custon Cipher List
+// UseCustomCiphers returns true if custom ciphers are to be used
 func UseCustomCiphers() bool {
 	f := os.Getenv("STOMP_USECUSTOMCIPHERS")
 	if f == "" {
@@ -245,7 +246,7 @@ func UseCustomCiphers() bool {
 	return useCustomCiphers
 }
 
-// CustomCiphers()
+// CustomCiphers returns a slice of custom ciphers
 func CustomCiphers() []uint16 {
 	if UseCustomCiphers() {
 		return cipherSuites
@@ -253,12 +254,12 @@ func CustomCiphers() []uint16 {
 	return []uint16{}
 }
 
-// Connection logger
+// Logger returns an indication of whether to do logging
 func Logger() string {
 	return os.Getenv("STOMP_LOGGER")
 }
 
-// Use special EOF message
+// UseEOF returns true if en EOF message is to be used.
 func UseEOF() bool {
 	if os.Getenv("STOMP_USEEOF") != "" {
 		return true
