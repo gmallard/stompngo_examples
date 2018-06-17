@@ -94,7 +94,11 @@ func ValueBetween(min, max int64, fact float64) int64 {
 func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 	llu.Printf("%s TLSConfig:\n", exampid)
 	llu.Printf("%s Rand:%#v\n", exampid, c.Rand)
-	llu.Printf("%s Time:%v\n", exampid, c.Time)
+	if c.Time != nil {
+		llu.Printf("%s Time:%v\n", exampid, c.Time())
+	} else {
+		llu.Printf("%s Time:%v\n", exampid, nil)
+	}
 	llu.Printf("%s Certificates:%#v\n", exampid, c.Certificates)
 	llu.Printf("%s NameToCertificate:%#v\n", exampid, c.NameToCertificate)
 	llu.Printf("%s RootCAs:%#v\n", exampid, c.RootCAs)
