@@ -172,7 +172,8 @@ func HandleSubscribe(c *stompngo.Connection, d, i, a string) <-chan stompngo.Mes
 	case stompngo.SPL_10:
 		// Nothing else to do here
 	default:
-		llu.Fatalf("v1:%v v2:%v\n", "subscribe invalid protocol level, should not happen")
+		llu.Fatalf("v1:%v v2:%v\n", "subscribe invalid protocol level, should not happen",
+			c.Protocol())
 	}
 	//
 	r, e := c.Subscribe(h)
@@ -194,7 +195,8 @@ func HandleUnsubscribe(c *stompngo.Connection, d, i string) {
 	case stompngo.SPL_10:
 		sbh = sbh.Add("destination", d)
 	default:
-		llu.Fatalf("v1:%v v2:%v\n", "unsubscribe invalid protocol level, should not happen")
+		llu.Fatalf("v1:%v v2:%v\n", "unsubscribe invalid protocol level, should not happen",
+			c.Protocol())
 	}
 	e := c.Unsubscribe(sbh)
 	if e != nil {
@@ -215,7 +217,8 @@ func HandleAck(c *stompngo.Connection, h stompngo.Headers, id string) {
 	case stompngo.SPL_10:
 		ah = ah.Add("message-id", h.Value("message-id"))
 	default:
-		llu.Fatalf("v1:%v v2:%v\n", "ack invalid protocol level, should not happen")
+		llu.Fatalf("v1:%v v2:%v\n", "ack invalid protocol level, should not happen",
+			c.Protocol())
 	}
 	if cv, ok := h.Contains(stompngo.HK_RECEIPT); ok {
 		ah = ah.Add(stompngo.HK_RECEIPT, cv)
