@@ -1,5 +1,5 @@
 //
-// Copyright © 2016 Guy M. Alluard
+// Copyright © 2016-2018 Guy M. Alluard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

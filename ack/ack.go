@@ -1,5 +1,5 @@
 //
-// Copyright © 2011-2016 Guy M. Allard
+// Copyright © 2011-2018 Guy M. Allard
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,10 +44,11 @@ Receive messages from a STOMP broker, and ACK them.
 package main
 
 import (
-	"github.com/gmallard/stompngo"
 	"log"
 	"os"
 	"time"
+
+	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
 	"github.com/gmallard/stompngo/senv"
 	// sngecomm methods are used specifically for these example clients.
