@@ -145,13 +145,15 @@ func init() {
 			}
 		}
 	}
-	//
+	// Option controlling destination numbering.  Destinations are normally
+	// suffixed with a sequence number, starting at 1.  This option allows
+	// that starting sequence number to be arbitrary.
 	if s := os.Getenv("STOMP_GORNSTR"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
 		if nil != e {
 			log.Printf("v1:%v v2:%v\n", "GORNSTR conversion error", e)
 		} else {
-			gorstr = int(i) // The fixed length to use
+			gorstr = int(i) // The starting sequence number to use.
 		}
 	}
 }
