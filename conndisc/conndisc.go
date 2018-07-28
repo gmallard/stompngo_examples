@@ -65,12 +65,14 @@ func main() {
 	// Standard example connect sequence
 	n, conn, e := sngecomm.CommonConnect(exampid, tag, ll)
 	if e != nil {
-		if conn != nil {
+		ll.Printf("%stag%s main_on_connect error basic:\nerror:%v\nconn:%v\n",
+			exampid, tag, e.Error(), conn)
+		if conn != nil && conn.ConnectResponse != nil {
 			ll.Printf("%stag%s connsess:%s main_on_connect error Connect Response headers:%v body%s\n",
 				exampid, tag, conn.Session(), conn.ConnectResponse.Headers,
 				string(conn.ConnectResponse.Body))
 		}
-		ll.Fatalf("%stag:%s connsess:%s main_on_connect error:%v",
+		ll.Fatalf("%stag:%s connsess:%s main_on_connect FATAL error:%v",
 			exampid, tag, sngecomm.Lcs,
 			e.Error()) // Handle this ......
 	}
