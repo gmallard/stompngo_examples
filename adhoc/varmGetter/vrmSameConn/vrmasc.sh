@@ -13,6 +13,7 @@ export VMG_NOUNSUB=y
 export VMG_NODISC=y
 export VMG_GETAR=y
 # ..............................................................................
+export STOMP_PBC=0
 export STOMP_ACKMODE=client
 export STOMP_DEST=/queue/varmGetter.
 export STOMP_NQS=9

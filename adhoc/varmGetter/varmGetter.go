@@ -74,6 +74,7 @@ func main() {
 	id := stompngo.Uuid()           // A unique name/id
 	nmsgs := senv.Nmsgs()           // int number of messages to get
 	mns := fmt.Sprintf("%d", nmsgs) // string number of messages to get
+	d = d + ".1"                    // Adjust destination from 'publish'
 	am := sngecomm.AckMode()        // ACK mode to use on SUBSCRIBE
 	nfa := true                     // Need "final" ACK (possiby reset below)
 	wh := stompngo.Headers{         // Starting SUBSCRIBE headers
@@ -183,18 +184,20 @@ GetLoop:
 				ss)
 		}
 
-		// Sanity check this message payload
-		wm := wlp + mcs // The left part plus the (string) meassage number]
-		bm := string(md.Message.Body)
-		if bm != wm {
-			ll.Fatalf("%stag:%s connsess:%s error_message_payload\n\tGot %s\n\tWant%s\n",
-				exampid, tag, session,
-				bm, wm) // Handle this ......
-		} else {
-			ll.Printf("%stag:%s connsess:%s  matched_body_string\n%s\n%s\n",
-				exampid, tag, session,
-				bm, wm) // Handle this ......)
-		}
+		// message payload sanity check commented out
+		/*
+			wm := wlp + mcs // The left part plus the (string) meassage number]
+			bm := string(md.Message.Body)
+			if bm != wm {
+				ll.Fatalf("%stag:%s connsess:%s error_message_payload\n\tGot %s\n\tWant%s\n",
+					exampid, tag, session,
+					bm, wm) // Handle this ......
+			} else {
+				ll.Printf("%stag:%s connsess:%s  matched_body_string\n%s\n%s\n",
+					exampid, tag, session,
+					bm, wm) // Handle this ......)
+			}
+		*/
 
 		// Run individual ACK if required
 		if am == stompngo.AckModeClientIndividual {

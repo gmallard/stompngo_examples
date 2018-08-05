@@ -99,15 +99,15 @@ func main() {
 
 func runNextQueue(qn int, conn *stompngo.Connection) {
 
-	qns := fmt.Sprintf("%d", qn) // string number of the queue
-	conn.SetLogger(ll)           // stompngo logging
-	pbc := sngecomm.Pbc()        // Print byte count
-	d := senv.Dest() + qns       // Destination
-	id := stompngo.Uuid()        // A unique name/id
-	nmsgs := qn                  // int number of messages to get, same as queue number
-	am := sngecomm.AckMode()     // ACK mode to use on SUBSCRIBE
-	nfa := true                  // Need "final" ACK (possiby reset below)
-	wh := stompngo.Headers{}     // Starting SUBSCRIBE headers
+	qns := fmt.Sprintf("%d", qn)  // string number of the queue
+	conn.SetLogger(ll)            // stompngo logging
+	pbc := sngecomm.Pbc()         // Print byte count
+	d := senv.Dest() + qns + ".1" // Destination
+	id := stompngo.Uuid()         // A unique name/id
+	nmsgs := qn                   // int number of messages to get, same as queue number
+	am := sngecomm.AckMode()      // ACK mode to use on SUBSCRIBE
+	nfa := true                   // Need "final" ACK (possiby reset below)
+	wh := stompngo.Headers{}      // Starting SUBSCRIBE headers
 
 	// Sanity check ACK mode
 	if conn.Protocol() == stompngo.SPL_10 &&
@@ -213,17 +213,19 @@ GetLoop:
 		}
 
 		// Sanity check this message payload
-		wm := wlp + mcs // The left part plus the (string) meassage number]
-		bm := string(md.Message.Body)
-		if bm != wm {
-			ll.Fatalf("%stag:%s connsess:%s error_message_payload\n\tGot %s\n\tWant%s\n",
-				exampid, tag, session,
-				bm, wm) // Handle this ......
-		} else {
-			ll.Printf("%stag:%s connsess:%s  matched_body_string\n%s\n%s\n",
-				exampid, tag, session,
-				bm, wm) // Handle this ......)
-		}
+		/*
+			wm := wlp + mcs // The left part plus the (string) meassage number]
+			bm := string(md.Message.Body)
+			if bm != wm {
+				ll.Fatalf("%stag:%s connsess:%s error_message_payload\n\tGot %s\n\tWant%s\n",
+					exampid, tag, session,
+					bm, wm) // Handle this ......
+			} else {
+				ll.Printf("%stag:%s connsess:%s  matched_body_string\n%s\n%s\n",
+					exampid, tag, session,
+					bm, wm) // Handle this ......)
+			}
+		*/
 
 		// Run individual ACK if required
 		if am == stompngo.AckModeClientIndividual {
