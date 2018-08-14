@@ -1,22 +1,21 @@
 #!/usr/bin/env bash
 # ------------------------------------------------------------------------------
-# Entry condition: all queues to be used start off empty.
-# Use this script to 'prime' queues for further experiments.
+eval $DeBug
 # ------------------------------------------------------------------------------
 cmd_base=$(dirname $0)
-source $cmd_base/funcs.sh
 # ------------------------------------------------------------------------------
-init
+go build varmGetter2.go
 # ------------------------------------------------------------------------------
-showparms
+export STOMP_ACKMODE=client
+export STOMP_PBC=0
 # ------------------------------------------------------------------------------
 cqn=1
-while [ "$cqn" -le "${MAX_QUEUE}" ]; do
+while [ "$cqn" -le "99" ]; do
 	echo "---------------------------------------------------------------------"
-	nqn="${QNBASE}${cqn}"
-	ncmd="STOMP_FXMSLEN=128 STOMP_DEST=${nqn} STOMP_NMSGS=${MSG_COUNT} go run $PUTTER"
+	ncmd="STOMP_DEST=/queue/varmGetter.${cqn} STOMP_NMSGS=${cqn} ./varmGetter2"
 	echo "Next Puts: ${ncmd}"
 	eval ${ncmd}
 	let cqn=cqn+1
 done
-
+# ------------------------------------------------------------------------------
+set +x
