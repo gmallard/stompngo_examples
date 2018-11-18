@@ -25,16 +25,18 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 	//
 	// "github.com/gmallard/stompngo"
 )
 
 var (
 	//
-	nqs  = 1               // Default number of queues for multi-queue demo(s)
-	mdml = 1024 * 32       // Message data max length of variable message, 32K
-	md   = make([]byte, 1) // Additional message data, primed during init()
-	pbc  = 64              // Number of bytes to print (used in some examples that receive).
+	nqs     = 1               // Default number of queues for multi-queue demo(s)
+	nqsLock sync.Mutex        // nqs variable lock
+	mdml    = 1024 * 32       // Message data max length of variable message, 32K
+	md      = make([]byte, 1) // Additional message data, primed during init()
+	pbc     = 64              // Number of bytes to print (used in some examples that receive).
 
 	ngors    = 1  // Number of go routines to use (publish)
 	gorsleep = "" // If non-empty, go routines will sleep (publish)
@@ -95,6 +97,8 @@ func Ngors() int {
 // Nqs sets the number of queues
 func Nqs() int {
 	//
+	nqsLock.Lock()
+	defer nqsLock.Unlock()
 	if s := os.Getenv("STOMP_NQS"); s != "" {
 		i, e := strconv.ParseInt(s, 10, 32)
 		if nil != e {
