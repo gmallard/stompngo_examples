@@ -77,6 +77,9 @@ func main() {
 	qname := sngecomm.Dest()
 	sh := stompngo.Headers{"destination", qname}
 	amsg := "A message from putget"
+	// Status message
+	ll.Printf("%stag:%s connsess:%s will PUT: %s, count: %d\n",
+		exampid, tag, conn.Session(), amsg, senv.Nmsgs())
 	for i := 0; i < senv.Nmsgs(); i++ {
 		e = conn.Send(sh, amsg)
 		if e != nil {
@@ -105,6 +108,9 @@ func main() {
 	} else if wns > 0 {
 		time.Sleep(wd)
 	}
+	// Status message
+	ll.Printf("%stag:%s connsess:%s PUT is done\n",
+		exampid, tag, conn.Session())
 	// Get
 	id := "putget-subid1"
 	sc := sngecomm.HandleSubscribe(conn, qname, id, sngecomm.AckMode())
@@ -123,6 +129,9 @@ func main() {
 			exampid, tag, conn.Session(),
 			md.Message.BodyString())
 	}
+	// Status message
+	ll.Printf("%stag:%s connsess:%s GET is done\n",
+		exampid, tag, conn.Session())
 	// Standard example disconnect sequence
 	e = sngecomm.CommonDisconnect(n, conn, exampid, tag, ll)
 	if e != nil {
