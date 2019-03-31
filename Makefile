@@ -16,6 +16,7 @@ dirs = 	ack \
 	jinterop/artemis/gorecv \
 	jinterop/artemis/gosend \
 	publish \
+	putget \
 	receipts/onack \
 	receipts/onsend \
 	recv_mds \
