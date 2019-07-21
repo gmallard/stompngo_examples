@@ -30,14 +30,12 @@ import (
 
 var (
 	pref  = "v"
-	major = "1" // Major
-	minor = "0" // Minor
-
-	// patch = "7" // Patch
-
-	patch = "7.plvl.001" // Patch
+	major = "1"       // Major
+	minor = "0"       // Minor
+	patch = "7"       // Patch
+	mod   = "-plvl.3" // mod
 )
 
 func Version() string {
-	return fmt.Sprintf("%s%s.%s.%s\n", pref, major, minor, patch)
+	return fmt.Sprintf("%s%s.%s.%s%s\n", pref, major, minor, patch, mod)
 }
