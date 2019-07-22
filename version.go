@@ -30,10 +30,11 @@ import (
 
 var (
 	pref  = "v"
-	major = "1"       // Major
-	minor = "0"       // Minor
-	patch = "7"       // Patch
-	mod   = "-plvl.3" // mod
+	major = "1" // Major
+	minor = "0" // Minor
+	patch = "8" // Patch
+	// mod   = "-plvl.1" // mod
+	mod = ""
 )
 
 func Version() string {
