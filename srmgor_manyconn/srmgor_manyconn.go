@@ -39,6 +39,7 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
 	//
 	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
@@ -70,7 +71,7 @@ var (
 	// Number of messages
 	nmsgs = senv.Nmsgs()
 
-	ll = log.New(os.Stdout, "EMSMR ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	ll *log.Logger
 
 	tag = "manyconn"
 )
@@ -283,7 +284,14 @@ func main() {
 
 	st := time.Now()
 
-	sngecomm.ShowRunParms(exampid)
+	if sngecomm.LogFile() == "" {
+		ll = log.New(os.Stdout, "EMSMR", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	} else {
+		f, _ := os.Create(sngecomm.LogFile())
+		ll = log.New(f, "EMSMR ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	}
+
+	sngecomm.ShowRunParmsLogger(exampid, ll)
 
 	ll.Printf("%stag:%s connsess:%s main_starts\n",
 		exampid, tag, sngecomm.Lcs)

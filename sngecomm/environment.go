@@ -263,6 +263,11 @@ func Logger() string {
 	return os.Getenv("STOMP_LOGGER")
 }
 
+// LogFile returns a log fle name or the empty string
+func LogFile() string {
+	return os.Getenv("STOMP_LOGFILE")
+}
+
 // UseEOF returns true if en EOF message is to be used.
 func UseEOF() bool {
 	if os.Getenv("STOMP_USEEOF") != "" {

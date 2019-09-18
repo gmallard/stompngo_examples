@@ -34,6 +34,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
 	//
 	"github.com/gmallard/stompngo"
 	// senv methods could be used in general by stompngo clients.
@@ -66,7 +67,7 @@ var (
 	// Possible profile file
 	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
-	ll = log.New(os.Stdout, "E1S1R ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	ll *log.Logger = nil
 
 	tag = "2conn"
 )
@@ -351,7 +352,14 @@ func main() {
 
 	st := time.Now()
 
-	sngecomm.ShowRunParms(exampid)
+	if sngecomm.LogFile() == "" {
+		ll = log.New(os.Stdout, "E2CN ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	} else {
+		f, _ := os.Create(sngecomm.LogFile())
+		ll = log.New(f, "E2CN ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	}
+
+	sngecomm.ShowRunParmsLogger(exampid, ll)
 
 	ll.Printf("%stag:%s connsess:%s main_starts\n",
 		exampid, tag, sngecomm.Lcs)

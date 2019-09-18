@@ -28,6 +28,7 @@ import (
 	"net"
 	"os"
 	"strings"
+
 	//
 	"github.com/gmallard/stompngo"
 	"github.com/gmallard/stompngo/senv"
@@ -36,6 +37,7 @@ import (
 var (
 	llu = log.New(os.Stdout, "UTIL ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 	Lcs = "NotAvailable"
+	vs  = ""
 )
 
 // Provide connect headers
@@ -84,6 +86,27 @@ func ShowStats(exampid, tag string, conn *stompngo.Connection) {
 	llu.Printf("%stag:%s bytes_written/sec:%20.6f\n", exampid, tag, float64(bw)/s)
 }
 
+// Show connection metrics.
+func ShowStatsLogger(exampid, tag string, conn *stompngo.Connection, lgr *log.Logger) {
+	r := conn.FramesRead()
+	br := conn.BytesRead()
+	w := conn.FramesWritten()
+	bw := conn.BytesWritten()
+	s := conn.Running().Seconds()
+	n := conn.Running().Nanoseconds()
+	lgr.Printf("%stag:%s frame_read_count:%v\n", exampid, tag, r)
+	lgr.Printf("%stag:%s bytes_read:%v\n", exampid, tag, br)
+	lgr.Printf("%stag:%s frame_write_count:%v\n", exampid, tag, w)
+	lgr.Printf("%stag:%s bytes_written:%v\n", exampid, tag, bw)
+	lgr.Printf("%stag:%s current_duration(ns):%v\n", exampid, tag, n)
+
+	lgr.Printf("%stag:%s current_duration(sec):%20.6f\n", exampid, tag, s)
+	lgr.Printf("%stag:%s frame_reads/sec:%20.6f\n", exampid, tag, float64(r)/s)
+	lgr.Printf("%stag:%s bytes_read/sec:%20.6f\n", exampid, tag, float64(br)/s)
+	lgr.Printf("%stag:%s frame_writes/sec:%20.6f\n", exampid, tag, float64(w)/s)
+	lgr.Printf("%stag:%s bytes_written/sec:%20.6f\n", exampid, tag, float64(bw)/s)
+}
+
 // Get a value between min amd max
 func ValueBetween(min, max int64, fact float64) int64 {
 	rt, _ := rand.Int(rand.Reader, big.NewInt(max-min)) // Ignore errors here
@@ -111,9 +134,25 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 	llu.Printf("%s SessionTicketsDisabled:%v\n", exampid, c.SessionTicketsDisabled)
 	llu.Printf("%s SessionTicketKey:%#v\n", exampid, c.SessionTicketKey)
 
-	// Idea Embelluished From:
+	// Idea Embellished From:
 	// https://groups.google.com/forum/#!topic/golang-nuts/TMNdOxugbTY
+	llu.Println("Connecton State Information:")
 	cs := n.ConnectionState()
+	switch cs.Version {
+	case tls.VersionTLS10:
+		vs = "TLS10"
+	case tls.VersionTLS11:
+		vs = "TLS11"
+	case tls.VersionTLS12:
+		vs = "TLS12"
+	case tls.VersionTLS13:
+		vs = "TLS13"
+	case tls.VersionSSL30:
+		vs = "SSL30"
+	default:
+		vs = "Unknown"
+	}
+	llu.Printf("%s Version:%s\n", exampid, vs)
 	llu.Printf("%s HandshakeComplete:%v\n", exampid, cs.HandshakeComplete)
 	llu.Printf("%s DidResume:%v\n", exampid, cs.DidResume)
 	llu.Printf("%s CipherSuite:%d(0x%X)\n", exampid, cs.CipherSuite, cs.CipherSuite)
@@ -243,6 +282,21 @@ func ShowRunParms(exampid string) {
 	llu.Printf("%sRECVWAIT:%t\n", exampid, RecvWait())
 	llu.Printf("%sSENDWAIT:%t\n", exampid, SendWait())
 	llu.Printf("%sACKMODE:%v\n", exampid, AckMode())
+}
+
+func ShowRunParmsLogger(exampid string, lgr *log.Logger) {
+	lgr.Printf("%sHOST:%v\n", exampid, os.Getenv("STOMP_HOST"))
+	lgr.Printf("%sPORT:%v\n", exampid, os.Getenv("STOMP_PORT"))
+	lgr.Printf("%sPROTOCOL:%v\n", exampid, senv.Protocol())
+	lgr.Printf("%sVHOST:%v\n", exampid, senv.Vhost())
+	lgr.Printf("%sNQS:%v\n", exampid, Nqs())
+	lgr.Printf("%sNMSGS:%v\n", exampid, senv.Nmsgs())
+	lgr.Printf("%sSUBCHANCAP:%v\n", exampid, senv.SubChanCap())
+	lgr.Printf("%sRECVFACT:%v\n", exampid, RecvFactor())
+	lgr.Printf("%sSENDFACT:%v\n", exampid, SendFactor())
+	lgr.Printf("%sRECVWAIT:%t\n", exampid, RecvWait())
+	lgr.Printf("%sSENDWAIT:%t\n", exampid, SendWait())
+	lgr.Printf("%sACKMODE:%v\n", exampid, AckMode())
 }
 
 // Return broker identity
