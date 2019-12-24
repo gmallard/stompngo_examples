@@ -72,7 +72,8 @@ const (
 // Initialization
 func init() {
 	p := "_123456789ABCDEF"
-	c := mdml / len(p)
+	// c := mdml / len(p)
+	c := Mdml() / len(p)
 	b := []byte(p)
 	md = bytes.Repeat(b, c) // A long string
 	//
@@ -124,6 +125,11 @@ func Mdml() int {
 			md = bytes.Repeat(b, c) // A long string
 		}
 	}
+	return mdml
+}
+
+// Mdml sets the Max Data Message Length
+func GetMdml() int {
 	return mdml
 }
 
