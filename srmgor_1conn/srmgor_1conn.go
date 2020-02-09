@@ -379,5 +379,10 @@ func main() {
 		exampid, tag, conn.Session(),
 		time.Now().Sub(st))
 
+	if os.Getenv("STOMP_TRACKELT") != "" {
+		conn.ShowEltd(ll)
+		conn.ShowEltdCsv()
+	}
+
 	time.Sleep(250 * time.Millisecond)
 }
