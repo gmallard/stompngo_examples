@@ -145,7 +145,9 @@ func DumpTLSConfig(exampid string, c *tls.Config, n *tls.Conn) {
 		vs = "TLS11"
 	case tls.VersionTLS12:
 		vs = "TLS12"
-	case tls.VersionTLS13:
+	// 1.6 and 1.7 do not have this constant:
+	// case tls.VersionTLS13:
+	case 0x0304: // Hardcoded for now
 		vs = "TLS13"
 	case tls.VersionSSL30:
 		vs = "SSL30"
